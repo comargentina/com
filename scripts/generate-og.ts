@@ -215,8 +215,8 @@ const SCREENSHOTS: ScreenshotSpec[] = [
     height: 720,
     card: {
       kind: 'static',
-      title: 'Rastrum',
-      subtitle: 'Identifica plantas, animales y hongos. Sin conexión. En tu idioma.',
+      title: 'COM Argentina',
+      subtitle: 'Club de Observadores de Mariposas de Argentina — Observación e identificación de biodiversidad.',
       accent: 'emerald',
     },
   },
@@ -226,8 +226,8 @@ const SCREENSHOTS: ScreenshotSpec[] = [
     height: 1334,
     card: {
       kind: 'static',
-      title: 'Rastrum',
-      subtitle: 'Captura una foto. Identifícala al instante. Sin conexión.',
+      title: 'COM Argentina',
+      subtitle: 'Plataforma comunitaria para registrar, identificar y conservar mariposas en Argentina.',
       accent: 'emerald',
     },
   },
