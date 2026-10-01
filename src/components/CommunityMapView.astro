@@ -356,11 +356,12 @@ const stringsJson = JSON.stringify({
 
       if (!map) {
         const maplibre = (await import('maplibre-gl')).default;
+        const { COLON_DEFAULT_CENTER } = await import('../lib/media-helpers');
         map = new maplibre.Map({
           container: mapContainer,
           style: basemapStyleUrl(),
-          center: [-99.1, 19.4], // CDMX default
-          zoom: 4,
+          center: [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat],
+          zoom: COLON_DEFAULT_CENTER.zoom - 2,
           attributionControl: { compact: true },
         });
         map.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');

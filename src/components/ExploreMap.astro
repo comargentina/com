@@ -197,11 +197,12 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
     throw new Error('offline-no-cache');
   }
 
+  const { COLON_DEFAULT_CENTER } = await import('../lib/media-helpers');
   const map = new maplibregl.Map({
     container,
     style: choice.style,
-    center: [-96.72, 17.06],
-    zoom: 6,
+    center: [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat],
+    zoom: COLON_DEFAULT_CENTER.zoom,
     attributionControl: { compact: true },
   });
 

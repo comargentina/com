@@ -165,7 +165,7 @@ const initialLng  = initialCoords?.lng ?? '';
 <noscript><link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.0/dist/maplibre-gl.css" /></noscript>
 
 <script>
-  import { MEXICO_DEFAULT_CENTER, isValidLatLng } from '../lib/media-helpers';
+  import { COLON_DEFAULT_CENTER, isValidLatLng } from '../lib/media-helpers';
   import { basemapStyleUrl, installSpriteFallback } from '../lib/map-style';
 
   type Coords = { lat: number; lng: number };
@@ -230,9 +230,9 @@ const initialLng  = initialCoords?.lng ?? '';
     const parsedLat = parseFloat(initialLatAttr);
     const parsedLng = parseFloat(initialLngAttr);
     const haveInitial = Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
-    const initialLat = haveInitial ? parsedLat : MEXICO_DEFAULT_CENTER.lat;
-    const initialLng = haveInitial ? parsedLng : MEXICO_DEFAULT_CENTER.lng;
-    const initialZoom = haveInitial ? 13 : MEXICO_DEFAULT_CENTER.zoom;
+    const initialLat = haveInitial ? parsedLat : COLON_DEFAULT_CENTER.lat;
+    const initialLng = haveInitial ? parsedLng : COLON_DEFAULT_CENTER.lng;
+    const initialZoom = haveInitial ? 13 : COLON_DEFAULT_CENTER.zoom;
 
     if (!state.map) {
       try {

@@ -90,6 +90,9 @@ export function computeThumbDims(
 /** Default starting view for the map picker when no GPS fix exists. */
 export const MEXICO_DEFAULT_CENTER = { lat: 19.4, lng: -99.1, zoom: 5 } as const;
 
+/** Default starting view for the map of Colón, Entre Ríos, Argentina */
+export const COLON_DEFAULT_CENTER = { lat: -32.2247, lng: -58.1419, zoom: 6 } as const;
+
 /**
  * Validate a (lat, lng) pair before pushing it into the location state.
  * Mirrors the finite-coords guard in the form's submit path.

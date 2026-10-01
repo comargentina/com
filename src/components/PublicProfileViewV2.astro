@@ -678,11 +678,12 @@ const sponsoringI18n = {
             const containerId = `pp-map-${profileId.replace(/-/g, '')}`;
             mapContainer.id = containerId;
 
+            const { COLON_DEFAULT_CENTER } = await import('../lib/media-helpers');
             const map = new maplibregl.Map({
               container: containerId,
               style: basemapStyleUrl(isDark),
               zoom: 2,
-              center: [0, 20],
+              center: [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat],
               attributionControl: { compact: true },
               scrollZoom: false,         // disable scroll-zoom (mobile-friendly)
             });
