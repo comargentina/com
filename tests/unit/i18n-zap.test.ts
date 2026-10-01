@@ -127,12 +127,12 @@ describe('getLocalizedString — overlay + fallback semantics', () => {
 
   it('works for the built-in en locale (no overlay path)', () => {
     expect(getLocalizedString('onboarding.steps.welcome.title', 'en'))
-      .toBe('Welcome to Rastrum');
+      .toBe('Welcome to COM Argentina');
   });
 
   it('works for the built-in es locale (no overlay path)', () => {
     expect(getLocalizedString('onboarding.steps.welcome.title', 'es'))
-      .toBe('Bienvenido a Rastrum');
+      .toBe('Bienvenido a COM Argentina');
   });
 });
 

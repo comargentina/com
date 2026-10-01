@@ -23,7 +23,7 @@ const STATIC_IMPORT_ALLOWLIST = new Set<string>([
 
 function listSourceFiles(): string[] {
   const out = execSync(
-    `git ls-files 'src/**/*.astro' 'src/**/*.ts' 'src/**/*.tsx'`,
+    `git ls-files "src/**/*.astro" "src/**/*.ts" "src/**/*.tsx"`,
     { cwd: REPO_ROOT, encoding: 'utf8' },
   );
   return out.split('\n').filter(Boolean);

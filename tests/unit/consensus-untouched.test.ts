@@ -30,7 +30,7 @@ describe('#1126 consensus + research-grade floor untouched', () => {
 
 describe('#1126 validation_queue routing is read-only', () => {
   const m = schema.match(
-    /CREATE OR REPLACE VIEW public\.validation_queue AS[\s\S]*?;\n/,
+    /CREATE OR REPLACE VIEW public\.validation_queue AS[\s\S]*?;\r?\n/,
   );
 
   it('the view definition is locatable', () => {
@@ -55,7 +55,7 @@ describe('#1126 validation_queue routing is read-only', () => {
 
 describe('#1128 R3 validation_queue surfaces source, consensus untouched', () => {
   const m = schema.match(
-    /CREATE OR REPLACE VIEW public\.validation_queue AS[\s\S]*?;\n/,
+    /CREATE OR REPLACE VIEW public\.validation_queue AS[\s\S]*?;\r?\n/,
   );
   const viewDef = m ? m[0] : '';
 

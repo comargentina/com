@@ -62,9 +62,7 @@ describe('HomeChips anon gating', () => {
 describe('HomeChips lives outside the .home-widgets hidden section', () => {
   it('HomeWidgets renders HomeChips outside the section that starts hidden', () => {
     const chipsIdx = widgetsSrc.indexOf('<HomeChips');
-    const sectionOpenIdx = widgetsSrc.indexOf(
-      '<section\n  class="home-widgets hidden',
-    );
+    const sectionOpenIdx = widgetsSrc.indexOf('class="home-widgets hidden');
     expect(chipsIdx).toBeGreaterThan(-1);
     expect(sectionOpenIdx).toBeGreaterThan(-1);
     // The component must be placed BEFORE the hidden section.
