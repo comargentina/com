@@ -1,7 +1,7 @@
 {
   "site": {
-    "title": "Rastrum",
-    "description": "Plataforma open-source de observación de biodiversidad construida para América Latina. ID multi-modal con IA, offline-first, lenguas indígenas, alineada con GBIF."
+    "title": "COM Argentina",
+    "description": "Plataforma del Club de Observadores de Mariposas Argentina. Registro e identificación de mariposas y biodiversidad en Argentina."
   },
   "nav": {
     "home": "Inicio",
@@ -12,7 +12,7 @@
     "about": "Acerca",
     "docs": "Docs",
     "chat": "Chat",
-    "tagline": "Biodiversidad, observada en tu idioma.",
+    "tagline": "Club de Observadores de Mariposas Argentina.",
     "explore_dropdown": {
       "map": "Mapa de observaciones",
       "recent": "Recientes",
@@ -83,8 +83,8 @@
     }
   },
   "home": {
-    "hero_title": "Identifica cualquier ser vivo — donde sea",
-    "hero_subtitle": "Rastrum existe para hacer que cada ser vivo sea identificable por cualquier persona, en cualquier lugar — incluso sin señal celular, sin formación académica, incluso en los idiomas que las guías de campo olvidaron.",
+    "hero_title": "Club de Observadores de Mariposas Argentina",
+    "hero_subtitle": "Plataforma comunitaria para registrar, identificar y conservar mariposas y biodiversidad en Argentina. Funciona en campo incluso sin señal celular.",
     "cta": "Registrar Observación",
     "how_title": "Cómo Funciona",
     "how_steps": [
@@ -98,10 +98,10 @@
       },
       {
         "title": "Contribuye",
-        "description": "Las observaciones validadas se suman a un dataset abierto exportado a GBIF y CONABIO para conservación real."
+        "description": "Las observaciones validadas se suman a un dataset abierto exportado a GBIF para conservación real."
       }
     ],
-    "why_title": "¿Por Qué Rastrum?",
+    "why_title": "¿Por Qué COM Argentina?",
     "why_items": [
       {
         "title": "Sin Conexión Primero",
@@ -374,8 +374,8 @@
   "footer": {
     "license": "Licencia AGPL-3.0",
     "source": "Código en GitHub",
-    "tagline": "Biodiversidad, observada en tu idioma.",
-    "description_short": "Observación de biodiversidad open-source para América Latina.",
+    "tagline": "Club de Observadores de Mariposas Argentina.",
+    "description_short": "Registro y observación de mariposas y biodiversidad en Argentina.",
     "columns": {
       "product": "Producto",
       "learn": "Aprender",
@@ -1202,8 +1202,8 @@
     "back": "Atrás",
     "step_label": "PASO {current} DE {total}",
     "close_label": "Cerrar onboarding",
-    "install_title": "Instala Rastrum",
-    "install_body": "Toca el botón de instalación abajo a la derecha para instalar Rastrum en tu teléfono.",
+    "install_title": "Instala COM Argentina",
+    "install_body": "Toca el botón de instalación abajo a la derecha para instalar COM Argentina en tu teléfono.",
     "install_body_ios": "En iOS, toca el botón Compartir y luego elige Añadir a la pantalla de inicio.",
     "observe_title": "Toma una foto",
     "observe_body": "Toca Observar para capturar o subir una foto. La identificamos al instante.",
@@ -1252,7 +1252,7 @@
     "summary_active": "Identificadores activos",
     "summary_cta": "Hacer mi primera observación",
     "install_pwa_title": "Instala como app",
-    "install_pwa_body": "Instala Rastrum en tu dispositivo para la mejor experiencia sin conexión.",
+    "install_pwa_body": "Instala COM Argentina en tu dispositivo para la mejor experiencia sin conexión.",
     "install_pwa_body_ios": "En iOS, toca el botón Compartir y luego elige Añadir a la pantalla de inicio.",
     "install_pwa_skip": "Quizá después",
     "duration_hint": "Toma cerca de 1 minuto",
@@ -1371,7 +1371,7 @@
     "update_dismiss": "Descartar",
     "ios_hint": "Toca Compartir y luego Añadir a la pantalla de inicio.",
     "ios_hint_close": "Entendido",
-    "discovery_title": "Instala Rastrum como app",
+    "discovery_title": "Instala COM Argentina como app",
     "discovery_body": "Funciona sin conexión y guarda mejor tus observaciones.",
     "discovery_emoji": "📱",
     "discovery_install": "Instalar",

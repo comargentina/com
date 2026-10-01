@@ -16,7 +16,7 @@ import ShareObsView from '../../../components/ShareObsView.astro';
 // We solve this client-side:
 //   1. The share button is wired to the share-card URL (not window.location)
 //      so the URL a user copies/pastes IS the share-card URL.
-//   2. An inline <script> in <head> rewrites og:image / og:title / og:url at
+//   2. An inline script tag in head rewrites og:image / og:title / og:url at
 //      runtime so that if the raw /share/obs/?id=… URL IS shared, at least
 //      apps that render JS (Notion, Discord desktop, etc.) get the right meta.
 //      Pure HTTP crawlers (WhatsApp) still see the static fallback — full fix

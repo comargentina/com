@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://rastrum.org',
+  site: 'https://com-mariposas.org.ar',
   base: '/',
   output: 'static',
   integrations: [

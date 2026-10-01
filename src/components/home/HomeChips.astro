@@ -25,7 +25,7 @@ const signInHref = lang === 'es' ? '/es/ingresar/' : '/en/sign-in/';
 <!-- Anon: discreet single-line CTA. Visible by default so it paints on the
      first frame (no auth round-trip needed). The script hides it once an
      authenticated session is detected. -->
-<p class="hc-anon-cta mb-6 text-sm text-zinc-600 dark:text-zinc-400">
+<p class="hc-anon-cta mb-2 text-sm text-zinc-600 dark:text-zinc-400">
   <a href={signInHref} class="font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
     {c.anon_cta.text} <span aria-hidden="true">→</span>
   </a>

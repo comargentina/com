@@ -13,9 +13,15 @@ const tr = t(lang);
        racha + recientes cercanos. Visitantes ven el hero de marketing. -->
   <HomeWidgets lang={lang} />
   <!-- Hero -->
-  <section class="text-center py-16 sm:py-24 space-y-6">
-    <SeasonalAccent class="mb-2 flex justify-center" />
-    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight max-w-3xl mx-auto">
+  <section class="text-center pt-2 pb-12 space-y-4">
+    <div class="flex justify-center mb-4">
+      <img
+        src="/com-logo.jpg"
+        alt="Club de Observadores de Mariposas Argentina"
+        class="w-56 h-56 sm:w-72 sm:h-72 rounded-full object-cover shadow-2xl border-4 border-emerald-500/20 hover:scale-105 transition-transform duration-300"
+      />
+    </div>
+    <h1 class="sr-only">
       {tr.home.hero_title}
     </h1>
     <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">

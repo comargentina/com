@@ -1,5 +1,6 @@
 {
-  "name": "rastrum",
+  "name": "com-mariposas-argentina",
+  "description": "Plataforma de observación y registro de mariposas y biodiversidad en Argentina - COM (Club de Observadores de Mariposas)",
   "type": "module",
   "version": "2026.5.5",
   "engines": {

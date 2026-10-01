@@ -11,31 +11,30 @@ const descriptionEs = 'Plataforma open-source de observación de biodiversidad p
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rastrum — Identify any living thing, anywhere</title>
-    <meta name="description" content={description} />
+    <title>COM Argentina — Club de Observadores de Mariposas</title>
+    <meta name="description" content={descriptionEs} />
 
     <!-- Crawlers: this is a transit page; prefer indexing the locale roots. -->
     <meta name="robots" content="noindex,follow" />
-    <link rel="canonical" href={`${site}/en/`} />
-    <link rel="alternate" hreflang="en" href={`${site}/en/`} />
+    <link rel="canonical" href={`${site}/es/`} />
     <link rel="alternate" hreflang="es" href={`${site}/es/`} />
-    <link rel="alternate" hreflang="x-default" href={`${site}/en/`} />
+    <link rel="alternate" hreflang="en" href={`${site}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${site}/es/`} />
 
     <!-- Open Graph + Twitter -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={`${site}/`} />
-    <meta property="og:title" content="Rastrum — Identify any living thing, anywhere" />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content="COM Argentina — Club de Observadores de Mariposas" />
+    <meta property="og:description" content={descriptionEs} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:locale:alternate" content="es_MX" />
+    <meta property="og:locale" content="es_AR" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Rastrum — Identify any living thing, anywhere" />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content="COM Argentina — Club de Observadores de Mariposas" />
+    <meta name="twitter:description" content={descriptionEs} />
     <meta name="twitter:image" content={ogImage} />
 
     <meta name="theme-color" content="#10b981" />
-    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/com-logo.svg`} />
 
     <!-- JS: redirect to the user's preferred locale (saved or browser-detected). -->
     <script is:inline define:vars={{ base }}>
@@ -73,13 +72,13 @@ const descriptionEs = 'Plataforma open-source de observación de biodiversidad p
   </head>
   <body>
     <main>
-      <img src={`${base}/rastrum-logo.svg`} alt="Rastrum" />
-      <h1>Rastrum</h1>
-      <p class="tagline">Identify any living thing, anywhere · Identifica cualquier ser vivo, donde sea</p>
-      <p class="desc">{description}<br /><br />{descriptionEs}</p>
+      <img src={`${base}/com-logo.jpg`} alt="COM Argentina" style="border-radius: 9999px; object-fit: cover;" />
+      <h1>COM Argentina</h1>
+      <p class="tagline">Club de Observadores de Mariposas Argentina</p>
+      <p class="desc">{descriptionEs}</p>
       <div class="links">
-        <a href={`${base}/en/`} hreflang="en">English →</a>
         <a href={`${base}/es/`} hreflang="es">Español →</a>
+        <a href={`${base}/en/`} hreflang="en">English →</a>
       </div>
     </main>
   </body>

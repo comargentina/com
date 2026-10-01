@@ -1,24 +1,18 @@
-# Rastrum
+# COM - Club de Observadores de Mariposas Argentina
 
-**Open-source species identification for plants, animals, fungi, and ecological evidence.**
+**Plataforma abierta para el registro, identificación y conservación de mariposas y biodiversidad en Argentina.**
 
-[![CI](https://img.shields.io/github/actions/workflow/status/ArtemioPadilla/rastrum/ci.yml?branch=main&label=ci)](https://github.com/ArtemioPadilla/rastrum/actions/workflows/ci.yml)
-[![Deploy](https://img.shields.io/github/actions/workflow/status/ArtemioPadilla/rastrum/deploy.yml?branch=main&label=deploy)](https://github.com/ArtemioPadilla/rastrum/actions/workflows/deploy.yml)
-[![Tests](https://img.shields.io/badge/tests-680%20passing-brightgreen.svg)](https://github.com/ArtemioPadilla/rastrum/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ArtemioPadilla/rastrum/pulls)
-
-**Live demo:** [rastrum.org](https://rastrum.org) — bilingual EN/ES PWA with offline drafts, camera capture, and a photo-ID cascade running on free-tier infrastructure.
+Plataforma basada en la arquitectura open-source de **Rastrum**, adaptada y enfocada en el registro de especies por naturalistas, observadores de mariposas, biólogos de campo y científicos ciudadanos en Argentina.
 
 ---
 
-## About
+## Sobre el proyecto COM Argentina
 
-Rastrum is a biodiversity observation platform that combines computer vision, audio analysis, and expert curation to identify species from photos, videos, audio recordings, and indirect evidence such as tracks, scat, and burrows. It is designed for naturalists, field biologists, citizen scientists, and anyone curious about the species around them.
+**COM (Club de Observadores de Mariposas Argentina)** es una plataforma de observación de biodiversidad centrada en la Lepidopterofauna y la biodiversidad regional argentina. Combina visión por computadora, análisis de evidencia en campo y curaduría experta para registrar e identificar mariposas (así como otras especies de flora y fauna) mediante fotos, audio y evidencia ecológica.
 
-The platform emphasizes regional biodiversity. Rather than training a single global model, Rastrum aims to build region-specific datasets that improve identification accuracy for local ecosystems, starting with the flora and fauna of Latin America and the Caribbean. Observations are GPS-tagged, time-stamped, and Darwin Core compatible so they can flow into ecological monitoring and GBIF.
+Las observaciones se registran con coordenadas GPS, fecha/hora y estándares **Darwin Core**, facilitando la integración con monitoreos ecológicos y bases de datos como GBIF.
 
-Rastrum is fully open source under the MIT license. The frontend ships as a static Progressive Web App, and the backend runs on Supabase + Cloudflare R2, keeping infrastructure costs low and making self-hosting straightforward.
+La plataforma es una **Progressive Web App (PWA)** estática impulsada por Astro, Tailwind CSS, Supabase y Cloudflare, diseñada para funcionar offline en el campo.
 
 ## Features
 
