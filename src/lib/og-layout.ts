@@ -60,7 +60,7 @@ const ACCENT = {
 } as const;
 
 /** Brand mark — vector SVG inlined so satori can render without an extra fetch. */
-const LOGO_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='80' height='80'><circle cx='12' cy='12' r='11' fill='#10b981'/><text x='12' y='17' text-anchor='middle' font-family='system-ui' font-size='14' font-weight='800' fill='white'>R</text></svg>`;
+const LOGO_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='80' height='80'><circle cx='12' cy='12' r='11' fill='#10b981'/><text x='12' y='17' text-anchor='middle' font-family='system-ui' font-size='12' font-weight='800' fill='white'>COM</text></svg>`;
 
 function brandStripe(accent: keyof typeof ACCENT) {
   const c = ACCENT[accent];
@@ -105,7 +105,7 @@ function rastrumWordmark() {
             height: 56,
           },
         },
-        { type: 'span' as const, props: { children: 'Rastrum' } },
+        { type: 'span' as const, props: { children: 'COM Argentina' } },
       ],
     },
   };
@@ -275,7 +275,7 @@ function profileCard(input: ProfileCardInput) {
           type: 'div' as const,
           props: {
             style: { fontSize: 24, color: '#a7c3b6', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 },
-            children: 'Observador en Rastrum',
+            children: 'Observador en COM Argentina',
           },
         },
         {

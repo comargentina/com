@@ -39,15 +39,15 @@ const PAGES: PageSpec[] = [
   {
     slug: 'default',
     cards: {
-      en: { kind: 'static', title: 'Rastrum',                       subtitle: 'Open biodiversity identification platform for Latin America.',          accent: 'emerald' },
-      es: { kind: 'static', title: 'Rastrum',                       subtitle: 'Plataforma de identificación de biodiversidad para América Latina.',     accent: 'emerald' },
+      en: { kind: 'static', title: 'COM Argentina',                 subtitle: 'Open biodiversity identification platform for Latin America.',          accent: 'emerald' },
+      es: { kind: 'static', title: 'COM Argentina',                 subtitle: 'Plataforma de identificación de biodiversidad para América Latina.',     accent: 'emerald' },
     },
   },
   {
     slug: 'home',
     cards: {
-      en: { kind: 'static', title: 'Identify any living thing',     subtitle: 'Rastrum — biodiversity observed in your language.',                      accent: 'emerald' },
-      es: { kind: 'static', title: 'Identifica cualquier ser vivo', subtitle: 'Rastrum — biodiversidad observada en tu idioma.',                        accent: 'emerald' },
+      en: { kind: 'static', title: 'Identify any living thing',     subtitle: 'COM Argentina — biodiversity observed in your language.',                accent: 'emerald' },
+      es: { kind: 'static', title: 'Identifica cualquier ser vivo', subtitle: 'COM Argentina — biodiversidad observada en tu idioma.',                  accent: 'emerald' },
     },
   },
   {
@@ -81,8 +81,8 @@ const PAGES: PageSpec[] = [
   {
     slug: 'about',
     cards: {
-      en: { kind: 'static', title: 'About Rastrum',                 subtitle: 'Open source · Offline-first · Indigenous-language ready.',               accent: 'stone' },
-      es: { kind: 'static', title: 'Acerca de Rastrum',             subtitle: 'Código abierto · Sin conexión · Lenguas indígenas.',                     accent: 'stone' },
+      en: { kind: 'static', title: 'About COM Argentina',           subtitle: 'Open source · Offline-first · Indigenous-language ready.',               accent: 'stone' },
+      es: { kind: 'static', title: 'Acerca de COM Argentina',       subtitle: 'Código abierto · Sin conexión · Lenguas indígenas.',                     accent: 'stone' },
     },
   },
   {
