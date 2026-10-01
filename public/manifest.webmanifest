@@ -1,8 +1,8 @@
 {
-  "name": "Rastrum",
+  "name": "COM Argentina",
   "version": "__BUILD_VERSION__",
-  "short_name": "Rastrum",
-  "description": "Offline-first biodiversity identification for Latin America.",
+  "short_name": "COM Argentina",
+  "description": "Club de Observadores de Mariposas de Argentina — Observación e identificación de biodiversidad.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -11,37 +11,37 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/rastrum-logo-192.png",
+      "src": "/com-logo-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/rastrum-logo-192.png",
+      "src": "/com-logo-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "/rastrum-logo-512.png",
+      "src": "/com-logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "/rastrum-logo-512.png",
+      "src": "/com-logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
     },
     {
-      "src": "/rastrum-logo-240.png",
+      "src": "/com-logo-240.png",
       "type": "image/png",
       "sizes": "240x240",
       "purpose": "any"
     },
     {
-      "src": "/rastrum-logo-120.png",
+      "src": "/com-logo-120.png",
       "type": "image/png",
       "sizes": "120x120",
       "purpose": "any"
@@ -53,14 +53,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Rastrum — biodiversity observation home page"
+      "label": "COM Argentina — página principal"
     },
     {
       "src": "/screenshots/mobile-home.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Rastrum — capture and identify species in the field"
+      "label": "COM Argentina — captura e identificación de especies"
     }
   ],
   "categories": [
