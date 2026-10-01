@@ -181,11 +181,10 @@ export function getSupabaseUrl(): string {
 
 export function getSupabase(): SupabaseClient {
   if (client) return client;
-  // No `lock` option: supabase-js auto-selects its proper `navigatorLock`
-  // in browsers when persistSession=true. Passing a custom lock that
-  // ignores `acquireTimeout` deadlocks getSession() if a previous holder
-  // (e.g. an interrupted token refresh) doesn't release.
-  client = createClient(url ?? '', anonKey ?? '', {
+  // Fallback to placeholder to avoid JS crash when env vars are missing on Vercel
+  const safeUrl = url || 'https://placeholder.supabase.co';
+  const safeKey = anonKey || 'placeholder-key';
+  client = createClient(safeUrl, safeKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
