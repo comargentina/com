@@ -14,6 +14,7 @@
 -- ============================================================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "postgis";
+CREATE EXTENSION IF NOT EXISTS "pg_cron";
 -- Deferred: pg_partman (v0.8+, when observations table crosses ~1M rows)
 -- Deferred: pgvector (v0.5+, when Scout AI RAG lands)
 
