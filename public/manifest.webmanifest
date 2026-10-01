@@ -68,7 +68,7 @@
     "science",
     "nature"
   ],
-  "lang": "en",
+  "lang": "es",
   "prefer_related_applications": false,
   "share_target": {
     "action": "/share-target",
@@ -103,8 +103,8 @@
   "related_applications": [
     {
       "platform": "webapp",
-      "url": "https://rastrum.org/manifest.webmanifest",
-      "id": "rastrum-pwa"
+      "url": "https://com-com-f83a.vercel.app/manifest.webmanifest",
+      "id": "com-argentina-pwa"
     }
   ]
 }
