@@ -133,8 +133,8 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="application-name" content="Rastrum" />
-    <meta name="apple-mobile-web-app-title" content="Rastrum" />
+    <meta name="application-name" content="COM Argentina" />
+    <meta name="apple-mobile-web-app-title" content="COM Argentina" />
     <meta name="app-version" content={import.meta.env.PUBLIC_VERSION ?? 'dev'} />
     <meta name="build-sha" content={import.meta.env.PUBLIC_BUILD_SHA ?? 'dev'} />
     <title>{title}</title>
@@ -142,7 +142,7 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
     {currentPath === `/${lang}/` && <StructuredData type="website" lang={lang === 'es' ? 'es' : 'en'} />}
     <!-- Open Graph -->
     <meta property="og:type" content={ogTypeFinal} />
-    <meta property="og:site_name" content="Rastrum" />
+    <meta property="og:site_name" content="COM Argentina" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />

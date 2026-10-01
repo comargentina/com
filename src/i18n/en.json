@@ -1,6 +1,6 @@
 {
   "site": {
-    "title": "Rastrum",
+    "title": "COM Argentina",
     "description": "Open-source biodiversity observation platform built for Latin America. Multi-modal AI species ID, offline-first, indigenous-language ready, GBIF-aligned."
   },
   "nav": {
@@ -84,7 +84,7 @@
   },
   "home": {
     "hero_title": "Identify any living thing — anywhere",
-    "hero_subtitle": "Rastrum exists to make every living thing identifiable by anyone, anywhere — even without cell signal, even without formal training, even in the languages that field guides forgot.",
+    "hero_subtitle": "COM Argentina exists to make every living thing identifiable by anyone, anywhere — even without cell signal, even without formal training, even in the languages that field guides forgot.",
     "cta": "Record Observation",
     "how_title": "How It Works",
     "how_steps": [
@@ -101,7 +101,7 @@
         "description": "Validated observations join a growing open dataset exported to GBIF and CONABIO for real conservation."
       }
     ],
-    "why_title": "Why Rastrum",
+    "why_title": "Why COM Argentina",
     "why_items": [
       {
         "title": "Offline-First",
@@ -305,8 +305,8 @@
     }
   },
   "about": {
-    "title": "About Rastrum",
-    "description": "Rastrum is an open-source biodiversity observation platform that combines computer vision, audio analysis, and expert curation to identify species from photos, videos, audio, and indirect evidence.",
+    "title": "About COM Argentina",
+    "description": "COM Argentina is an open-source biodiversity observation platform that combines computer vision, audio analysis, and expert curation to identify species from photos, videos, audio, and indirect evidence.",
     "stack_title": "Tech Stack",
     "stack": [
       "Astro + GitHub Pages",
@@ -316,13 +316,13 @@
       "PWA-ready"
     ],
     "people": {
-      "title": "Who is behind Rastrum",
+      "title": "Who is behind COM Argentina",
       "lede": "A small, honest team. We tell you who we are because you're trusting us with your location, your photos, and your time.",
       "members": [
         {
           "name": "Artemio Padilla",
           "role": "Solo dev and maintainer",
-          "bio": "Builds and maintains Rastrum on nights and weekends. Based in Mexico. Reachable via GitHub Issues or Discussions.",
+          "bio": "Builds and maintains COM Argentina on nights and weekends. Based in Mexico. Reachable via GitHub Issues or Discussions.",
           "github": "ArtemioPadilla"
         }
       ],
@@ -334,7 +334,7 @@
       "title": "How it's funded",
       "lede": "We believe you should know exactly who pays for what you use.",
       "status_title": "Current status",
-      "status_body": "Rastrum is currently unfunded. There is no company, no investors, and no advertising. Hosting and infrastructure costs are covered by the operator out of pocket. Volunteer time is the largest input.",
+      "status_body": "COM Argentina is currently unfunded. There is no company, no investors, and no advertising. Hosting and infrastructure costs are covered by the operator out of pocket. Volunteer time is the largest input.",
       "what_costs_title": "What it costs to run",
       "what_costs": [
         "Supabase Free tier (database, auth, storage) — currently $0/mo",
@@ -349,7 +349,7 @@
       "title": "Governance and licensing",
       "lede": "Decisions are made in the open, by the people who do the work.",
       "license_title": "License",
-      "license_body": "Code is MIT-licensed. The server (deployed Edge Functions) is AGPL-3.0 — if you run a public Rastrum instance with modifications, you must share those modifications. Each observation carries its own Creative Commons license, chosen by the contributor (CC BY, CC BY-NC, or CC0).",
+      "license_body": "Code is MIT-licensed. The server (deployed Edge Functions) is AGPL-3.0 — if you run a public COM Argentina instance with modifications, you must share those modifications. Each observation carries its own Creative Commons license, chosen by the contributor (CC BY, CC BY-NC, or CC0).",
       "decisions_title": "How decisions get made",
       "decisions_body": "Roadmap items live as GitHub Issues with public labels. Anyone can open an issue, comment, or send a pull request. Architectural changes go through a written spec under docs/specs/modules/ before code lands. The maintainer has the final call when no consensus emerges, but the bias is always toward shipping the most-debated path.",
       "contribute_title": "How to contribute",
@@ -368,7 +368,7 @@
     },
     "press": {
       "title": "Press and mentions",
-      "empty": "No press coverage yet. If you write about Rastrum, we'd love to hear about it — open an issue and we'll add the link here."
+      "empty": "No press coverage yet. If you write about COM Argentina, we'd love to hear about it — open an issue and we'll add the link here."
     }
   },
   "footer": {
@@ -438,7 +438,7 @@
   "auth": {
     "sign_in": "Sign in",
     "sign_out": "Sign out",
-    "sign_in_title": "Sign in to Rastrum",
+    "sign_in_title": "Sign in to COM Argentina",
     "sign_in_subtitle": "We'll email you a magic link. No password needed.",
     "email_label": "Email address",
     "email_placeholder": "you@example.com",
@@ -742,7 +742,7 @@
     "public_profile_loading": "Loading profile…",
     "public_profile_no_observations": "No public observations yet.",
     "public_profile_member_since": "Member since",
-    "public_profile_page_title": "{name} — Rastrum",
+    "public_profile_page_title": "{name} — COM Argentina",
     "settings_link": "Settings",
     "view_public": "View public",
     "country": "Country",
@@ -1146,11 +1146,11 @@
     "consent_download": "Download model (~880 MB)",
     "consent_unsupported": "Your browser does not support WebGPU — chat is unavailable here.",
     "consent_open_settings": "Manage in Profile → AI settings",
-    "system_prompt_en": "You are a helpful biodiversity assistant for Rastrum. Answer concisely. The user may ask in English or Spanish — reply in whichever language they used.",
-    "system_prompt_es": "You are a helpful biodiversity assistant for Rastrum. Answer concisely. The user may ask in English or Spanish — reply in whichever language they used.",
+    "system_prompt_en": "You are a helpful biodiversity assistant for COM Argentina. Answer concisely. The user may ask in English or Spanish — reply in whichever language they used.",
+    "system_prompt_es": "You are a helpful biodiversity assistant for COM Argentina. Answer concisely. The user may ask in English or Spanish — reply in whichever language they used.",
     "loading_model": "Loading model into GPU…",
     "you": "You",
-    "assistant": "Rastrum",
+    "assistant": "COM Argentina",
     "attach_photo": "Take photo",
     "attach_gallery": "Upload from gallery",
     "attach_audio": "Record audio",
@@ -1202,8 +1202,8 @@
     "back": "Back",
     "step_label": "STEP {current} OF {total}",
     "close_label": "Close onboarding",
-    "install_title": "Install Rastrum",
-    "install_body": "Tap the install button at the bottom right to install Rastrum on your phone.",
+    "install_title": "Install COM Argentina",
+    "install_body": "Tap the install button at the bottom right to install COM Argentina on your phone.",
     "install_body_ios": "On iOS, tap the Share button, then choose Add to Home Screen.",
     "observe_title": "Take a photo",
     "observe_body": "Tap Observar to capture or upload a photo. We identify it for you instantly.",
@@ -1211,10 +1211,10 @@
     "profile_title": "Your profile",
     "profile_body": "Your observations live in your profile. Sign in syncs them across devices.",
     "profile_cta": "View profile",
-    "first_obs_title": "Welcome to Rastrum 🌱",
+    "first_obs_title": "Welcome to COM Argentina 🌱",
     "first_obs_body": "Your first observation is in the books. Keep them coming!",
     "first_obs_close": "Thanks!",
-    "pipeline_title": "How Rastrum identifies species",
+    "pipeline_title": "How COM Argentina identifies species",
     "pipeline_body": "Each photo runs through specialized models first. If none is confident enough, an LLM interpreter refines the result. The more models you configure, the more robust your pipeline.",
     "pipeline_diagram_specialized": "Specialized models",
     "pipeline_diagram_parallel": "race in parallel",
@@ -1252,7 +1252,7 @@
     "summary_active": "Active identifiers",
     "summary_cta": "Make my first observation",
     "install_pwa_title": "Install as an app",
-    "install_pwa_body": "Install Rastrum on your device for the best offline experience.",
+    "install_pwa_body": "Install COM Argentina on your device for the best offline experience.",
     "install_pwa_body_ios": "On iOS, tap the Share button, then choose Add to Home Screen.",
     "install_pwa_skip": "Maybe later",
     "duration_hint": "Takes about 1 minute",
@@ -1276,15 +1276,15 @@
     "key_help_anthropic_steps": [
       "Open <a class=\"underline text-emerald-700 dark:text-emerald-400\" href=\"https://console.anthropic.com/login\" target=\"_blank\" rel=\"noopener\">console.anthropic.com</a> and sign in (or create an account).",
       "In the left sidebar, click <b>API Keys</b>.",
-      "Click <b>Create Key</b>, name it <code>Rastrum</code>, and copy the value starting with <code>sk-ant-</code>.",
+      "Click <b>Create Key</b>, name it <code>COM Argentina</code>, and copy the value starting with <code>sk-ant-</code>.",
       "Paste it above and tap Save."
     ],
-    "key_help_privacy": "Your key stays in this browser's local storage. It's only sent to Anthropic when you identify a photo — never to Rastrum's servers.",
+    "key_help_privacy": "Your key stays in this browser's local storage. It's only sent to Anthropic when you identify a photo — never to COM Argentina's servers.",
     "start": "Start tour",
     "steps": {
       "welcome": {
-        "title": "Welcome to Rastrum",
-        "body": "Rastrum helps you identify and log any species. Quick 30-second tour — skip anytime."
+        "title": "Welcome to COM Argentina",
+        "body": "COM Argentina helps you identify and log any species. Quick 30-second tour — skip anytime."
       },
       "fab": {
         "title": "Start observing",
@@ -1371,7 +1371,7 @@
     "update_dismiss": "Dismiss",
     "ios_hint": "Tap Share, then Add to Home Screen.",
     "ios_hint_close": "Got it",
-    "discovery_title": "Install Rastrum as an app",
+    "discovery_title": "Install COM Argentina as an app",
     "discovery_body": "Works offline and saves your observations more reliably.",
     "discovery_emoji": "📱",
     "discovery_install": "Install",
@@ -1381,7 +1381,7 @@
     "discovery_ios_step3": "Tap Add to finish",
     "discovery_ios_label": "iOS install steps",
     "discovery_firefox_android_title": "On Firefox for Android:",
-    "discovery_firefox_android_step1": "Open the menu (⋮) and choose Install to add Rastrum to your home screen.",
+    "discovery_firefox_android_step1": "Open the menu (⋮) and choose Install to add COM Argentina to your home screen.",
     "discovery_firefox_desktop_title": "Desktop Firefox doesn't yet support installing web apps.",
     "discovery_firefox_desktop_body": "You can keep using it here (offline support via service worker still works), or install from Chrome, Edge or Safari for a dedicated app icon."
   },
@@ -1443,7 +1443,7 @@
     "problem_title": "The Problem",
     "problem": "Species identification tools are fragmented across platforms, locked behind language barriers, and rarely work offline. Most existing models are trained on data from North America and Europe, leaving megadiverse regions like Latin America critically underserved.",
     "solution_title": "The Solution",
-    "solution": "Rastrum unifies photo, audio, and video identification into a single open platform powered by multiple AI models and validated by community experts. Every observation feeds a growing dataset that strengthens regional accuracy and fuels real conservation action."
+    "solution": "COM Argentina unifies photo, audio, and video identification into a single open platform powered by multiple AI models and validated by community experts. Every observation feeds a growing dataset that strengthens regional accuracy and fuels real conservation action."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -1501,7 +1501,7 @@
   },
   "team": {
     "title": "Open Source",
-    "description": "Rastrum is AGPL-3.0-licensed and community-driven. Every observation, every validation, every line of code strengthens the global biodiversity knowledge commons."
+    "description": "COM Argentina is AGPL-3.0-licensed and community-driven. Every observation, every validation, every line of code strengthens the global biodiversity knowledge commons."
   },
   "how_it_works": {
     "title": "How It Works",
@@ -1723,7 +1723,7 @@
     "quota_paused_gray": "Your sponsored access is paused. Your sponsor was notified.",
     "decline_sponsorship": "Decline this sponsorship",
     "show_sponsor_publicly": "Show {sponsor} on my public profile",
-    "discovery_card_title": "Want your friends to try Rastrum without configuring their own API key?",
+    "discovery_card_title": "Want your friends to try COM Argentina without configuring their own API key?",
     "discovery_card_cta": "Sponsor AI access",
     "paused_reason_rate_limit": "rate limit reached",
     "paused_reason_cred_invalid": "credential no longer valid",
@@ -1993,8 +1993,8 @@
     "toc_aria_label": "Section navigation",
     "back_to_docs": "All docs",
     "edit_on_github": "Edit on GitHub",
-    "index_title": "Rastrum Docs",
-    "index_subtitle": "Everything you need to understand and build with Rastrum",
+    "index_title": "COM Argentina Docs",
+    "index_subtitle": "Everything you need to understand and build with COM Argentina",
     "sections": {
       "vision": "Vision & Mission",
       "features": "Features",
@@ -2025,7 +2025,7 @@
       "features": "What v1.0 ships today: identification cascade, observation logging, social and curation, data export, offline PWA, and privacy.",
       "roadmap": "Six milestones from v0.1 MVP to v2.5 AI assistant over 30 months.",
       "tasks": "Per-roadmap-item subtask breakdown with status, dependencies, and module references.",
-      "market": "Competitive analysis, market sizing, and the specific gap Rastrum fills.",
+      "market": "Competitive analysis, market sizing, and the specific gap COM Argentina fills.",
       "architecture": "How the pieces fit together — system overview, identification cascade, offline-first sync, and the auth + token surface.",
       "indigenous": "CARE principles, FPIC, Local Contexts Labels, and the CARI advisory council.",
       "funding": "~$400K in credits available now, grant pipeline, legal structure, and revenue model.",
@@ -2035,20 +2035,20 @@
       "terms": "Acceptable use, per-observation licensing, and how we handle account suspensions.",
       "console": "Privileged-actions surface for admin, moderator, and expert roles. Role model, audit log, and per-action runbooks.",
       "sponsorships": "Share your Anthropic credential with friends, capped per month and audited.",
-      "mcp": "Connect AI agents — Claude Desktop, Cursor, OpenClaw, and any MCP-compatible client — directly to your Rastrum data using the Model Context Protocol.",
-      "changelog": "Version history and significant changes in Rastrum.",
+      "mcp": "Connect AI agents — Claude Desktop, Cursor, OpenClaw, and any MCP-compatible client — directly to your COM Argentina data using the Model Context Protocol.",
+      "changelog": "Version history and significant changes in COM Argentina.",
       "community": "Community discovery: find observers, experts, and naturalists near you. Filter by country, taxon, and activity.",
       "camera-stations": "Camera-trap station management with active periods, trap-night computation, and wildlife detection indices.",
       "sponsor-pools": "Multi-provider AI vision and platform sponsor pools. Anthropic, Vertex, and OpenAI with community credit distribution.",
       "obs-detail": "Observation detail page with photo gallery, interactive map, community identifications, and owner management tools.",
       "status": "Public triage SLA dashboard: open issues, median time-to-first-comment over the last 30 days, and recent resolution count.",
-      "algorithms": "Every ranked surface in Rastrum, with the inputs it consumes, the time window it considers, and the settings that change its behavior.",
+      "algorithms": "Every ranked surface in COM Argentina, with the inputs it consumes, the time window it considers, and the settings that change its behavior.",
       "surprises": "Transparent variable rewards: 3 fixed surprise kinds, opt-in toggle, capped at 1 per day. The rules and the catalog are public."
     },
     "triage": {
       "title": "Triage status",
-      "subtitle": "How fast Rastrum responds to bug reports and feature requests.",
-      "intro": "Rastrum is open-source and maintained by a small team. This page shows a public SLA so you can tell at a glance how responsive the project is.",
+      "subtitle": "How fast COM Argentina responds to bug reports and feature requests.",
+      "intro": "COM Argentina is open-source and maintained by a small team. This page shows a public SLA so you can tell at a glance how responsive the project is.",
       "stat_open": "Open issues",
       "stat_open_help": "Total issues currently open in the repo.",
       "stat_resolved": "Resolved last 30 days",
@@ -2058,7 +2058,7 @@
       "stat_median_unit_h": "h",
       "stat_median_none": "n/a",
       "team_heading": "Who responds",
-      "team_body": "Rastrum is currently maintained by Artemio Padilla with help from community contributors. There is no on-call rotation — responses come on a best-effort basis, usually within a couple of days.",
+      "team_body": "COM Argentina is currently maintained by Artemio Padilla with help from community contributors. There is no on-call rotation — responses come on a best-effort basis, usually within a couple of days.",
       "report_heading": "How to report",
       "report_body": "The fastest way is to open a GitHub issue with the right template:",
       "report_bug": "Bug report",
@@ -2084,16 +2084,16 @@
     "title": "AI Sponsorships",
     "subtitle": "How community-funded AI identification works",
     "what_heading": "What are AI sponsorships?",
-    "what_body": "Rastrum lets community members share their AI provider credentials so everyone can identify species — even without their own API key.",
+    "what_body": "COM Argentina lets community members share their AI provider credentials so everyone can identify species — even without their own API key.",
     "sponsor_heading": "Become a sponsor",
     "sponsor_body": "Go to Profile → Sponsorships, add your API credential, then invite beneficiaries or donate to a platform pool.",
     "sponsor_step_1": "Go to Profile → AI Sponsoring and add an Anthropic credential (API key sk-ant-api03-… or long-lived token sk-ant-oat01-…).",
-    "sponsor_step_2": "The credential is stored encrypted in Supabase Vault. Only the Rastrum Edge Function can decrypt it at call time. Never appears in logs or in the browser.",
+    "sponsor_step_2": "The credential is stored encrypted in Supabase Vault. Only the COM Argentina Edge Function can decrypt it at call time. Never appears in logs or in the browser.",
     "sponsor_step_3": "Add your friends by username, set a monthly cap (default 200 calls/month, max 10,000), and pick a priority if you have multiple credentials.",
-    "sponsor_step_4": "When a friend identifies a photo, Rastrum uses your credential automatically. You earn social karma for sharing.",
+    "sponsor_step_4": "When a friend identifies a photo, COM Argentina uses your credential automatically. You earn social karma for sharing.",
     "request_heading": "Request a sponsorship",
     "request_body": "If you don't have an API key, you can request a sponsorship from an active sponsor or use a platform pool.",
-    "request_detail": "Ask someone already on Rastrum — a friend, an expert you follow, someone from your community — to sponsor you. You can also send a formal request from Profile → Sponsored By → Request tab.",
+    "request_detail": "Ask someone already on COM Argentina — a friend, an expert you follow, someone from your community — to sponsor you. You can also send a formal request from Profile → Sponsored By → Request tab.",
     "pool_heading": "Platform pools",
     "pool_body": "Platform pools are community-funded shared resources. Any sponsor can donate calls; any user can consume them (with daily limits).",
     "pool_detail": "Operators or institutions donate credentials to a shared pool. Credits are distributed fairly among users without a BYO key, with a per-user daily cap to prevent abuse.",
@@ -2104,7 +2104,7 @@
     "privacy_mutual_optin": "For the relationship to be publicly visible, both parties have to opt-in.",
     "cost_heading": "Cost estimates",
     "cost_body": "Costs depend on the model. Claude Haiku 4.5 costs ~$0.30 per 100 calls. See the model picker for current estimates.",
-    "cost_detail": "Identifications count against your Anthropic quota, not against Rastrum. If you use a long-lived token (OAT) against your Pro/Max subscription, calls are effectively free within your plan.",
+    "cost_detail": "Identifications count against your Anthropic quota, not against COM Argentina. If you use a long-lived token (OAT) against your Pro/Max subscription, calls are effectively free within your plan.",
     "rules_heading": "Usage rules",
     "rule_byo_wins": "BYO always wins",
     "rule_byo_wins_detail": "If a user configures their own API key, that's used first. Sponsorship only applies when there's no BYO.",
@@ -2188,7 +2188,7 @@
   },
   "tokens": {
     "title": "API Tokens",
-    "desc": "Personal tokens to use Rastrum from AI agents, scripts, or external tools.",
+    "desc": "Personal tokens to use COM Argentina from AI agents, scripts, or external tools.",
     "copy_now": "Save this token now — you won't be able to see it again.",
     "copy": "Copy",
     "loading": "Loading tokens…",
@@ -2250,7 +2250,7 @@
     },
     "species": {
       "title": "Species",
-      "subtitle": "Browse the corpus of species observed across Rastrum.",
+      "subtitle": "Browse the corpus of species observed across COM Argentina.",
       "coming_soon": "Coming in a future release. In the meantime, browse the map or your watchlist.",
       "search_placeholder": "Search by scientific or common name…",
       "back_to_index": "Back to species",
@@ -2268,11 +2268,11 @@
       "distribution": "Distribution",
       "recent_photos": "Recent photos",
       "no_coordinates": "No public observations with coordinates yet.",
-      "page_title": "{name} — Rastrum"
+      "page_title": "{name} — COM Argentina"
     },
     "places": {
       "title": "Places",
-      "subtitle": "Browse protected areas, H3 zones, and community places on Rastrum.",
+      "subtitle": "Browse protected areas, H3 zones, and community places on COM Argentina.",
       "search_placeholder": "Search by name…",
       "filter_all": "All types",
       "filter_protected_area": "Protected areas",
@@ -2292,7 +2292,7 @@
       "page_of": "Page {page} of {total}"
     },
     "species_profile": {
-      "page_title": "{name} — Rastrum",
+      "page_title": "{name} — COM Argentina",
       "not_found": "Species not found.",
       "error": "Failed to load species profile.",
       "loading": "Loading species profile…",
@@ -2486,7 +2486,7 @@
     },
     "visitor_not_found_cta": "Browse recent observations →",
     "visitor_back_to_profile": "← Back to profile",
-    "visitor_page_title": "@{handle}'s Pokédex — Rastrum",
+    "visitor_page_title": "@{handle}'s Pokédex — COM Argentina",
     "visitor_load_error": "Couldn't load this Pokédex. Check your connection and try again.",
     "missing": {
       "show": "Show missing",
@@ -2497,12 +2497,12 @@
       "empty": "No missing species in our regional pool yet — keep observing!",
       "card_tag": "Missing",
       "cta": "Observe this",
-      "disclaimer": "Estimate based on Rastrum community observations in your region — incomplete for some areas. (GBIF baseline coming in v1.1.)"
+      "disclaimer": "Estimate based on COM Argentina community observations in your region — incomplete for some areas. (GBIF baseline coming in v1.1.)"
     }
   },
   "explore_species_hero": {
     "title": "Species",
-    "subtitle": "Explore the catalog of species observed on Rastrum. Find endemics, threatened species, and recent community discoveries.",
+    "subtitle": "Explore the catalog of species observed on COM Argentina. Find endemics, threatened species, and recent community discoveries.",
     "featured_label": "Featured this week",
     "species_label": "Species",
     "observers_label": "Observers",
@@ -2526,7 +2526,7 @@
     "make_private_action": "Make profile private"
   },
   "search": {
-    "placeholder": "Search Rastrum…",
+    "placeholder": "Search COM Argentina…",
     "empty_recent": "Recent",
     "empty_quick_actions": "Quick actions",
     "groups": {
@@ -2713,7 +2713,7 @@
   "console": {
     "nav": "Console",
     "exit": "Exit console",
-    "back_to_site": "Back to Rastrum",
+    "back_to_site": "Back to COM Argentina",
     "not_authorized": "You don't have console access.",
     "anon": {
       "title": "Console — for moderators & admins",
@@ -3115,7 +3115,7 @@
     "karma_note_obs_synced": "Every new observation synced to the server.",
     "karma_note_consensus_win": "Observer ID confirmed by ≥60% community vote.",
     "karma_note_consensus_loss": "Observer ID overridden by community consensus.",
-    "karma_note_first_in_rastrum": "First observation of this taxon ever on Rastrum.",
+    "karma_note_first_in_rastrum": "First observation of this taxon ever on COM Argentina.",
     "karma_note_comment_reaction": "Positive reaction received on a comment.",
     "karma_note_manual_adjust": "Admin manual adjustment via award_karma().",
     "karma_note_pool_donation": "Sponsor donated calls to a platform pool.",
@@ -3843,7 +3843,7 @@
     "skip": "Skip guide",
     "observe": {
       "step1_title": "Upload a photo",
-      "step1_body": "Drag a photo here or tap to open your camera. Rastrum identifies species from photos, audio, and video.",
+      "step1_body": "Drag a photo here or tap to open your camera. COM Argentina identifies species from photos, audio, and video.",
       "step2_title": "See the identification",
       "step2_body": "Our AI cascade checks multiple sources. The best match appears here with a confidence score.",
       "step3_title": "Confirm or correct",
@@ -3948,7 +3948,7 @@
     },
     "in_research": {
       "label": "Observations in research projects",
-      "tooltip": "Count of your observations tagged into a Rastrum project (typically an ANP polygon or a researcher-defined sampling grid)."
+      "tooltip": "Count of your observations tagged into a COM Argentina project (typically an ANP polygon or a researcher-defined sampling grid)."
     },
     "sensitive_seen": {
       "label": "At-risk species you have helped track",
@@ -4033,11 +4033,11 @@
     "sign_in_hint": "Sign in to get a personalized feed."
   },
   "consent": {
-    "banner_text": "We use analytics to improve Rastrum. No personal data is sold.",
+    "banner_text": "We use analytics to improve COM Argentina. No personal data is sold.",
     "accept": "Accept",
     "decline": "Decline",
     "settings_label": "Analytics",
-    "settings_description": "Allow Rastrum to collect anonymous usage analytics via PostHog.",
+    "settings_description": "Allow COM Argentina to collect anonymous usage analytics via PostHog.",
     "settings_enable": "Enable analytics",
     "settings_disable": "Disable analytics",
     "opted_in_toast": "Analytics enabled",
@@ -4058,12 +4058,12 @@
     "field_guide": "Field Guide"
   },
   "field_guide": {
-    "page_title": "Field Guide — Rastrum",
+    "page_title": "Field Guide — COM Argentina",
     "print_button": "Print / Save as PDF",
     "back_link": "Back to trail",
     "loading": "Loading field guide…",
     "not_found": "Trail not found.",
-    "subtitle": "Rastrum · Field Guide",
+    "subtitle": "COM Argentina · Field Guide",
     "created": "Created",
     "species": "Species",
     "observations": "Observations",
@@ -4077,17 +4077,17 @@
     "col_lng": "Lng",
     "col_obs": "Obs",
     "no_waypoints": "No waypoints recorded.",
-    "footer_generated": "Rastrum · Field guide generated",
+    "footer_generated": "COM Argentina · Field guide generated",
     "footer_suffix": "· rastrum.org",
-    "title_suffix": "— Field Guide | Rastrum"
+    "title_suffix": "— Field Guide | COM Argentina"
   },
   "pit_landing": {
-    "meta_title_detail": "Rastrum — Territorial Information Point",
-    "meta_description_detail": "You've arrived at a Rastrum Territorial Information Point. Record your biodiversity observation here.",
-    "meta_title_index": "Rastrum — Territorial Information Points",
+    "meta_title_detail": "COM Argentina — Territorial Information Point",
+    "meta_description_detail": "You've arrived at a COM Argentina Territorial Information Point. Record your biodiversity observation here.",
+    "meta_title_index": "COM Argentina — Territorial Information Points",
     "meta_description_index": "Territorial Information Points (PITs) are scannable QR-coded landmarks that let visitors record biodiversity observations on the spot.",
     "not_found": "PIT not found.",
-    "back_to_explore": "Explore Rastrum",
+    "back_to_explore": "Explore COM Argentina",
     "no_slug_heading": "No PIT specified",
     "no_slug_body": "Open this page by scanning a PIT's QR code, or pick one from the Explore page."
   },
@@ -4102,8 +4102,8 @@
     "add_error": "Failed to add species.",
     "empty": "No species in this list yet.",
     "species_word": "species",
-    "rastrum_suffix": "— Rastrum",
-    "page_title": "Species list — Rastrum",
-    "meta_description": "A user-curated species list on Rastrum."
+    "rastrum_suffix": "— COM Argentina",
+    "page_title": "Species list — COM Argentina",
+    "meta_description": "A user-curated species list on COM Argentina."
   }
 }
