@@ -4,11 +4,20 @@
  * Gate: expert OR admin. The /console/ root picks this view when the active
  * role pill is 'expert'.
  */
-import { t } from '../i18n/utils';
+import { t, getLocalizedPath, routes } from '../i18n/utils';
 
 interface Props { lang: 'en' | 'es' }
 const { lang } = Astro.props;
 const tr = t(lang);
+const locale = lang === 'es' ? 'es' : 'en';
+
+const validationHref = getLocalizedPath(lang, routes.consoleExpertValidation[locale] + '/');
+const expertiseHref = getLocalizedPath(lang, routes.consoleExpertExpertise[locale] + '/');
+const isEs = lang === 'es';
+const pendingLabel = isEs ? 'validación(es) pendiente(s) en tus taxa' : 'pending validation(s) in your taxa';
+const scoreLabel = isEs ? 'Puntaje total:' : 'Total score:';
+const linkValText = tr.console.exp_overview_link_validation || (isEs ? 'Validaciones pendientes →' : 'Pending validations →');
+const linkExpText = tr.console.exp_overview_link_expertise || (isEs ? 'Tu experiencia →' : 'Your expertise →');
 ---
 
 <section class="max-w-5xl">
@@ -16,7 +25,16 @@ const tr = t(lang);
     {tr.console.not_authorized}
   </div>
 
-  <div id="exp-overview-shell" class="hidden space-y-6">
+  <div
+    id="exp-overview-shell"
+    class="hidden space-y-6"
+    data-validation-href={validationHref}
+    data-expertise-href={expertiseHref}
+    data-pending-label={pendingLabel}
+    data-score-label={scoreLabel}
+    data-link-val-text={linkValText}
+    data-link-exp-text={linkExpText}
+  >
     <p class="text-sm text-zinc-600 dark:text-zinc-400">{tr.console.exp_overview_heading}</p>
 
     <!-- KPI counters -->
@@ -120,23 +138,31 @@ const tr = t(lang);
     setText('exp-kpi-pending', String(pendingCount));
 
     // Action items
+    const shell = document.getElementById('exp-overview-shell');
+    const valHref = shell?.dataset.validationHref ?? '#';
+    const expHref = shell?.dataset.expertiseHref ?? '#';
+    const labelPending = shell?.dataset.pendingLabel ?? 'pending validation(s) in your taxa';
+    const labelScore = shell?.dataset.scoreLabel ?? 'Total score:';
+    const textLinkVal = shell?.dataset.linkValText ?? 'Pending validations →';
+    const textLinkExp = shell?.dataset.linkExpText ?? 'Your expertise →';
+
     const itemsEl = document.getElementById('exp-overview-items');
     if (itemsEl && pendingCount > 0) {
       itemsEl.innerHTML = `
         <div class="flex items-center justify-between rounded-md border border-amber-200 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/10 px-3 py-2 text-sm">
-          <span class="text-amber-900 dark:text-amber-100">${pendingCount} pending validation(s) in your taxa</span>
-          <a href="../validation/" class="text-amber-700 dark:text-amber-300 underline text-xs">Pending validations →</a>
+          <span class="text-amber-900 dark:text-amber-100">${pendingCount} ${labelPending}</span>
+          <a href="${valHref}" class="text-amber-700 dark:text-amber-300 underline text-xs">${textLinkVal}</a>
         </div>
         <div class="flex items-center justify-between rounded-md border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
-          <span class="text-zinc-700 dark:text-zinc-300">Total score: ${Math.round(totalScore)}</span>
-          <a href="../expertise/" class="text-zinc-600 dark:text-zinc-400 underline text-xs">Your expertise →</a>
+          <span class="text-zinc-700 dark:text-zinc-300">${labelScore} ${Math.round(totalScore)}</span>
+          <a href="${expHref}" class="text-zinc-600 dark:text-zinc-400 underline text-xs">${textLinkExp}</a>
         </div>
       `;
     } else if (itemsEl) {
       itemsEl.innerHTML = `
         <div class="flex items-center justify-between rounded-md border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-sm">
-          <span class="text-zinc-700 dark:text-zinc-300">Total score: ${Math.round(totalScore)}</span>
-          <a href="../expertise/" class="text-zinc-600 dark:text-zinc-400 underline text-xs">Your expertise →</a>
+          <span class="text-zinc-700 dark:text-zinc-300">${labelScore} ${Math.round(totalScore)}</span>
+          <a href="${expHref}" class="text-zinc-600 dark:text-zinc-400 underline text-xs">${textLinkExp}</a>
         </div>
       `;
     }

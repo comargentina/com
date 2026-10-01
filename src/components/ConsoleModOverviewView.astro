@@ -4,11 +4,17 @@
  * Gate: moderator OR admin. The /console/ root picks this view when the active
  * role pill is 'moderator'.
  */
-import { t } from '../i18n/utils';
+import { t, getLocalizedPath, routes } from '../i18n/utils';
 
 interface Props { lang: 'en' | 'es' }
 const { lang } = Astro.props;
 const tr = t(lang);
+const locale = lang === 'es' ? 'es' : 'en';
+
+const flagQueueHref = getLocalizedPath(lang, routes.consoleModFlagQueue[locale] + '/');
+const isEs = lang === 'es';
+const openReportsLabel = isEs ? 'reporte(s) abierto(s) requieren atención' : 'open report(s) need attention';
+const queueLinkText = isEs ? 'Ver cola →' : 'View queue →';
 ---
 
 <section class="max-w-5xl">
@@ -16,7 +22,13 @@ const tr = t(lang);
     {tr.console.not_authorized}
   </div>
 
-  <div id="mod-overview-shell" class="hidden space-y-6">
+  <div
+    id="mod-overview-shell"
+    class="hidden space-y-6"
+    data-queue-href={flagQueueHref}
+    data-open-label={openReportsLabel}
+    data-queue-link-text={queueLinkText}
+  >
     <p class="text-sm text-zinc-600 dark:text-zinc-400">{tr.console.mod_overview_intro}</p>
 
     <!-- KPI counters -->
@@ -103,14 +115,19 @@ const tr = t(lang);
     }
 
     // Action items — show oldest open report if any
+    const shell = document.getElementById('mod-overview-shell');
+    const queueHref = shell?.dataset.queueHref ?? '#';
+    const labelOpen = shell?.dataset.openLabel ?? 'open report(s) need attention';
+    const textQueueLink = shell?.dataset.queueLinkText ?? 'View queue →';
+
     const openCount = openReports.count ?? 0;
     if (openCount > 0) {
       const itemsEl = document.getElementById('mod-overview-items');
       if (itemsEl) {
         itemsEl.innerHTML = `
           <div class="flex items-center justify-between rounded-md border border-amber-200 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/10 px-3 py-2 text-sm">
-            <span class="text-amber-900 dark:text-amber-100">${openCount} open report(s) need attention</span>
-            <a href={lang === "es" ? "/es/consola/cola-banderas/" : "/en/console/flag-queue/"} class="text-amber-700 dark:text-amber-300 underline text-xs">View queue →</a>
+            <span class="text-amber-900 dark:text-amber-100">${openCount} ${labelOpen}</span>
+            <a href="${queueHref}" class="text-amber-700 dark:text-amber-300 underline text-xs">${textQueueLink}</a>
           </div>
         `;
       }
