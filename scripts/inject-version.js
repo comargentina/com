@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * scripts/inject-version.js
  *

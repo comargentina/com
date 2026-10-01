@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * scripts/backfill-rarity-tier.mjs
  *
