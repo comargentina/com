@@ -1456,6 +1456,7 @@ const indexBase = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'explore/spe
         .from('observations')
         .select('id, location, observed_at, media_files(url, thumbnail_url, is_primary, media_type, deleted_at)')
         .eq('sync_status', 'synced')
+        .eq('hidden', false)
         .eq('primary_taxon_id', taxon.id)
         .order('observed_at', { ascending: false })
         .limit(200);

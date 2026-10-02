@@ -236,6 +236,7 @@ const communityHref = `/${lang}/${lang === 'es' ? 'comunidad/observadores' : 'co
       .in('observer_id', followedIds)
       .gte('observed_at', since24h)
       .eq('sync_status', 'synced')
+      .eq('hidden', false)
       .order('observed_at', { ascending: false })
       .limit(12);
 

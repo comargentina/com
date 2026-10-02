@@ -231,6 +231,7 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
       .from('observations')
       .select('id, location, location_obscured, obscure_level, observed_at, taxa:primary_taxon_id(kingdom), identifications(scientific_name, is_primary), media_files(url, thumbnail_url, is_primary, media_type)')
       .eq('sync_status', 'synced')
+      .eq('hidden', false)
       .limit(500);
 
     if (error) {

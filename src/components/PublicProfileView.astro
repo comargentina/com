@@ -298,6 +298,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       .select('id, observed_at, state_province, identifications!inner(scientific_name, is_primary), media_files(url, is_primary, media_type)')
       .eq('observer_id', profile.id)
       .eq('sync_status', 'synced')
+      .eq('hidden', false)
       .eq('identifications.is_primary', true)
       .order('observed_at', { ascending: false })
       .limit(12);

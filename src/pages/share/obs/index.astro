@@ -149,7 +149,7 @@ const lang: 'en' | 'es' = 'en';
         .from('observations')
         .select(`
           id, observed_at, obscure_level, state_province, habitat, weather, establishment_means, observer_id, notes,
-          last_material_edit_at, is_range_extension, location, location_obscured, evidence_type,
+          last_material_edit_at, is_range_extension, location, location_obscured, evidence_type, hidden, hidden_reason,
           places:place_id(id, slug, name, place_type),
           identifications(scientific_name, is_primary, is_research_grade),
           users:observer_id(display_name, username, profile_public)
@@ -181,6 +181,33 @@ const lang: 'en' | 'es' = 'en';
           errEl.classList.remove('hidden');
         }
         return;
+      }
+
+      if ((obs as { hidden?: boolean }).hidden) {
+        const { getCachedSession } = await import('../../../lib/supabase');
+        const session = await getCachedSession();
+        const viewerId = session?.user?.id;
+        const isOwner = viewerId && viewerId === obs.observer_id;
+        if (!isOwner) {
+          document.getElementById('loading')?.classList.add('hidden');
+          const errEl = document.getElementById('err');
+          if (errEl) {
+            const es = document.documentElement.lang === 'es';
+            const recent = es ? '/es/explorar/recientes/' : '/en/explore/recent/';
+            const home   = es ? '/es/' : '/en/';
+            errEl.innerHTML =
+              `<span class="block text-red-600 dark:text-red-400 font-medium">${es
+                ? 'Esta observación fue ocultada por moderación.'
+                : 'This observation was hidden by moderation.'}</span>` +
+              `<span class="mt-3 flex gap-4 justify-center text-sm not-italic">` +
+              `<a class="text-emerald-700 dark:text-emerald-400 underline" href="${recent}">${es
+                ? 'Ver observaciones recientes →' : 'Browse recent observations →'}</a>` +
+              `<a class="text-zinc-600 dark:text-zinc-300 underline" href="${home}">${es ? 'Inicio' : 'Home'}</a>` +
+              `</span>`;
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
       }
 
       const idArr = Array.isArray(obs.identifications) ? obs.identifications : (obs.identifications ? [obs.identifications] : []);
