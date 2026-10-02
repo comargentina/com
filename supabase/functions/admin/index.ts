@@ -22,22 +22,14 @@ import {
 } from './_shared/irreversible-enforcement.ts';
 import { HANDLERS } from './handlers/index.ts';
 
-const ALLOWED_ORIGINS = [
-  'https://rastrum.org',
-  'https://com-com-f83a.vercel.app',
-  'http://localhost:4321',  // astro dev
-  'http://localhost:4329',  // astro preview (e2e)
-];
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
+};
 
-function corsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get('origin') ?? '';
-  const allowed = ALLOWED_ORIGINS.includes(origin);
-  return {
-    'Access-Control-Allow-Origin': allowed ? origin : ALLOWED_ORIGINS[0],
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
-    'Vary': 'Origin',
-  };
+function corsHeaders(_req: Request): Record<string, string> {
+  return CORS_HEADERS;
 }
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
