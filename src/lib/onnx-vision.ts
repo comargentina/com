@@ -156,13 +156,28 @@ export async function loadGemmaVisionEngine(
     Gemma4ForConditionalGeneration: { from_pretrained: (id: string, opts?: Record<string, unknown>) => Promise<GemmaModelLike> };
   };
 
-  const progressBridge = (p: { status?: string; progress?: number; file?: string }) => {
-    const ratio = typeof p.progress === 'number'
-      ? (p.progress > 1 ? p.progress / 100 : p.progress)
-      : 0;
+  const progressBridge = (p: { status?: string; progress?: number; file?: string; loaded?: number; total?: number }) => {
+    let ratio = 0;
+    if (typeof p.progress === 'number' && !isNaN(p.progress)) {
+      ratio = p.progress > 1 ? p.progress / 100 : p.progress;
+    } else if (typeof p.loaded === 'number' && typeof p.total === 'number' && p.total > 0) {
+      ratio = p.loaded / p.total;
+    }
+
+    let progressStr = `${Math.round(ratio * 100)}%`;
+    if (typeof p.loaded === 'number' && p.loaded > 0) {
+      const mbLoaded = (p.loaded / (1024 * 1024)).toFixed(1);
+      if (typeof p.total === 'number' && p.total > 0) {
+        const mbTotal = (p.total / (1024 * 1024)).toFixed(1);
+        progressStr = `${mbLoaded} MB / ${mbTotal} MB (${Math.round(ratio * 100)}%)`;
+      } else {
+        progressStr = `${mbLoaded} MB`;
+      }
+    }
+
     onProgress({
       progress: Math.max(0, Math.min(1, ratio)),
-      text: p.file ? `${p.status ?? 'loading'} ${p.file}` : (p.status ?? 'loading'),
+      text: p.file ? `${progressStr} · ${p.file}` : (p.status ?? 'cargando'),
       timeElapsedMs: performance.now() - start,
     });
   };
@@ -306,7 +321,17 @@ export async function* generateGemmaText(
     enable_thinking: false,
     add_generation_prompt: true,
   });
-  const inputs = await proc(promptText, undefined, { add_special_tokens: false });
+  let inputs: Record<string, unknown>;
+  try {
+    const tokFunc = proc.tokenizer as unknown as (t: string, o?: Record<string, unknown>) => Promise<Record<string, unknown>>;
+    if (typeof tokFunc === 'function') {
+      inputs = await tokFunc(promptText as string, { add_special_tokens: false });
+    } else {
+      inputs = await proc(promptText as string, undefined, { add_special_tokens: false });
+    }
+  } catch {
+    inputs = await proc(promptText as string, undefined, { add_special_tokens: false });
+  }
 
   const max_new_tokens = Math.min(opts.max_tokens ?? 512, 1024);
 

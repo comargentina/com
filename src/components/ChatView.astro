@@ -1313,37 +1313,25 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       }
 
       try {
-        const lib = await import('../lib/local-ai');
-        if (dlProgress) dlProgress.classList.remove('hidden');
-        const engine = await lib.loadTextEngine((p) => {
-          if (dlProgress) dlProgress.textContent = `${Math.round((p.progress ?? 0) * 100)}%  ${p.text ?? ''}`;
-          if ((p.progress ?? 0) >= 1) dlProgress?.classList.add('hidden');
-        });
-        dlProgress?.classList.add('hidden');
-
-        const messages = [
-          { role: 'system' as const, content: CHAT_SYSTEM_PROMPT },
+        const { streamChat } = await import('../lib/chat-engine');
+        type ChatMsg = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string };
+        const messages: ChatMsg[] = [
+          { role: 'system', content: CHAT_SYSTEM_PROMPT },
           ...conversation
             .slice(0, -1)
-            .filter(t => !t.attachment) // skip prior attached turns from text-only history
-            .map(t => ({ role: t.role, content: t.content })),
+            .filter(t => !t.attachment)
+            .slice(-6)
+            .map(t => ({ role: t.role as ChatMsg['role'], content: t.content.slice(0, 600) })),
         ];
 
         let assembled = '';
-        try {
-          const stream = await engine.chat.completions.create({ messages, max_tokens: 512, stream: true });
-          for await (const chunk of stream as AsyncIterable<{ choices?: Array<{ delta?: { content?: string } }> }>) {
-            const delta = chunk.choices?.[0]?.delta?.content ?? '';
-            if (!delta) continue;
-            assembled += delta;
+        const preferEngine = readChatEngine() ?? undefined;
+        for await (const event of streamChat({ messages, prefer: preferEngine })) {
+          if (event.type === 'text') {
+            assembled += event.delta;
             conversation[assistantIdx].content = assembled;
             setBubbleStreaming(assistantIdx, assembled);
           }
-        } catch {
-          const reply = await engine.chat.completions.create({ messages, max_tokens: 512 });
-          const raw = reply.choices?.[0]?.message?.content ?? '';
-          assembled = typeof raw === 'string' ? raw : '';
-          conversation[assistantIdx].content = assembled;
         }
         paintConversation();
         persistAssistantTurn(conversation[assistantIdx]);
