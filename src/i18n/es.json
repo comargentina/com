@@ -1144,7 +1144,7 @@
     "empty_state": "Pregunta por una especie, un hábitat o cómo registrar una observación complicada. También puedes adjuntar una foto o un audio. Las respuestas se quedan en este dispositivo.",
     "consent_required": "El chat en el dispositivo descarga un modelo de lenguaje pequeño una sola vez (Llama-3.2-1B, ~880 MB). Si ya descargaste Gemma 4 desde Perfil → Ajustes de IA, se usa ese modelo — los mismos pesos, sin descarga adicional.",
     "consent_download": "Descargar modelo (~880 MB)",
-    "consent_unsupported": "Tu navegador no soporta WebGPU — el chat no está disponible aquí.",
+    "consent_unsupported": "WebGPU no está disponible. El modo Incógnito de Chrome, la falta de aceleración por GPU o navegadores sin WebGPU impiden ejecutar modelos locales aquí. Intenta en una pestaña normal de Chrome.",
     "consent_open_settings": "Gestionar en Perfil → Ajustes de IA",
     "system_prompt_en": "You are a helpful biodiversity assistant for COM Argentina. Answer concisely. The user may ask in English or Spanish — reply in whichever language they used.",
     "system_prompt_es": "You are a helpful biodiversity assistant for COM Argentina. Answer concisely. The user may ask in English or Spanish — reply in whichever language they used.",

@@ -72,7 +72,7 @@ export function gemmaSupported(): boolean {
   const hasGpu = 'gpu' in navigator && typeof (navigator as Navigator & { gpu?: unknown }).gpu !== 'undefined';
   if (!hasGpu) return false;
   const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  if (typeof mem === 'number' && mem <= 4) return false;
+  if (typeof mem === 'number' && mem <= 2) return false;
   return true;
 }
 

@@ -132,6 +132,22 @@ export function localAISupported(): boolean {
   return true;
 }
 
+/**
+ * Asynchronously probes whether WebGPU GPUAdapter is actually accessible.
+ * In Chrome Incognito mode or environments without GPU access, navigator.gpu exists but requestAdapter() returns null or rejects.
+ */
+export async function checkWebGPUAdapter(): Promise<boolean> {
+  if (!localAISupported()) return false;
+  try {
+    const nav = navigator as Navigator & { gpu?: { requestAdapter: () => Promise<unknown> } };
+    if (!nav.gpu?.requestAdapter) return false;
+    const adapter = await nav.gpu.requestAdapter();
+    return !!adapter;
+  } catch {
+    return false;
+  }
+}
+
 async function ensureCreator() {
   if (createEngine) return createEngine;
   const mod = await import('@mlc-ai/web-llm');

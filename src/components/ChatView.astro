@@ -680,7 +680,8 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   async function refreshState() {
     try {
       const lib = await import('../lib/local-ai');
-      if (!lib.localAISupported()) {
+      const adapterOk = await lib.checkWebGPUAdapter();
+      if (!adapterOk) {
         consentBox?.classList.remove('hidden');
         unsupNote?.classList.remove('hidden');
         if (downloadBtn) downloadBtn.disabled = true;
@@ -797,6 +798,17 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     }).catch(() => { /* best effort */ });
   }
 
+  function formatGpuError(err: unknown): string {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isEs = document.documentElement.lang === 'es';
+    if (/compatible GPU|WebGPU|GPUAdapter|requestAdapter/i.test(msg)) {
+      return isEs
+        ? 'No se encontró una GPU compatible. El modo Incógnito de Chrome o la falta de aceleración por hardware desactivan WebGPU. Intenta en una pestaña normal.'
+        : 'No compatible GPU found. Chrome Incognito mode or disabled hardware acceleration blocks WebGPU. Try in a normal tab.';
+    }
+    return msg;
+  }
+
   downloadBtn?.addEventListener('click', async () => {
     if (!downloadBtn || !downloadLabel) return;
     downloadBtn.disabled = true;
@@ -815,7 +827,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       formEl?.classList.remove('hidden');
       paintConversation();
     } catch (err) {
-      if (dlProgress) dlProgress.textContent = err instanceof Error ? err.message : String(err);
+      if (dlProgress) dlProgress.textContent = formatGpuError(err);
     } finally {
       downloadBtn.disabled = false;
       downloadLabel.textContent = DL_DEFAULT;
@@ -852,7 +864,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       formEl?.classList.remove('hidden');
       paintConversation();
     } catch (err) {
-      if (dlProgress) dlProgress.textContent = err instanceof Error ? err.message : String(err);
+      if (dlProgress) dlProgress.textContent = formatGpuError(err);
     } finally {
       gemmaDownloadBtn.disabled = false;
     }
