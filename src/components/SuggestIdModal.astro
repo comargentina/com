@@ -375,12 +375,15 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
 
         // Auto-create new taxon if valid species name is not yet in the catalog
         if (!taxonId && sciFormatted.length > 2) {
+          const genusName = sciFormatted.split(' ')[0] || sciFormatted;
           const { data: newTaxon, error: createErr } = await supabase
             .from('taxa')
             .insert({
               scientific_name: sciFormatted,
+              canonical_name: sciFormatted,
+              genus: genusName,
               kingdom: 'Animalia',
-              rank: sciFormatted.split(' ').length > 2 ? 'subspecies' : 'species',
+              taxon_rank: 'species',
             })
             .select('id, scientific_name')
             .single();
@@ -389,6 +392,7 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
             taxonId = newTaxon.id;
             matchedSciName = newTaxon.scientific_name;
           } else if (createErr) {
+            console.warn('[rastrum] Could not create new taxon:', createErr);
             const { data: retryTaxon } = await supabase
               .from('taxa')
               .select('id, scientific_name')
@@ -397,8 +401,6 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
             if (retryTaxon?.id) {
               taxonId = retryTaxon.id;
               matchedSciName = retryTaxon.scientific_name;
-            } else {
-              console.warn('[rastrum] Could not create new taxon:', createErr);
             }
           }
         }
