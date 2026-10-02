@@ -405,16 +405,6 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
           }
         }
 
-        if (!taxonId) {
-          if (errorEl) {
-            errorEl.textContent = noTaxonMatch;
-            errorEl.classList.remove('hidden');
-          }
-          submitBtn!.disabled = false;
-          submitLabel!.textContent = original;
-          return;
-        }
-
         // Upsert against the partial UNIQUE index on
         // (observation_id, validated_by) — repeating a vote (e.g.
         // user picked Confirm twice or changed their mind via
@@ -424,7 +414,7 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
           .from('identifications')
           .upsert({
             observation_id: observationId,
-            taxon_id: taxonId,
+            taxon_id: taxonId ?? null,
             scientific_name: matchedSciName,
             confidence,
             source: 'human',
