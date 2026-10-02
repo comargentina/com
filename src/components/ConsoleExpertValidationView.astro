@@ -4,11 +4,16 @@
  * expert_taxa. Read-only; each row links to /explore/validate/?obs=<id>
  * for the actual suggest/vote write path.
  */
-import { t } from '../i18n/utils';
+import { t, getLocalizedPath, routes } from '../i18n/utils';
 
 interface Props { lang: 'en' | 'es' }
 const { lang } = Astro.props;
 const tr = t(lang);
+const locale = lang === 'es' ? 'es' : 'en';
+
+const validateQueueHref = getLocalizedPath(lang, routes.exploreValidate[locale] + '/');
+const isEs = lang === 'es';
+const openInQueueText = isEs ? 'Abrir en cola →' : 'Open in queue →';
 ---
 
 <section class="max-w-5xl space-y-4">
@@ -16,7 +21,12 @@ const tr = t(lang);
     {tr.console.not_authorized}
   </div>
 
-  <div id="exp-val-shell" class="hidden space-y-4">
+  <div
+    id="exp-val-shell"
+    class="hidden space-y-4"
+    data-validate-queue-href={validateQueueHref}
+    data-open-in-queue-text={openInQueueText}
+  >
     <p class="text-sm text-zinc-600 dark:text-zinc-400">{tr.console.exp_val_intro}</p>
 
     <!-- Filter toggle -->
@@ -177,10 +187,14 @@ const tr = t(lang);
     hide('exp-val-empty');
     show('exp-val-table-wrap');
 
+    const shell = document.getElementById('exp-val-shell');
+    const queueBaseUrl = shell?.dataset.validateQueueHref ?? (document.documentElement.lang === 'es' ? '/es/explorar/validar/' : '/en/explore/validate/');
+    const openText = shell?.dataset.openInQueueText ?? (document.documentElement.lang === 'es' ? 'Abrir en cola →' : 'Open in queue →');
+
     tbody.innerHTML = rows.map(r => {
       const conf = r.current_confidence != null ? `${Math.round(r.current_confidence * 100)}%` : '—';
       // uuid is structurally safe but escape for uniformity with the rest of the component
-      const obsUrl = `/explore/validate/?obs=${escHtml(r.observation_id)}`;
+      const obsUrl = `${queueBaseUrl}?obs=${escHtml(r.observation_id)}`;
       const name = r.current_scientific_name ?? '—';
       const suggestions = r.suggestion_count ?? 0;
       const voters = r.distinct_voter_count ?? 0;
@@ -190,7 +204,7 @@ const tr = t(lang);
         <td class="py-2 pr-3 text-zinc-600 dark:text-zinc-300">${suggestions}</td>
         <td class="py-2 pr-3 text-zinc-600 dark:text-zinc-300">${voters}</td>
         <td class="py-2 pr-3 text-zinc-600 dark:text-zinc-300 font-mono text-xs">${r.observer_id ? r.observer_id.slice(0, 8) + '…' : '—'}</td>
-        <td class="py-2"><a href="${obsUrl}" class="text-xs text-emerald-700 dark:text-emerald-400 underline whitespace-nowrap">Open in queue →</a></td>
+        <td class="py-2"><a href="${obsUrl}" class="text-xs text-emerald-700 dark:text-emerald-400 underline whitespace-nowrap">${openText}</a></td>
       </tr>`;
     }).join('');
   }
