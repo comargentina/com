@@ -24,6 +24,7 @@ import { HANDLERS } from './handlers/index.ts';
 
 const ALLOWED_ORIGINS = [
   'https://rastrum.org',
+  'https://com-com-f83a.vercel.app',
   'http://localhost:4321',  // astro dev
   'http://localhost:4329',  // astro preview (e2e)
 ];
