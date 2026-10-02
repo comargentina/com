@@ -179,7 +179,7 @@ const distancePage = page as unknown as Record<string, string>;
   <div id="er-list-block" class="hidden mt-2 space-y-2"></div>
 
   <!-- Map mode block -->
-  <div id="er-map-block" class="hidden min-h-[400px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 mt-2"></div>
+  <div id="er-map-block" class="hidden h-[500px] sm:h-[600px] w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 mt-2"></div>
 
   <!-- Timeline mode block -->
   <div id="er-timeline-block" class="hidden mt-2 space-y-4"></div>
@@ -261,6 +261,9 @@ const distancePage = page as unknown as Record<string, string>;
     observed_at: string;
     state_province: string | null;
     observer_id: string;
+    location: unknown;
+    location_obscured: unknown;
+    obscure_level: string | null;
     identifications: Ident[] | Ident | null;
     media_files: Media[];
     users: Observer | Observer[] | null;
@@ -620,8 +623,9 @@ const distancePage = page as unknown as Record<string, string>;
     // ── End distance filter setup ────────────────────────────────────────────
 
     // MapLibre state
-    let mapInstance: { resize: () => void; fitBounds: (b: [[number,number],[number,number]], o?: Record<string,unknown>) => void } | null = null;
+    let mapInstance: any = null;
     let mapInited = false;
+    let mapMarkers: any[] = [];
 
     function listRowMarkup(r: Row): string {
       const ident = pickIdent(r);
@@ -737,33 +741,67 @@ const distancePage = page as unknown as Record<string, string>;
       timelineBlockEl.innerHTML = html;
     }
 
-    async function initMap(_rows: Row[]) {
+    async function initMap(rows: Row[]) {
       if (!mapBlockEl) return;
-      const { default: maplibregl } = await import('maplibre-gl' as string) as unknown as { default: {
-        Map: new (o: Record<string, unknown>) => {
-          on: (e: string, cb: () => void) => void;
-          resize: () => void;
-          fitBounds: (b: [[number,number],[number,number]], o?: Record<string,unknown>) => void;
-        };
-        Marker: new (o?: Record<string, unknown>) => { setLngLat: (c: [number,number]) => { addTo: (m: unknown) => unknown } };
-        NavigationControl: new () => unknown;
-        Popup: new (o?: Record<string, unknown>) => { setHTML: (h: string) => { setLngLat: (c: [number,number]) => { addTo: (m: unknown) => unknown } } };
-      }};
+      const { default: maplibregl } = await import('maplibre-gl' as string) as any;
+      const { basemapStyleUrl, installSpriteFallback } = await import('../lib/map-style');
+      const { parseLocationToGeoJSON } = await import('../lib/geo');
+      const { COLON_DEFAULT_CENTER } = await import('../lib/media-helpers');
 
-      // Collect rows with coordinates (stored as lat/lng in state_province — fallback CDMX)
-      // Note: observations don't have lat/lng directly exposed in the Row type here,
-      // so we use CDMX as center and skip per-marker coords (they'd need a schema change).
-      // Map still renders; markers would need coordinate data from the API.
-      const cdmx: [number, number] = [-99.1332, 19.4326];
+      const colonLngLat: [number, number] = [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat];
 
       const map = new maplibregl.Map({
         container: mapBlockEl,
-        style: 'https://demotiles.maplibre.org/style.json',
-        center: cdmx,
-        zoom: 5,
+        style: basemapStyleUrl(),
+        center: colonLngLat,
+        zoom: 9,
+        attributionControl: { compact: true },
       });
+      installSpriteFallback(map);
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
       mapInstance = map;
       mapInited = true;
+
+      map.on('load', () => {
+        plotMapMarkers(rows, maplibregl, parseLocationToGeoJSON);
+      });
+    }
+
+    function plotMapMarkers(rows: Row[], maplibregl: any, parseLocationToGeoJSON: any) {
+      if (!mapInstance) return;
+      mapMarkers.forEach(m => m.remove());
+      mapMarkers = [];
+
+      for (const r of rows) {
+        const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
+          ? r.location_obscured
+          : r.location;
+        const parsed = parseLocationToGeoJSON(raw);
+        if (!parsed?.coordinates) continue;
+
+        const ident = pickIdent(r);
+        const sci = ident?.scientific_name ?? unknownLabel;
+        const common = lang === 'es'
+          ? (ident?.taxa?.common_name_es ?? ident?.taxa?.common_name_en ?? '')
+          : (ident?.taxa?.common_name_en ?? ident?.taxa?.common_name_es ?? '');
+
+        const popupHtml = `
+          <div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 2px;">
+            <p style="font-weight: 600; font-style: italic; margin: 0; color: #18181b;">${escapeText(sci)}</p>
+            ${common ? `<p style="margin: 2px 0 0; color: #71717a;">${escapeText(common)}</p>` : ''}
+            <a href="${shareBase}?id=${encodeURIComponent(r.id)}" style="display: inline-block; margin-top: 6px; color: #059669; font-weight: 600; text-decoration: underline;">
+              ${lang === 'es' ? 'Ver observación →' : 'View observation →'}
+            </a>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 12, closeButton: false }).setHTML(popupHtml);
+        const marker = new maplibregl.Marker({ color: '#059669' })
+          .setLngLat(parsed.coordinates as [number, number])
+          .setPopup(popup)
+          .addTo(mapInstance);
+        mapMarkers.push(marker);
+      }
     }
 
     function setViewMode(mode: ViewMode) {
@@ -793,8 +831,16 @@ const distancePage = page as unknown as Record<string, string>;
       if (mode === 'map') {
         if (!mapInited) {
           initMap(allRows).catch(() => { /* map unavailable */ });
-        } else {
-          mapInstance?.resize();
+        } else if (mapInstance) {
+          // Lock current center and zoom to prevent any vertical drifting / jumping
+          const curCenter = mapInstance.getCenter();
+          const curZoom = mapInstance.getZoom();
+          requestAnimationFrame(() => {
+            mapInstance?.resize();
+            if (curCenter) {
+              mapInstance?.jumpTo({ center: curCenter, zoom: curZoom });
+            }
+          });
         }
       }
 
@@ -857,7 +903,7 @@ const distancePage = page as unknown as Record<string, string>;
       const { data, error } = await supabase
         .from('observations')
         .select(`
-          id, observed_at, state_province, observer_id,
+          id, observed_at, state_province, observer_id, location, location_obscured, obscure_level,
           identifications(scientific_name, is_primary, is_research_grade, confidence, taxa(common_name_es, common_name_en)),
           media_files(url, thumbnail_url, is_primary, media_type, deleted_at),
           users:observer_id(id, username, display_name, profile_public, profile_privacy, avatar_url, karma_total)
