@@ -123,25 +123,25 @@ export async function cancelModelDownload(modelId: string): Promise<void> {
  */
 export function localAISupported(): boolean {
   if (typeof navigator === 'undefined') return false;
-  const hasGpu = 'gpu' in navigator && typeof (navigator as Navigator & { gpu?: unknown }).gpu !== 'undefined';
-  if (!hasGpu) return false;
-  // navigator.deviceMemory is approximate (0.25, 0.5, 1, 2, 4, 8 GiB).
-  // Reject low-memory devices reporting <= 2 GB. Devices with 4 GB RAM can run Gemma 4 E2B (~500 MB).
-  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  if (typeof mem === 'number' && mem <= 2) return false;
-  return true;
+  return 'gpu' in navigator && typeof (navigator as Navigator & { gpu?: unknown }).gpu !== 'undefined';
 }
 
 /**
  * Asynchronously probes whether WebGPU GPUAdapter is actually accessible.
- * In Chrome Incognito mode or environments without GPU access, navigator.gpu exists but requestAdapter() returns null or rejects.
+ * Tries default, high-performance, and low-power powerPreferences.
  */
 export async function checkWebGPUAdapter(): Promise<boolean> {
-  if (!localAISupported()) return false;
+  if (typeof navigator === 'undefined') return false;
+  const nav = navigator as Navigator & { gpu?: { requestAdapter: (opts?: unknown) => Promise<unknown> } };
+  if (!nav.gpu?.requestAdapter) return false;
   try {
-    const nav = navigator as Navigator & { gpu?: { requestAdapter: () => Promise<unknown> } };
-    if (!nav.gpu?.requestAdapter) return false;
-    const adapter = await nav.gpu.requestAdapter();
+    let adapter = await nav.gpu.requestAdapter().catch(() => null);
+    if (!adapter) {
+      adapter = await nav.gpu.requestAdapter({ powerPreference: 'high-performance' }).catch(() => null);
+    }
+    if (!adapter) {
+      adapter = await nav.gpu.requestAdapter({ powerPreference: 'low-power' }).catch(() => null);
+    }
     return !!adapter;
   } catch {
     return false;

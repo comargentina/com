@@ -680,8 +680,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   async function refreshState() {
     try {
       const lib = await import('../lib/local-ai');
-      const adapterOk = await lib.checkWebGPUAdapter();
-      if (!adapterOk) {
+      if (!lib.localAISupported()) {
         consentBox?.classList.remove('hidden');
         unsupNote?.classList.remove('hidden');
         if (downloadBtn) downloadBtn.disabled = true;
@@ -803,8 +802,8 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     const isEs = document.documentElement.lang === 'es';
     if (/compatible GPU|WebGPU|GPUAdapter|requestAdapter/i.test(msg)) {
       return isEs
-        ? 'No se encontró una GPU compatible. El modo Incógnito de Chrome o la falta de aceleración por hardware desactivan WebGPU. Intenta en una pestaña normal.'
-        : 'No compatible GPU found. Chrome Incognito mode or disabled hardware acceleration blocks WebGPU. Try in a normal tab.';
+        ? 'No se pudo iniciar la GPU. Si estás en Chrome, verifica en Configuración → Sistema (chrome://settings/system) que la "Aceleración por hardware" esté activada.'
+        : 'Could not start GPU. In Chrome, check Settings → System (chrome://settings/system) to ensure "Use hardware acceleration" is enabled.';
     }
     return msg;
   }
@@ -838,17 +837,6 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   const gemmaDownloadBtn = document.getElementById('chat-gemma-download-btn') as HTMLButtonElement | null;
   gemmaDownloadBtn?.addEventListener('click', async () => {
     if (!gemmaDownloadBtn) return;
-    const lib = await import('../lib/local-ai');
-    if (!lib.localAISupported()) {
-      const isEs = document.documentElement.lang === 'es';
-      if (dlProgress) {
-        dlProgress.textContent = isEs
-          ? 'Tu navegador no soporta WebGPU — el modelo local no está disponible aquí.'
-          : 'WebGPU is not supported on this browser — local model unavailable.';
-        dlProgress.classList.remove('hidden');
-      }
-      return;
-    }
     gemmaDownloadBtn.disabled = true;
     if (dlProgress) dlProgress.classList.remove('hidden');
     try {
