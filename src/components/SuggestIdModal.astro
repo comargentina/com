@@ -475,7 +475,15 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
         }));
         close();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
+        let msg = 'Error desconocido';
+        if (err instanceof Error) {
+          msg = err.message;
+        } else if (typeof err === 'object' && err !== null) {
+          const pgErr = err as { message?: string; details?: string; hint?: string; error_description?: string };
+          msg = pgErr.message || pgErr.details || pgErr.hint || pgErr.error_description || JSON.stringify(err);
+        } else {
+          msg = String(err);
+        }
         if (errorEl) {
           errorEl.textContent = failedTpl.replace('{error}', msg);
           errorEl.classList.remove('hidden');
