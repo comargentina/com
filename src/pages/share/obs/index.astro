@@ -25,6 +25,45 @@ const lang: 'en' | 'es' = 'en';
 ---
 
 <BaseLayout title="Observation — Rastrum" description="View a shared biodiversity observation from the Rastrum community — species identification, photo, audio, GPS location, and observer notes." lang={lang}>
+
+  <!-- Detect user language preference BEFORE first paint so strings render correctly.
+       This page is locale-neutral (no /en/ or /es/ prefix) so lang is always 'en'
+       at build time. We swap the [data-i18n] text nodes at runtime. -->
+  <script is:inline>
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem('rastrum.lang'); } catch (_) { /* ignore */ }
+      var browserEs = typeof navigator !== 'undefined' && navigator.language && navigator.language.toLowerCase().startsWith('es');
+      var lang = stored === 'es' || (!stored && browserEs) ? 'es' : 'en';
+      document.documentElement.lang = lang;
+
+      // Swap [data-i18n] text nodes to the detected language immediately.
+      function applyLang() {
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var text = el.getAttribute('data-' + lang);
+          if (text) el.textContent = text;
+        });
+        // Fix sign-in link lang prefix
+        var signInLink = document.getElementById('ci-signin-link');
+        if (signInLink) signInLink.setAttribute('href', '/' + lang + '/sign-in/');
+        // Fix Ask Rastrum link lang prefix (built with static /en/chat/)
+        var askLink = document.getElementById('ask-rastrum-link');
+        if (askLink && lang === 'es') {
+          var href = askLink.getAttribute('href') || '';
+          askLink.setAttribute('href', href.replace('/en/', '/es/'));
+          askLink.setAttribute('aria-label', 'Pregunta a Rastrum');
+          askLink.setAttribute('title', 'Pregunta a Rastrum');
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyLang);
+      } else {
+        applyLang();
+      }
+    })();
+  </script>
+
   <ShareObsView lang={lang} />
 
   <script>
