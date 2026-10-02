@@ -13289,3 +13289,144 @@ $$;
 REVOKE ALL ON FUNCTION public.admin_unban_user(uuid, uuid, text) FROM public;
 GRANT EXECUTE ON FUNCTION public.admin_unban_user(uuid, uuid, text) TO authenticated, service_role;
 
+CREATE OR REPLACE FUNCTION public.admin_hide_observation(
+  p_observation_id uuid,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_actor_id uuid := auth.uid();
+BEGIN
+  IF NOT (public.has_role(v_actor_id, 'moderator') OR public.has_role(v_actor_id, 'admin')) THEN
+    RAISE EXCEPTION 'No autorizado';
+  END IF;
+
+  UPDATE public.observations
+  SET hidden = true,
+      hidden_at = now(),
+      hidden_by = v_actor_id,
+      hidden_reason = p_reason
+  WHERE id = p_observation_id;
+
+  BEGIN
+    INSERT INTO public.admin_audit (actor_id, op, target_type, target_id, reason, after)
+    VALUES (v_actor_id, 'observation_hide', 'observation', p_observation_id::text, p_reason, jsonb_build_object('hidden', true));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_hide_observation(uuid, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.admin_hide_observation(uuid, text) TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_unhide_observation(
+  p_observation_id uuid,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_actor_id uuid := auth.uid();
+BEGIN
+  IF NOT (public.has_role(v_actor_id, 'moderator') OR public.has_role(v_actor_id, 'admin')) THEN
+    RAISE EXCEPTION 'No autorizado';
+  END IF;
+
+  UPDATE public.observations
+  SET hidden = false,
+      hidden_at = NULL,
+      hidden_by = NULL,
+      hidden_reason = NULL
+  WHERE id = p_observation_id;
+
+  BEGIN
+    INSERT INTO public.admin_audit (actor_id, op, target_type, target_id, reason, after)
+    VALUES (v_actor_id, 'observation_unhide', 'observation', p_observation_id::text, p_reason, jsonb_build_object('hidden', false));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_unhide_observation(uuid, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.admin_unhide_observation(uuid, text) TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_obscure_observation(
+  p_observation_id uuid,
+  p_obscure_level text,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_actor_id uuid := auth.uid();
+BEGIN
+  IF NOT (public.has_role(v_actor_id, 'moderator') OR public.has_role(v_actor_id, 'admin')) THEN
+    RAISE EXCEPTION 'No autorizado';
+  END IF;
+
+  UPDATE public.observations
+  SET obscure_level = p_obscure_level
+  WHERE id = p_observation_id;
+
+  BEGIN
+    INSERT INTO public.admin_audit (actor_id, op, target_type, target_id, reason, after)
+    VALUES (v_actor_id, 'observation_obscure', 'observation', p_observation_id::text, p_reason, jsonb_build_object('obscure_level', p_obscure_level));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_obscure_observation(uuid, text, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.admin_obscure_observation(uuid, text, text) TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_license_override_observation(
+  p_observation_id uuid,
+  p_license text,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_actor_id uuid := auth.uid();
+BEGIN
+  IF NOT (public.has_role(v_actor_id, 'moderator') OR public.has_role(v_actor_id, 'admin')) THEN
+    RAISE EXCEPTION 'No autorizado';
+  END IF;
+
+  UPDATE public.observations
+  SET observer_license = p_license
+  WHERE id = p_observation_id;
+
+  BEGIN
+    INSERT INTO public.admin_audit (actor_id, op, target_type, target_id, reason, after)
+    VALUES (v_actor_id, 'observation_license_override', 'observation', p_observation_id::text, p_reason, jsonb_build_object('license', p_license));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_license_override_observation(uuid, text, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.admin_license_override_observation(uuid, text, text) TO authenticated, service_role;
+
+

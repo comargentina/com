@@ -45,7 +45,7 @@ const customLabel = tr.console.quick_reason_custom;
   aria-live="polite"
   data-proposal-toast-template={tr.console.proposalCreated}
 ></div>
-<div id={id} class="hidden fixed inset-0 z-50 pointer-events-none" data-irreversible={irreversible ? 'true' : 'false'}>
+<div id={id} class="hidden fixed inset-0 z-50 pointer-events-none" data-irreversible={irreversible ? 'true' : 'false'} data-lang={lang}>
   <div class="absolute inset-0 bg-black/40 pointer-events-auto" data-slideover-backdrop></div>
   <aside class="absolute right-0 top-0 bottom-0 w-full md:w-[420px] bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 shadow-xl pointer-events-auto flex flex-col">
     <!-- Scrollable content area -->
@@ -188,7 +188,8 @@ const customLabel = tr.console.quick_reason_custom;
     const reason = (reasonEl?.value ?? '').trim();
     if (reason.length < 5) {
       if (errorEl) {
-        errorEl.textContent = 'Reason must be at least 5 characters.';
+        const isEs = root.dataset.lang === 'es' || document.documentElement.lang === 'es';
+        errorEl.textContent = isEs ? 'El motivo debe tener al menos 5 caracteres.' : 'Reason must be at least 5 characters.';
         errorEl.classList.remove('hidden');
       }
       return;

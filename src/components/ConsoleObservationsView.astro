@@ -12,7 +12,7 @@ const { lang } = Astro.props;
 const tr = t(lang);
 ---
 
-<section class="max-w-6xl">
+<section id="obs-section" data-lang={lang} class="max-w-6xl">
   <div id="obs-not-auth" class="hidden rounded border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-100">
     {tr.console.not_authorized}
   </div>
@@ -328,8 +328,10 @@ const tr = t(lang);
     obscureEl.textContent = o.obscure_level;
     licenseEl.textContent = o.users?.observer_license ?? 'CC BY 4.0';
 
+    const isEs = document.getElementById('obs-section')?.dataset.lang === 'es';
+
     if (o.hidden) {
-      hiddenEl.textContent = 'Hidden by admin';
+      hiddenEl.textContent = isEs ? 'Oculta por administración' : 'Hidden by admin';
       hiddenEl.className = 'font-medium text-red-600 dark:text-red-400';
       hideBtn.classList.add('hidden');
       unhideBtn.classList.remove('hidden');
@@ -340,7 +342,7 @@ const tr = t(lang);
         hiddenReasonRow.classList.add('hidden');
       }
     } else {
-      hiddenEl.textContent = 'Visible to public';
+      hiddenEl.textContent = isEs ? 'Visible al público' : 'Visible to public';
       hiddenEl.className = 'font-medium text-emerald-600 dark:text-emerald-400';
       hideBtn.classList.remove('hidden');
       unhideBtn.classList.add('hidden');
@@ -356,6 +358,7 @@ const tr = t(lang);
   }
 
   document.addEventListener('click', (ev) => {
+    const isEs = document.getElementById('obs-section')?.dataset.lang === 'es';
     const li = (ev.target as HTMLElement).closest<HTMLElement>('li[data-obs-id]');
     if (li?.dataset.obsId) { selectObs(li.dataset.obsId); return; }
 
@@ -364,7 +367,7 @@ const tr = t(lang);
       document.dispatchEvent(new CustomEvent('console:slideover-open', {
         detail: {
           id: 'console-slideover-obs',
-          title: 'Hide observation',
+          title: isEs ? 'Ocultar observación' : 'Hide observation',
           action: 'observation.hide',
           payload: { observation_id: selectedId },
         },
@@ -379,7 +382,7 @@ const tr = t(lang);
       document.dispatchEvent(new CustomEvent('console:slideover-open', {
         detail: {
           id: 'console-slideover-obs',
-          title: 'Unhide observation',
+          title: isEs ? 'Mostrar observación' : 'Unhide observation',
           action: 'observation.unhide',
           payload: { observation_id: selectedId },
         },
@@ -397,7 +400,7 @@ const tr = t(lang);
       document.dispatchEvent(new CustomEvent('console:slideover-open', {
         detail: {
           id: 'console-slideover-obs',
-          title: 'Change privacy level',
+          title: isEs ? 'Cambiar nivel de privacidad' : 'Change privacy level',
           action: 'observation.obscure',
           payload: { observation_id: selectedId, obscure_level: current },
         },
@@ -415,7 +418,7 @@ const tr = t(lang);
       document.dispatchEvent(new CustomEvent('console:slideover-open', {
         detail: {
           id: 'console-slideover-obs',
-          title: 'Override license',
+          title: isEs ? 'Sobrescribir licencia' : 'Override license',
           action: 'observation.license_override',
           payload: { observation_id: selectedId, license: current },
         },
@@ -438,17 +441,51 @@ const tr = t(lang);
 
     try {
       if (action === 'observation.hide') {
-        await adminClient.observation.hide({ observation_id: payload.observation_id }, reason, session.access_token);
+        try {
+          await adminClient.observation.hide({ observation_id: payload.observation_id }, reason, session.access_token);
+        } catch (edgeErr) {
+          const { error: rpcErr } = await supabase.rpc('admin_hide_observation', {
+            p_observation_id: payload.observation_id,
+            p_reason: reason,
+          });
+          if (rpcErr) throw edgeErr;
+        }
       } else if (action === 'observation.unhide') {
-        await adminClient.observation.unhide({ observation_id: payload.observation_id }, reason, session.access_token);
+        try {
+          await adminClient.observation.unhide({ observation_id: payload.observation_id }, reason, session.access_token);
+        } catch (edgeErr) {
+          const { error: rpcErr } = await supabase.rpc('admin_unhide_observation', {
+            p_observation_id: payload.observation_id,
+            p_reason: reason,
+          });
+          if (rpcErr) throw edgeErr;
+        }
       } else if (action === 'observation.obscure') {
         const sel = document.getElementById('slideover-obs-obscure-select') as HTMLSelectElement | null;
         const level = (sel?.value ?? payload.obscure_level) as 'none' | '0.1deg' | '0.2deg' | '5km' | 'full';
-        await adminClient.observation.obscure({ observation_id: payload.observation_id, obscure_level: level }, reason, session.access_token);
+        try {
+          await adminClient.observation.obscure({ observation_id: payload.observation_id, obscure_level: level }, reason, session.access_token);
+        } catch (edgeErr) {
+          const { error: rpcErr } = await supabase.rpc('admin_obscure_observation', {
+            p_observation_id: payload.observation_id,
+            p_obscure_level: level,
+            p_reason: reason,
+          });
+          if (rpcErr) throw edgeErr;
+        }
       } else if (action === 'observation.license_override') {
         const sel = document.getElementById('slideover-obs-license-select') as HTMLSelectElement | null;
         const lic = (sel?.value ?? payload.license) as 'CC BY 4.0' | 'CC BY-NC 4.0' | 'CC0';
-        await adminClient.observation.licenseOverride({ observation_id: payload.observation_id, license: lic }, reason, session.access_token);
+        try {
+          await adminClient.observation.licenseOverride({ observation_id: payload.observation_id, license: lic }, reason, session.access_token);
+        } catch (edgeErr) {
+          const { error: rpcErr } = await supabase.rpc('admin_license_override_observation', {
+            p_observation_id: payload.observation_id,
+            p_license: lic,
+            p_reason: reason,
+          });
+          if (rpcErr) throw edgeErr;
+        }
       }
 
       document.dispatchEvent(new CustomEvent('console:slideover-done', { detail: { id, ok: true } }));
