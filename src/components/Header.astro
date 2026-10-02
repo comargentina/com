@@ -300,9 +300,15 @@ const docColumns = [
     const dark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   });
-  document.getElementById('lang-toggle')?.addEventListener('click', function() {
+  document.getElementById('lang-toggle')?.addEventListener('click', function(e) {
     const target = this.dataset.targetLang;
     if (target) localStorage.setItem('rastrum.lang', target);
+    // For locale-neutral pages (e.g. /share/obs/?id=…) the build-time href
+    // loses the query string. Re-append it before navigating.
+    if (window.location.search && this instanceof HTMLAnchorElement && !this.href.includes('?')) {
+      e.preventDefault();
+      window.location.href = this.href + window.location.search;
+    }
   });
 
   // Hamburger → drawer (handler exposed by MobileDrawer)

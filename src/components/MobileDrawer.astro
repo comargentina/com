@@ -268,8 +268,12 @@ const getDocLabel = (key: string) => (tr.docs.sections as Record<string, string>
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   });
 
-  langTog?.addEventListener('click', () => {
+  langTog?.addEventListener('click', (e) => {
     const target = langTog.dataset.targetLang;
     if (target) localStorage.setItem('rastrum.lang', target);
+    if (window.location.search && !langTog.href.includes('?')) {
+      e.preventDefault();
+      window.location.href = langTog.href + window.location.search;
+    }
   });
 </script>
