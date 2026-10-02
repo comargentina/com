@@ -13186,3 +13186,106 @@ $taxa_dedup$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS taxa_scientific_name_key
   ON public.taxa (scientific_name);
+
+-- ============================================================
+-- RPC helpers for admin ban / unban (direct Postgres fallback)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.admin_ban_user(
+  p_target_user_id uuid,
+  p_duration_hours integer,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_actor_id uuid := auth.uid();
+  v_expires_at timestamptz := NULL;
+  v_existing record;
+  v_ban_id uuid;
+BEGIN
+  IF NOT (public.has_role(v_actor_id, 'moderator') OR public.has_role(v_actor_id, 'admin')) THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+
+  IF p_reason IS NULL OR length(trim(p_reason)) < 3 THEN
+    RAISE EXCEPTION 'Reason is required (min 3 chars)';
+  END IF;
+
+  IF p_duration_hours IS NOT NULL AND p_duration_hours > 0 THEN
+    v_expires_at := now() + (p_duration_hours || ' hours')::interval;
+  END IF;
+
+  SELECT id, expires_at, reason INTO v_existing
+  FROM public.user_bans
+  WHERE user_id = p_target_user_id
+    AND revoked_at IS NULL
+    AND (expires_at IS NULL OR expires_at > now())
+  LIMIT 1;
+
+  IF FOUND THEN
+    RETURN jsonb_build_object('ok', true, 'ban_id', v_existing.id, 'already_banned', true);
+  END IF;
+
+  INSERT INTO public.user_bans (user_id, banned_by, reason, expires_at)
+  VALUES (p_target_user_id, v_actor_id, p_reason, v_expires_at)
+  RETURNING id INTO v_ban_id;
+
+  BEGIN
+    INSERT INTO public.admin_audit (actor_id, op, target_type, target_id, reason, after)
+    VALUES (v_actor_id, 'user_ban', 'user', p_target_user_id::text, p_reason, jsonb_build_object('ban_id', v_ban_id, 'expires_at', v_expires_at));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  BEGIN
+    INSERT INTO public.notifications (user_id, kind, payload)
+    VALUES (p_target_user_id, 'ban_received', jsonb_build_object('ban_id', v_ban_id, 'expires_at', v_expires_at, 'reason', p_reason, 'appealable', true));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  RETURN jsonb_build_object('ok', true, 'ban_id', v_ban_id);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_ban_user(uuid, integer, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.admin_ban_user(uuid, integer, text) TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_unban_user(
+  p_target_user_id uuid,
+  p_ban_id uuid,
+  p_reason text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_actor_id uuid := auth.uid();
+BEGIN
+  IF NOT (public.has_role(v_actor_id, 'moderator') OR public.has_role(v_actor_id, 'admin')) THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+
+  UPDATE public.user_bans
+  SET revoked_at = now(),
+      revoked_by = v_actor_id,
+      revoke_reason = p_reason
+  WHERE (id = p_ban_id OR (p_ban_id IS NULL AND user_id = p_target_user_id AND revoked_at IS NULL));
+
+  BEGIN
+    INSERT INTO public.admin_audit (actor_id, op, target_type, target_id, reason, after)
+    VALUES (v_actor_id, 'user_unban', 'user', p_target_user_id::text, p_reason, jsonb_build_object('ban_id', p_ban_id));
+  EXCEPTION WHEN OTHERS THEN
+  END;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_unban_user(uuid, uuid, text) FROM public;
+GRANT EXECUTE ON FUNCTION public.admin_unban_user(uuid, uuid, text) TO authenticated, service_role;
+

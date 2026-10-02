@@ -498,7 +498,16 @@ const tr = t(lang);
       }
 
       try {
-        await adminClient.user.ban({ target_user_id: userId, duration_hours: durationHours }, reason, session.access_token);
+        try {
+          await adminClient.user.ban({ target_user_id: userId, duration_hours: durationHours }, reason, session.access_token);
+        } catch (edgeErr) {
+          const { error: rpcErr } = await supabase.rpc('admin_ban_user', {
+            p_target_user_id: userId,
+            p_duration_hours: durationHours,
+            p_reason: reason,
+          });
+          if (rpcErr) throw edgeErr;
+        }
         document.dispatchEvent(new CustomEvent('console:slideover-done', { detail: { id, ok: true } }));
         await loadBans();
       } catch (err) {
@@ -517,7 +526,16 @@ const tr = t(lang);
     }
 
     try {
-      await adminClient.user.unban({ target_user_id: payload.target_user_id, ban_id: payload.ban_id }, reason, session.access_token);
+      try {
+        await adminClient.user.unban({ target_user_id: payload.target_user_id, ban_id: payload.ban_id }, reason, session.access_token);
+      } catch (edgeErr) {
+        const { error: rpcErr } = await supabase.rpc('admin_unban_user', {
+          p_target_user_id: payload.target_user_id,
+          p_ban_id: payload.ban_id,
+          p_reason: reason,
+        });
+        if (rpcErr) throw edgeErr;
+      }
       document.dispatchEvent(new CustomEvent('console:slideover-done', { detail: { id, ok: true } }));
       await refreshSelected();
     } catch (err) {
