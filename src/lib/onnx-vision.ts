@@ -327,10 +327,10 @@ export async function* generateGemmaText(
     if (typeof tokFunc === 'function') {
       inputs = await tokFunc(promptText as string, { add_special_tokens: false });
     } else {
-      inputs = await proc(promptText as string, undefined, { add_special_tokens: false });
+      inputs = (await proc(promptText as string, undefined, { add_special_tokens: false })) as Record<string, unknown>;
     }
   } catch {
-    inputs = await proc(promptText as string, undefined, { add_special_tokens: false });
+    inputs = (await proc(promptText as string, undefined, { add_special_tokens: false })) as Record<string, unknown>;
   }
 
   const max_new_tokens = Math.min(opts.max_tokens ?? 512, 1024);
