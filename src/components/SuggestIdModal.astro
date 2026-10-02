@@ -409,21 +409,42 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
         // (observation_id, validated_by) — repeating a vote (e.g.
         // user picked Confirm twice or changed their mind via
         // Suggest another) is a legitimate flow and must not throw a
-        // 23505. The unique index is the conflict target.
-        const { error: insertErr } = await supabase
+        const { data: existingVote } = await supabase
           .from('identifications')
-          .upsert({
-            observation_id: observationId,
-            taxon_id: taxonId ?? null,
-            scientific_name: matchedSciName,
-            confidence,
-            source: 'human',
-            is_primary: false,
-            validated_by: user.id,
-            validated_at: new Date().toISOString(),
-            raw_response: note ? { note } : null,
-          }, { onConflict: 'observation_id,validated_by' });
-        if (insertErr) throw insertErr;
+          .select('id')
+          .eq('observation_id', observationId)
+          .eq('validated_by', user.id)
+          .maybeSingle();
+
+        if (existingVote?.id) {
+          const { error: updateErr } = await supabase
+            .from('identifications')
+            .update({
+              taxon_id: taxonId ?? null,
+              scientific_name: matchedSciName,
+              confidence,
+              source: 'human',
+              validated_at: new Date().toISOString(),
+              raw_response: note ? { note } : null,
+            })
+            .eq('id', existingVote.id);
+          if (updateErr) throw updateErr;
+        } else {
+          const { error: insertErr } = await supabase
+            .from('identifications')
+            .insert({
+              observation_id: observationId,
+              taxon_id: taxonId ?? null,
+              scientific_name: matchedSciName,
+              confidence,
+              source: 'human',
+              is_primary: false,
+              validated_by: user.id,
+              validated_at: new Date().toISOString(),
+              raw_response: note ? { note } : null,
+            });
+          if (insertErr) throw insertErr;
+        }
 
         // Trigger consensus check; the DB handles the promotion.
         // Re-fetch the now-current primary identification to learn
