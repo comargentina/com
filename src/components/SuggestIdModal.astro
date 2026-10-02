@@ -339,14 +339,71 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
         const user = await getCachedUser();
         if (!user) throw new Error('not_signed_in');
 
-        // Resolve taxon_id by name (required — see spec; the consensus
-        // function uses taxon_id to apply expert-kingdom weighting).
-        const { data: taxon } = await supabase
+        // Helper to format binomial/trinomial names cleanly: "morpho epistrophus argentinus" -> "Morpho epistrophus argentinus"
+        const formatSciName = (raw: string): string => {
+          const parts = raw.trim().split(/\s+/);
+          if (parts.length === 0 || !parts[0]) return raw.trim();
+          return parts.map((p, i) => i === 0 ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : p.toLowerCase()).join(' ');
+        };
+
+        const sciFormatted = formatSciName(sci);
+
+        // Resolve taxon_id by name (case-insensitive search first, with auto-creation fallback for uncataloged species)
+        let taxonId: string | null = null;
+        let matchedSciName = sciFormatted;
+
+        const { data: existingTaxon } = await supabase
           .from('taxa')
-          .select('id')
-          .eq('scientific_name', sci)
+          .select('id, scientific_name')
+          .ilike('scientific_name', sci)
           .maybeSingle();
-        if (!taxon?.id) {
+
+        if (existingTaxon?.id) {
+          taxonId = existingTaxon.id;
+          matchedSciName = existingTaxon.scientific_name;
+        } else {
+          const { data: existingFormatted } = await supabase
+            .from('taxa')
+            .select('id, scientific_name')
+            .ilike('scientific_name', sciFormatted)
+            .maybeSingle();
+          if (existingFormatted?.id) {
+            taxonId = existingFormatted.id;
+            matchedSciName = existingFormatted.scientific_name;
+          }
+        }
+
+        // Auto-create new taxon if valid species name is not yet in the catalog
+        if (!taxonId && sciFormatted.length > 2) {
+          const { data: newTaxon, error: createErr } = await supabase
+            .from('taxa')
+            .insert({
+              scientific_name: sciFormatted,
+              kingdom: 'Animalia',
+              rank: sciFormatted.split(' ').length > 2 ? 'subspecies' : 'species',
+            })
+            .select('id, scientific_name')
+            .single();
+
+          if (newTaxon?.id) {
+            taxonId = newTaxon.id;
+            matchedSciName = newTaxon.scientific_name;
+          } else if (createErr) {
+            const { data: retryTaxon } = await supabase
+              .from('taxa')
+              .select('id, scientific_name')
+              .ilike('scientific_name', sciFormatted)
+              .maybeSingle();
+            if (retryTaxon?.id) {
+              taxonId = retryTaxon.id;
+              matchedSciName = retryTaxon.scientific_name;
+            } else {
+              console.warn('[rastrum] Could not create new taxon:', createErr);
+            }
+          }
+        }
+
+        if (!taxonId) {
           if (errorEl) {
             errorEl.textContent = noTaxonMatch;
             errorEl.classList.remove('hidden');
@@ -365,8 +422,8 @@ const v = (tr as unknown as { validation: Record<string, string> }).validation;
           .from('identifications')
           .upsert({
             observation_id: observationId,
-            taxon_id: taxon.id,
-            scientific_name: sci,
+            taxon_id: taxonId,
+            scientific_name: matchedSciName,
             confidence,
             source: 'human',
             is_primary: false,

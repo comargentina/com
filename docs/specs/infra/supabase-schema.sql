@@ -443,9 +443,12 @@ DROP POLICY IF EXISTS "users_self_update" ON public.users;
 CREATE POLICY "users_self_update" ON public.users FOR UPDATE
   USING ((SELECT auth.uid()) = id);
 
--- Taxa: public read
+-- Taxa: public read, authenticated insert for new species
 DROP POLICY IF EXISTS "taxa_public_read" ON public.taxa;
 CREATE POLICY "taxa_public_read" ON public.taxa FOR SELECT USING (true);
+DROP POLICY IF EXISTS "taxa_authenticated_insert" ON public.taxa;
+CREATE POLICY "taxa_authenticated_insert" ON public.taxa FOR INSERT
+  WITH CHECK ((SELECT auth.uid()) IS NOT NULL);
 
 -- Observations: owner full access, public read for synced non-sensitive rows.
 -- obscure_level is denormalized onto observations (see trigger below) so the
