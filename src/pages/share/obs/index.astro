@@ -753,14 +753,14 @@ const lang: 'en' | 'es' = 'en';
       async function refresh() {
         const { data: rows } = await supabase
           .from('identifications')
-          .select('id, scientific_name, confidence, validated_by, created_at, is_research_grade, source')
+          .select('id, scientific_name, confidence, validated_by, created_at, is_research_grade, source, raw_response')
           .eq('observation_id', obsId)
           .not('validated_by', 'is', null)
           .order('created_at', { ascending: true });
         const arr = (rows ?? []) as Array<{
           id: string; scientific_name: string | null; confidence: number | null;
           validated_by: string | null; is_research_grade: boolean | null;
-          source: string | null;
+          source: string | null; raw_response?: { note?: string } | null;
         }>;
 
         if (arr.length === 0) {
@@ -806,10 +806,19 @@ const lang: 'en' | 'es' = 'en';
           const rgChip = r.is_research_grade
             ? `<span class="ml-1 inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">${isEs ? 'Grado investigación' : 'Research grade'}</span>`
             : '';
-          return `<li class="flex items-baseline gap-2 flex-wrap py-1.5 border-b border-zinc-100 dark:border-zinc-800/60 last:border-b-0">
-            <span class="italic font-medium text-emerald-700 dark:text-emerald-400">${escAttr(name)}</span>
-            ${rgChip}
-            <span class="text-xs text-zinc-600 dark:text-zinc-300">${escAttr(validator)}${conf ? ' · ' + conf : ''}${supportLine}</span>
+          const noteStr = (r.raw_response && typeof r.raw_response === 'object' && 'note' in r.raw_response && typeof r.raw_response.note === 'string')
+            ? r.raw_response.note.trim()
+            : null;
+          const noteHtml = noteStr
+            ? `<p class="w-full text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 pl-2 border-l-2 border-emerald-500/40">💬 "${escAttr(noteStr)}"</p>`
+            : '';
+          return `<li class="flex flex-col py-1.5 border-b border-zinc-100 dark:border-zinc-800/60 last:border-b-0">
+            <div class="flex items-baseline gap-2 flex-wrap">
+              <span class="italic font-medium text-emerald-700 dark:text-emerald-400">${escAttr(name)}</span>
+              ${rgChip}
+              <span class="text-xs text-zinc-600 dark:text-zinc-300">${escAttr(validator)}${conf ? ' · ' + conf : ''}${supportLine}</span>
+            </div>
+            ${noteHtml}
           </li>`;
         }).join('');
       }

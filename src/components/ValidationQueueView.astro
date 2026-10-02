@@ -388,6 +388,56 @@ const sharePathBase = '/share/obs/';
       load();
     }) as EventListener);
 
-    load();
+    // Auto-open SuggestIdModal for the observation passed via ?obs= in the URL.
+    // Shown only once per obs ID (tracked in localStorage) so returning to the
+    // queue does not re-open it on every visit.
+    async function maybeAutoOpenFromUrl() {
+      const obsId = new URLSearchParams(window.location.search).get('obs');
+      if (!obsId) return;
+
+      const SEEN_KEY = 'rastrum.vq-obs-seen';
+      let seen: string[] = [];
+      try { seen = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]'); } catch { /* ignore */ }
+      if (seen.includes(obsId)) return;
+
+      // Wait for the row to appear in the rendered list (load() is async).
+      const MAX_WAIT = 6000;
+      const start = Date.now();
+      await new Promise<void>(resolve => {
+        const check = () => {
+          const btn = document.querySelector<HTMLButtonElement>(
+            `button[data-action="suggest"][data-obs="${obsId}"], button[data-action="confirm"][data-obs="${obsId}"]`
+          );
+          if (btn) { resolve(); return; }
+          if (Date.now() - start > MAX_WAIT) { resolve(); return; }
+          setTimeout(check, 200);
+        };
+        check();
+      });
+
+      const btn = document.querySelector<HTMLButtonElement>(
+        `button[data-action="suggest"][data-obs="${obsId}"], button[data-action="confirm"][data-obs="${obsId}"]`
+      );
+      if (!btn) return;
+
+      btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      const opener = (window as unknown as { __rastrumOpenSuggestId?: (id: string, name: string | null) => void }).__rastrumOpenSuggestId;
+      if (typeof opener === 'function') {
+        const observer = btn.dataset.observer || null;
+        opener(obsId, observer);
+        const name = btn.dataset.name;
+        if (name) {
+          const inp = document.getElementById('sid-name') as HTMLInputElement | null;
+          if (inp) inp.value = name;
+        }
+      }
+
+      // Mark this obs as seen so the auto-open doesn't repeat.
+      seen.push(obsId);
+      try { localStorage.setItem(SEEN_KEY, JSON.stringify(seen.slice(-20))); } catch { /* ignore */ }
+    }
+
+    load().then(() => maybeAutoOpenFromUrl());
   }
 </script>
