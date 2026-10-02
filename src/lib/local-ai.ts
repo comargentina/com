@@ -126,9 +126,9 @@ export function localAISupported(): boolean {
   const hasGpu = 'gpu' in navigator && typeof (navigator as Navigator & { gpu?: unknown }).gpu !== 'undefined';
   if (!hasGpu) return false;
   // navigator.deviceMemory is approximate (0.25, 0.5, 1, 2, 4, 8 GiB).
-  // Phi-3.5-vision needs ~4 GB VRAM + overhead; reject devices reporting ≤4 GB.
+  // Reject low-memory devices reporting <= 2 GB. Devices with 4 GB RAM can run Gemma 4 E2B (~500 MB).
   const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  if (typeof mem === 'number' && mem <= 4) return false;
+  if (typeof mem === 'number' && mem <= 2) return false;
   return true;
 }
 

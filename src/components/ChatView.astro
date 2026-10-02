@@ -684,6 +684,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         consentBox?.classList.remove('hidden');
         unsupNote?.classList.remove('hidden');
         if (downloadBtn) downloadBtn.disabled = true;
+        if (gemmaDownloadBtn) gemmaDownloadBtn.disabled = true;
         return;
       }
       const llamaStatus = await lib.getModelCacheStatus(lib.TEXT_MODEL_ID);
@@ -825,6 +826,17 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   const gemmaDownloadBtn = document.getElementById('chat-gemma-download-btn') as HTMLButtonElement | null;
   gemmaDownloadBtn?.addEventListener('click', async () => {
     if (!gemmaDownloadBtn) return;
+    const lib = await import('../lib/local-ai');
+    if (!lib.localAISupported()) {
+      const isEs = document.documentElement.lang === 'es';
+      if (dlProgress) {
+        dlProgress.textContent = isEs
+          ? 'Tu navegador no soporta WebGPU — el modelo local no está disponible aquí.'
+          : 'WebGPU is not supported on this browser — local model unavailable.';
+        dlProgress.classList.remove('hidden');
+      }
+      return;
+    }
     gemmaDownloadBtn.disabled = true;
     if (dlProgress) dlProgress.classList.remove('hidden');
     try {
