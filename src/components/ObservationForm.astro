@@ -924,6 +924,16 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
   const archCascadeUrl = `/${docLang}/docs/architecture/#identifier-cascade`;
   const archInBrowserUrl = `/${docLang}/docs/architecture/#in-browser-ai`;
   const SOURCE_META: Record<string, { name: string; meta: string; desc: string; spec: string; isInterpreter?: boolean }> = {
+    bioclip_2: {
+      name: 'BioCLIP 2',
+      meta: isEs
+        ? 'BioCLIP 2 � modelo fundacional del �rbol de la vida por Imageomics Institute. Especializado en mariposas, insectos y biodiversidad.'
+        : 'BioCLIP 2 � tree-of-life foundation model by Imageomics Institute. Specialized in butterflies, insects, and biodiversity.',
+      desc: isEs
+        ? 'Modelo especializado en biodiversidad y mariposas (Hugging Face).'
+        : 'Specialized biodiversity and butterfly model (Hugging Face).',
+      spec: 'https://huggingface.co/spaces/imageomics/bioclip-2-demo',
+    },
     plantnet: {
       name: 'PlantNet',
       meta: isEs
@@ -1322,35 +1332,15 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
     }
     idSpinner?.classList.remove('hidden');
 
-    // Build the runner set based on what's actually available.
+    // Build the runner set with BioCLIP 2
     const { runParallelIdentify, filterRunnersByHint } = await import('../lib/identify-cascade-client');
-    const { makePlantNetRunner, makeClaudeRunner, makePhiRunner, makeGemmaRunner } = await import('../lib/identify-runners');
-    const { claudeAvailable } = await import('../lib/claude-availability');
+    const { makeBioClipRunner } = await import('../lib/identify-runners');
 
     const runners: Record<string, import('../lib/identify-cascade-client').IdentifierRunner> = {};
     const locale = isEs ? 'es' : 'en';
 
-    // PlantNet always works via the Edge Function (operator key server-side).
-    runners.plantnet = makePlantNetRunner(locale);
-    if (await claudeAvailable()) {
-      runners.claude_haiku = makeClaudeRunner(locale);
-    }
-    // Phi-vision: only include if opted-in, supported, and cached (pluginReady
-    // encapsulates all three checks via the identifier registry). The
-    // session-broken flag inside the runner kicks in if Phi crashes
-    // mid-session, so subsequent calls skip it cleanly.
-    if (await pluginReady('webllm_phi35_vision')) {
-      runners.webllm_phi35_vision = makePhiRunner(locale);
-    }
-
-    // Gemma 4 vision: parallel runtime to Phi (transformers.js + ONNX). Same
-    // opt-in pattern + own session-broken flag. Both can be enabled
-    // simultaneously — runParallelIdentify races them and uses whichever
-    // returns a confident answer first. When one runtime crashes on a
-    // given GPU/driver, the other often still works (independent kernels).
-    if (await pluginReady('onnx_gemma4_vision')) {
-      runners.onnx_gemma4_vision = makeGemmaRunner(locale);
-    }
+    // BioCLIP 2 is the primary identifier for butterflies and biodiversity
+    runners.bioclip_2 = makeBioClipRunner(locale);
 
     // "Identify another way" — exclude the previous winner's runner so the
     // cascade resolves to the next-best provider. The map below covers
@@ -1430,42 +1420,10 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
    * runners were actually available. The goal is to point at the next
    * concrete step the user can take, not just say "try again".
    */
-  function describeAllFailed(ctx: {
-    hint: TaxonHint | null;
-    hadPlantNet: boolean;
-    hadClaude: boolean;
-    hadPhi: boolean;
-    hadGemma: boolean;
-    /** True when the taxon-hint chip filtered out the only available runner (#784). */
-    hintFilteredOutAll?: boolean;
-  }): string {
-    const hadOnDeviceVLM = ctx.hadPhi || ctx.hadGemma;
-    const isAnimal = ctx.hint && ctx.hint !== 'Plantae' && ctx.hint !== 'Fungi';
-    const onlyPlantNet = ctx.hadPlantNet && !ctx.hadClaude && !hadOnDeviceVLM;
-
-    // When the taxon chip filtered PlantNet (the only available runner),
-    // give a clear explanation instead of a generic failure (#784).
-    if (ctx.hintFilteredOutAll && isAnimal) {
-      return isEs
-        ? 'El filtro de taxón evitó que PlantNet identifique animales (es un modelo de plantas). Agrega tu llave de Claude Haiku (Perfil → Editar) o activa un modelo en el dispositivo (Gemma ~500 MB) para poder identificar animales.'
-        : 'The taxon filter skipped PlantNet — it only handles plants. Add your Claude Haiku key (Profile → Edit) or enable an on-device model (Gemma ~500 MB) to identify animals.';
-    }
-    if (isAnimal && onlyPlantNet) {
-      return isEs
-        ? 'Para identificar animales necesitamos un modelo más allá de PlantNet. Configura tu llave de Claude Haiku (Perfil → Editar) o activa un modelo en el dispositivo (Phi ~4 GB o Gemma ~500 MB) para que funcione sin conexión.'
-        : "We need a non-plant identifier for animals. Add your Claude Haiku key (Profile \u2192 Edit) or enable an on-device model (Phi ~4 GB or Gemma ~500 MB) for offline use.";
-    }
-    if (!ctx.hadClaude && !hadOnDeviceVLM && !ctx.hadPlantNet) {
-      return isEs
-        ? 'No hay ningún identificador disponible. Configura una llave en Perfil → Editar, o activa un modelo en el dispositivo.'
-        : 'No identifier is available. Configure a key in Profile → Edit, or enable an on-device model.';
-    }
-    if (ctx.hint === 'Animalia.Aves' && !ctx.hadClaude) {
-      return isEs
-        ? 'Para aves recomendamos audio (BirdNET) o agregar tu llave de Claude Haiku.'
-        : 'Birds work best with audio (BirdNET) or with your Claude Haiku key.';
-    }
-    return idStringsRT.all_failed;
+  function describeAllFailed(_ctx?: unknown): string {
+    return isEs
+      ? 'BioCLIP 2 no pudo identificar esta especie con suficiente confianza. Intenta con una foto más nítida o escribe el nombre manualmente.'
+      : 'BioCLIP 2 could not identify this species with enough confidence. Try a clearer photo or enter the name manually.';
   }
 
   function offerPhiVision() {
@@ -1793,6 +1751,10 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
    */
   function mapIdentificationSource(source: string | undefined): 'plantnet' | 'claude_haiku' | 'claude_sonnet' | 'onnx_offline' | 'human' {
     switch (source) {
+      case 'bioclip_2':
+      case 'bioclip':
+      case 'BioCLIP 2':
+        return 'onnx_offline';
       case 'plantnet':
       case 'PlantNet':
         return 'plantnet';

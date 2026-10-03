@@ -10,6 +10,7 @@
  * registry has runtime collision detection, so duplicate ids fail loud.
  */
 import { registry } from './registry';
+import { bioClipIdentifier } from './bioclip';
 import { plantNetIdentifier } from './plantnet';
 import { claudeIdentifier } from './claude';
 import { phiVisionIdentifier } from './phi-vision';
@@ -22,6 +23,7 @@ import { speciesnetIdentifier } from './speciesnet';
 let booted = false;
 export function bootstrapIdentifiers() {
   if (booted) return registry;
+  registry.register(bioClipIdentifier);
   registry.register(plantNetIdentifier);
   registry.register(claudeIdentifier);
   registry.register(phiVisionIdentifier);

@@ -9,7 +9,7 @@ import type { IdResult } from './observe-card-state';
 import type { IdAttempt } from './observe-audit-trace';
 import { ceilingForSource } from './confidence-ceiling';
 
-const CLOUD_SOURCES = new Set<string>(['plantnet', 'claude_haiku', 'claude_sonnet']);
+const CLOUD_SOURCES = new Set<string>(['bioclip_2', 'bioclip', 'plantnet', 'claude_haiku', 'claude_sonnet']);
 function isCloud(source: string): boolean {
   return CLOUD_SOURCES.has(source);
 }

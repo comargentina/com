@@ -43,6 +43,8 @@ export type EvidenceType =
   | 'feather' | 'bone' | 'sound' | 'camera_trap';
 
 export type IDSource =
+  | 'bioclip_2'
+  | 'bioclip'
   | 'plantnet'
   | 'claude_haiku'
   | 'claude_sonnet'

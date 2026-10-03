@@ -4,7 +4,7 @@
  * higher-signal items under capped guesses. NOT a consensus weight — pure
  * queue ordering/visibility.
  */
-const CLOUD = new Set(['plantnet', 'claude_haiku', 'claude_sonnet', 'bedrock', 'openai', 'azure_openai', 'gemini', 'vertex_ai']);
+const CLOUD = new Set(['bioclip_2', 'bioclip', 'plantnet', 'claude_haiku', 'claude_sonnet', 'bedrock', 'openai', 'azure_openai', 'gemini', 'vertex_ai']);
 const CAPPED_ON_DEVICE = new Set(['onnx_efficientnet_lite0', 'camera_trap_megadetector', 'phi_vision', 'webllm_phi35_vision', 'onnx_gemma4_vision', 'birdnet_lite', 'onnx_offline']);
 
 export function sourceTrustRank(source: string | null | undefined): number {

@@ -442,3 +442,27 @@ export function makeGemmaRunner(
     };
   };
 }
+
+// ─────────────── BioCLIP 2 (Hugging Face) ───────────────
+
+export function makeBioClipRunner(locale: Locale): IdentifierRunner {
+  return async (file, _signal) => {
+    const { bioClipIdentifier } = await import('./identifiers/bioclip');
+    const res = await bioClipIdentifier.identify({
+      media: { kind: 'blob', blob: file, mime: file.type || 'image/jpeg' },
+      mediaKind: 'photo',
+    });
+
+    return {
+      source: 'bioclip_2',
+      scientific_name: res.scientific_name,
+      common_name: locale === 'es' ? (res.common_name_es ?? res.common_name_en) : (res.common_name_en ?? res.common_name_es),
+      confidence: res.confidence,
+      alternates: [],
+      family: res.family ?? undefined,
+      kingdom: res.kingdom,
+      raw: res.raw,
+    };
+  };
+}
+

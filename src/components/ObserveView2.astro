@@ -408,7 +408,7 @@ const cardStrings: CardStrings = {
 function redispatchCardVm() {
   try {
     const hasOnDeviceModel = cardAttempts.some(
-      (a) => !['plantnet', 'claude_haiku', 'claude_sonnet'].includes(a.source),
+      (a) => !['bioclip_2', 'bioclip', 'plantnet', 'claude_haiku', 'claude_sonnet'].includes(a.source),
     );
     const cardVm = buildCardViewModel(
       attemptsToCardVmInput(cardAttempts, {
@@ -633,13 +633,8 @@ registerSyncTriggers();
 
     // Provider-agnostic "Cloud AI" label — the EF resolves Anthropic /
     // OpenAI / Bedrock / Azure / Gemini / Vertex via BYO → sponsor → pool.
-    const ready: string[] = [];
-    if (runners.plantnet)     ready.push('PlantNet');
+    const ready: string[] = ['BioCLIP 2'];
     if (runners.birdnet)      ready.push('BirdNET');
-    if (runners.claude)       ready.push(isEs ? 'IA en la nube' : 'Cloud AI');
-    if (runners.phi)          ready.push('Phi Vision');
-    if (runners.gemma)        ready.push('Gemma 4');
-    if (runners.efficientNet) ready.push('EfficientNet');
 
     if (ready.length === 0) {
       capText.textContent = isEs
@@ -944,85 +939,30 @@ async function runPipeline(state: PipelineState) {
     setNodeState(state, node.id, 'running');
     try {
       if (pf.kind === 'photo') {
-        const { hasKeysForPlugin } = await import('../lib/byo-keys');
-        const { getOnnxBaseCacheStatus, getOnnxBaseWeightsBaseUrl } = await import('../lib/identifiers/onnx-base-cache');
-        const efficientNetCached = getOnnxBaseWeightsBaseUrl()
-          ? await getOnnxBaseCacheStatus().then(s => s.modelCached && s.labelsCached).catch(() => false)
-          : false;
-        const avail: RunnerAvailability = {
-          // PlantNet is always reachable via the EF operator key when online.
-          plantnet: true,
-          claude: aiMode === 'own-key'
-            ? (hasKeysForPlugin('claude_haiku') && await hasAnthropicKey())
-            : await claudeAvailable(),
-          phi: await pluginReady('webllm_phi35_vision').catch(() => false),
-          gemma: await pluginReady('onnx_gemma4_vision').catch(() => false),
-          efficientNet: efficientNetCached,
-          // MegaDetector pre-filter wiring is a later card-spec task.
-          megaDetector: false,
-          // Audio (BirdNET) is handled by the non-photo branch.
-          birdnet: false,
-        };
-        let chosen = resolveRunnerSet({ aiMode, mediaKind: 'photo', available: avail });
-        if (aiMode === 'local' && chosen.length === 0) {
-          // Nothing on-device for photos — honest fallback to sponsored.
-          aiMode = 'sponsored'; writeAiMode('sponsored'); applyModeStyles('sponsored');
-          showModeToast(tr.observe.local_fallback_sponsored);
-          chosen = resolveRunnerSet({ aiMode, mediaKind: 'photo', available: avail });
-        }
+        const { makeBioClipRunner } = await import('../lib/identify-runners');
         const runners: Record<string, import('../lib/identify-cascade-client').IdentifierRunner> = {};
-        if (chosen.includes('plantnet')) runners.plantnet = makePlantNetRunner(lang as 'en' | 'es');
-        if (chosen.includes('claude')) runners.claude_haiku = makeClaudeRunner(lang as 'en' | 'es');
-        if (chosen.includes('phi')) {
-          try { runners.webllm_phi35_vision = makePhiRunner(lang as 'en' | 'es'); } catch { /* WebLLM unavailable, skip */ }
-        }
-        if (chosen.includes('gemma')) {
-          try {
-            const { makeGemmaRunner } = await import('../lib/identify-runners');
-            runners.onnx_gemma4_vision = makeGemmaRunner(lang as 'en' | 'es');
-          } catch { /* transformers.js unavailable, skip */ }
-        }
-        if (chosen.includes('efficientNet')) {
-          try {
-            const { onnxBaseIdentifier } = await import('../lib/identifiers/onnx-base');
-            runners.onnx_efficientnet_lite0 = async (file: File) => {
-              const result = await onnxBaseIdentifier.identify({
-                media: { kind: 'blob', blob: file },
-                mediaKind: 'photo',
-                locale: lang as 'en' | 'es',
-              });
-              return result;
-            };
-          } catch { /* EfficientNet unavailable, skip */ }
-        }
+        runners.bioclip_2 = makeBioClipRunner(lang as 'en' | 'es');
 
-        if (Object.keys(runners).length === 0) {
-          setNodeState(state, node.id, 'skipped', undefined, 'No runner available');
-        } else {
-          const abort = new AbortController();
-          const out = await runParallelIdentify(pf.file as File, { runners, taxonHint: selectedTaxonHint }, abort.signal);
-          cardAttempts = cardAttempts.concat(out.attempts ?? []);
-          if (out.kind === 'winner' || out.kind === 'uncertain') {
-            const r = out.result;
-            setNodeState(state, node.id, 'done', {
-              scientific_name: r.scientific_name,
-              common_name_en: r.common_name_en,
-              confidence: r.confidence,
-              source: r.source,
-            });
-            if (!bestResult || r.confidence > (bestResult.confidence ?? 0)) {
-              bestResult = { scientific_name: r.scientific_name, common_name_en: r.common_name_en ?? null, confidence: r.confidence, source: r.source };
-            }
-          } else {
-            // Surface the actual reason (e.g. unsupported photo format,
-            // PlantNet rejected the image) instead of a blank "failed".
-            // Prefer the always-on PlantNet runner's message.
-            const errs = (out as { errors?: Record<string, string> }).errors ?? {};
-            const reason = errs.plantnet ?? errs.claude_haiku ?? Object.values(errs)[0]
-              ?? (isEs ? 'Sin resultado de identificación' : 'No identification result');
-            identifyErrorReason = reason;
-            setNodeState(state, node.id, 'failed', undefined, reason);
+        const abort = new AbortController();
+        const out = await runParallelIdentify(pf.file as File, { runners, taxonHint: selectedTaxonHint }, abort.signal);
+        cardAttempts = cardAttempts.concat(out.attempts ?? []);
+        if (out.kind === 'winner' || out.kind === 'uncertain') {
+          const r = out.result;
+          setNodeState(state, node.id, 'done', {
+            scientific_name: r.scientific_name,
+            common_name_en: r.common_name_en,
+            confidence: r.confidence,
+            source: r.source,
+          });
+          if (!bestResult || r.confidence > (bestResult.confidence ?? 0)) {
+            bestResult = { scientific_name: r.scientific_name, common_name_en: r.common_name_en ?? null, confidence: r.confidence, source: r.source };
           }
+        } else {
+          const errs = (out as { errors?: Record<string, string> }).errors ?? {};
+          const reason = errs.bioclip_2 ?? Object.values(errs)[0]
+            ?? (isEs ? 'Sin resultado de identificación' : 'No identification result');
+          identifyErrorReason = reason;
+          setNodeState(state, node.id, 'failed', undefined, reason);
         }
       } else if (pf.kind === 'audio') {
         const { birdnetIdentifier } = await import('../lib/identifiers/birdnet');
