@@ -22,6 +22,7 @@ vi.mock('./supabase', () => ({
     },
   }),
   getSupabaseUrl: () => 'https://test.supabase.co',
+  getSupabaseAnonKey: () => 'test-anon-key',
 }));
 
 import { streamChat } from './chat-engine';

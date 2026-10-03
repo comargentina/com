@@ -15,6 +15,7 @@ vi.mock('../../src/lib/supabase', () => ({
     },
   }),
   getSupabaseUrl: () => 'https://test.supabase.co',
+  getSupabaseAnonKey: () => 'test-anon-key',
 }));
 
 const runToolMock = vi.fn();

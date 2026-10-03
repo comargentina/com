@@ -179,6 +179,11 @@ export function getSupabaseUrl(): string {
   return url ?? '';
 }
 
+/** Returns the Supabase anon key — safe to call from client-side scripts. */
+export function getSupabaseAnonKey(): string {
+  return anonKey ?? '';
+}
+
 export function getSupabase(): SupabaseClient {
   if (client) return client;
   // Fallback to placeholder to avoid JS crash when env vars are missing on Vercel

@@ -6,7 +6,7 @@
  */
 import { runTool, toolDefinitions, buildUpdateNotesAction } from './chat-tools';
 import type { ChatAction } from './chat-tools';
-import { getSupabase, getSupabaseUrl } from './supabase';
+import { getSupabase, getSupabaseUrl, getSupabaseAnonKey } from './supabase';
 
 export type ChatMessage = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string };
 
@@ -84,11 +84,14 @@ async function* streamGeminiEdge(
   if (geminiKey) body['client_gemini_key'] = geminiKey;
 
   const { data: { session } } = await supabase.auth.getSession();
+  const anonKey = getSupabaseAnonKey();
+  const token = session?.access_token || anonKey;
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'Accept': 'text/event-stream',
   };
-  if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+  if (anonKey) headers['apikey'] = anonKey;
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const url = `${getSupabaseUrl()}/functions/v1/chat`;
 
