@@ -227,7 +227,7 @@ export const routes: Record<string, Record<Locale, string>> = {
 
 export const docPages = [
   'vision', 'features', 'roadmap', 'tasks', 'market',
-  'architecture', 'indigenous', 'funding', 'contribute',
+  'architecture', 'funding', 'contribute',
   'faq', 'privacy', 'terms', 'console', 'sponsorships', 'mcp',
   'changelog', 'community', 'camera-stations', 'sponsor-pools',
   'obs-detail', 'status', 'algorithms', 'surprises',
@@ -411,10 +411,6 @@ export const docPageMeta = {
   architecture: {
     en: "How Rastrum's identifier cascade, offline outbox, R2 media storage, and Darwin Core pipeline fit together. Block diagram, data flows, decisions.",
     es: "Cómo se integran el cascade de identificadores, outbox offline, almacén de medios R2 y pipeline Darwin Core de Rastrum. Diagrama de bloques, flujos, decisiones.",
-  },
-  indigenous: {
-    en: "Indigenous-language commitments in Rastrum: Zapoteco, Mixteco, Náhuatl, Maya, Tsotsil/Tseltal. Built with CARE principles and community consent.",
-    es: "Compromiso de Rastrum con lenguas indígenas: Zapoteco, Mixteco, Náhuatl, Maya, Tsotsil/Tseltal. Construido con principios CARE y consentimiento comunitario.",
   },
   funding: {
     en: "How Rastrum is funded today (zero-cost, BYO-key model) and how to support development. Grant outreach, GitHub Sponsors, operator-paid project keys.",

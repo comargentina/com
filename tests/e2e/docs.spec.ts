@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const DOC_PAGES = [
   'vision', 'features', 'roadmap', 'tasks', 'market',
-  'architecture', 'indigenous', 'funding', 'contribute',
+  'architecture', 'funding', 'contribute',
 ] as const;
 
 // `a[href=…]` matches the card grid AND the docs dropdown / sidebar /
