@@ -121,6 +121,7 @@ serve(async (req: Request) => {
 
   if (!geminiRes.ok) {
     const errText = await geminiRes.text().catch(() => 'unknown');
+    console.error(`[chat] Gemini error status=${geminiRes.status} body=${errText} keyPrefix=${apiKey.slice(0,6)}`);
     if (geminiRes.status === 429) return jsonErr('RATE_LIMITED', 429);
     if (geminiRes.status === 400) return jsonErr(`Gemini 400 (bad request / invalid key format): ${errText}`, 502);
     if (geminiRes.status === 401 || geminiRes.status === 403) return jsonErr(`Gemini ${geminiRes.status} (invalid API key): ${errText}`, 401);
