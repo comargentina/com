@@ -63,10 +63,11 @@ export interface PipelineState {
 }
 
 export interface AvailableRunners {
-  plantnet: boolean;
-  birdnet: boolean;
-  claude: boolean;
-  phi: boolean;
+  bioclip?: boolean;
+  plantnet?: boolean;
+  birdnet?: boolean;
+  claude?: boolean;
+  phi?: boolean;
 }
 
 // ── File triage ────────────────────────────────────────────────────────────
@@ -167,20 +168,15 @@ function kindLabel(kind: FileKind): string {
 
 function identifyLabel(kind: FileKind, runner: string | null): string {
   if (kind === 'audio') return runner ? 'BirdNET' : 'Audio (no runner)';
-  if (kind === 'photo') return runner === 'plantnet' ? 'PlantNet' : runner === 'claude' ? 'Claude Haiku' : runner === 'phi' ? 'Phi Vision' : 'Photo ID';
+  if (kind === 'photo') return 'BioCLIP 2';
   if (kind === 'video') return 'Video frames';
   return 'Identify';
 }
 
 function pickRunner(kind: FileKind, runners: AvailableRunners): string | null {
   if (kind === 'audio') return runners.birdnet ? 'birdnet' : null;
-  if (kind === 'photo') {
-    if (runners.plantnet) return 'plantnet';
-    if (runners.claude) return 'claude';
-    if (runners.phi) return 'phi';
-    return null;
-  }
-  if (kind === 'video') return runners.plantnet || runners.claude ? 'frames' : null;
+  if (kind === 'photo') return 'bioclip_2';
+  if (kind === 'video') return 'frames';
   return null;
 }
 
