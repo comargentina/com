@@ -1355,9 +1355,6 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         form?.requestSubmit();
       });
     });
-
-    // Re-paint badge after small delay (consent box may flip after init).
-    setTimeout(paintModelBadge, 1500);
   })().catch((e) => {
     console.warn('[chat] entity wiring init failed', e);
   });
