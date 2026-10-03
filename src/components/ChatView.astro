@@ -918,10 +918,6 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     const text = inputEl.value.trim();
     const att = pendingAttachment;
     if (!text && !att) return;
-    if (!modelReady) {
-      consentBox?.classList.remove('hidden');
-      return;
-    }
     busy = true;
     sendBtn.disabled = true;
     sendLabel.textContent = SEND_BUSY;
