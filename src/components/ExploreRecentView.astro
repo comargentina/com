@@ -626,6 +626,8 @@ const distancePage = page as unknown as Record<string, string>;
     let mapInstance: any = null;
     let mapInited = false;
     let mapMarkers: any[] = [];
+    let mapTargetCenter: [number, number] | null = null;
+    let mapTargetZoom = 9;
 
     function listRowMarkup(r: Row): string {
       const ident = pickIdent(r);
@@ -749,6 +751,8 @@ const distancePage = page as unknown as Record<string, string>;
       const { COLON_DEFAULT_CENTER } = await import('../lib/media-helpers');
 
       const colonLngLat: [number, number] = [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat];
+      mapTargetCenter = colonLngLat;
+      mapTargetZoom = 9;
 
       const map = new maplibregl.Map({
         container: mapBlockEl,
@@ -761,6 +765,16 @@ const distancePage = page as unknown as Record<string, string>;
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
       mapInstance = map;
       mapInited = true;
+
+      map.on('moveend', () => {
+        if (mapBlockEl && mapBlockEl.clientHeight > 0 && !mapBlockEl.classList.contains('hidden')) {
+          const c = map.getCenter();
+          if (c && typeof c.lat === 'number' && !isNaN(c.lat) && typeof c.lng === 'number' && !isNaN(c.lng)) {
+            mapTargetCenter = [c.lng, c.lat];
+            mapTargetZoom = map.getZoom();
+          }
+        }
+      });
 
       map.on('load', () => {
         plotMapMarkers(rows, maplibregl, parseLocationToGeoJSON);
@@ -832,13 +846,10 @@ const distancePage = page as unknown as Record<string, string>;
         if (!mapInited) {
           initMap(allRows).catch(() => { /* map unavailable */ });
         } else if (mapInstance) {
-          // Lock current center and zoom to prevent any vertical drifting / jumping
-          const curCenter = mapInstance.getCenter();
-          const curZoom = mapInstance.getZoom();
           requestAnimationFrame(() => {
             mapInstance?.resize();
-            if (curCenter) {
-              mapInstance?.jumpTo({ center: curCenter, zoom: curZoom });
+            if (mapTargetCenter) {
+              mapInstance?.jumpTo({ center: mapTargetCenter, zoom: mapTargetZoom });
             }
           });
         }
