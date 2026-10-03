@@ -24,7 +24,7 @@ const CORS_HEADERS = {
   'Access-Control-Max-Age': '86400',
 };
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function jsonErr(msg: string, status: number): Response {
