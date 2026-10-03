@@ -90,8 +90,8 @@ describe('local-ai-helpers · narrative prompt', () => {
 });
 
 describe('local-ai-helpers · chat system prompt', () => {
-  it('mentions Rastrum and bilingual mirroring', () => {
-    expect(CHAT_SYSTEM_PROMPT).toContain('Rastrum');
+  it('mentions COM and bilingual mirroring', () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain('COM');
     expect(CHAT_SYSTEM_PROMPT).toMatch(/English/);
     expect(CHAT_SYSTEM_PROMPT).toMatch(/Spanish/);
   });
