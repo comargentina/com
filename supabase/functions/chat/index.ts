@@ -98,7 +98,9 @@ serve(async (req: Request) => {
     },
   };
 
-  const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:streamGenerateContent?key=${apiKey}&alt=sse`;
+  // Support both legacy AIza keys (?key=) and new AQ. auth keys (x-goog-api-key header).
+  // Using x-goog-api-key header works for both formats.
+  const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
 
   let geminiRes: Response;
   try {
@@ -106,7 +108,10 @@ serve(async (req: Request) => {
     const timeout = setTimeout(() => ac.abort(), 30_000);
     geminiRes = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
       body: JSON.stringify(geminiBody),
       signal: ac.signal,
     }).finally(() => clearTimeout(timeout));
