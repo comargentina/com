@@ -9,7 +9,7 @@
 // client only issues plain `update(...)` calls - no application-side
 // flagging is needed.
 
-import {getCachedUser, getSupabase} from './supabase';
+import { getCachedSession, getCachedUser, getSupabase } from './supabase';
 import { willDemote, type PhotoForDeletion } from './photo-deletion';
 import { resizeImage, uploadMedia } from './upload';
 import { escapeHtml as escAttr } from './escape';
@@ -323,31 +323,56 @@ export async function wireManagePanelDetails(
   async function runDelete(): Promise<void> {
     if (confirmYesBtn) confirmYesBtn.disabled = true;
     errEl?.classList.add('hidden');
-    // The invoke can hang indefinitely (e.g. the gotrue auth-lock steal —
-    // #1076/#1098): without a bound the try never settles, the catch never
-    // fires and the confirm button stays disabled forever with no feedback.
-    // Race it against a timeout and always re-enable in finally so a hang
-    // becomes a visible, retryable error (the confirm row stays open so the
-    // user can just click Delete again; the EF soft-delete is idempotent).
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const result = await Promise.race([
-        supabase.functions.invoke<{
-          ok: boolean; r2_deleted?: number; r2_errors?: unknown[]; error?: string;
-        }>('delete-observation', {
-          body: { observation_id: obsId },
-        }),
-        new Promise<never>((_, reject) => {
-          timer = setTimeout(() => reject(new Error(
-            lang === 'es'
-              ? 'La eliminación tardó demasiado. Revisa tu conexión e inténtalo de nuevo.'
-              : 'Delete timed out. Check your connection and try again.',
-          )), 15000);
-        }),
-      ]);
-      const { data, error: invokeErr } = result;
-      if (invokeErr) throw invokeErr;
-      if (data && !data.ok) throw new Error(data.error ?? 'Delete failed');
+      const session = await getCachedSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      let deleted = false;
+      try {
+        const result = await Promise.race([
+          supabase.functions.invoke<{
+            ok: boolean; r2_deleted?: number; r2_errors?: unknown[]; error?: string;
+          }>('delete-observation', {
+            body: { observation_id: obsId },
+            headers,
+          }),
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error(
+              lang === 'es'
+                ? 'La eliminación tardó demasiado. Revisa tu conexión e inténtalo de nuevo.'
+                : 'Delete timed out. Check your connection and try again.',
+            )), 10000);
+          }),
+        ]);
+        const { data, error: invokeErr } = result;
+        if (!invokeErr && data?.ok) {
+          deleted = true;
+        }
+      } catch (efErr) {
+        console.warn('[manage-panel] delete-observation EF failed, falling back to direct DB delete:', efErr);
+      }
+
+      // If the Edge Function didn't delete, fallback to direct database delete (RLS obs_owner policy allows owner deletes)
+      if (!deleted) {
+        const { error: dbDelErr } = await supabase
+          .from('observations')
+          .delete()
+          .eq('id', obsId);
+        if (dbDelErr) throw new Error(dbDelErr.message);
+      }
+
+      // Clean up local Dexie storage if the observation was stored locally
+      try {
+        const { getDB } = await import('./db');
+        const db = getDB();
+        await db.observations.delete(obsId);
+        await db.mediaBlobs.where('observation_id').equals(obsId).delete();
+      } catch { /* local DB cleanup non-fatal */ }
+
       window.location.href = `/${lang}/${lang === 'es' ? 'perfil/observaciones' : 'profile/observations'}/?deleted=1`;
     } catch (err) {
       if (errEl) {
@@ -361,9 +386,6 @@ export async function wireManagePanelDetails(
       }
     } finally {
       if (timer) clearTimeout(timer);
-      // Always re-enable — harmless on the success path (page is navigating
-      // away); critical on every failure/timeout path so the button is
-      // never left silently stuck disabled.
       if (confirmYesBtn) confirmYesBtn.disabled = false;
     }
   }

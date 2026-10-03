@@ -68,29 +68,29 @@ export async function handler(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
-  if (req.method !== 'POST') return textResponse('Method not allowed', 405);
+  if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'Method not allowed' }, 405);
 
   const env = (k: string) => Deno.env.get(k);
   const r2Endpoint = env('R2_ENDPOINT_URL')
     ?? (env('CF_ACCOUNT_ID') ? `https://${env('CF_ACCOUNT_ID')}.r2.cloudflarestorage.com` : null);
-  if (!r2Endpoint) return textResponse('Function not configured: R2_ENDPOINT_URL or CF_ACCOUNT_ID', 500);
+  if (!r2Endpoint) return jsonResponse({ ok: false, error: 'Function not configured: R2_ENDPOINT_URL or CF_ACCOUNT_ID' }, 500);
   for (const k of ['R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','R2_BUCKET_NAME','SUPABASE_URL','SUPABASE_ANON_KEY','SUPABASE_SERVICE_ROLE_KEY']) {
-    if (!env(k)) return textResponse(`Function not configured: ${k}`, 500);
+    if (!env(k)) return jsonResponse({ ok: false, error: `Function not configured: ${k}` }, 500);
   }
 
   // Authenticate the caller.
   const auth = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  if (!auth) return textResponse('Missing Authorization header', 401);
+  if (!auth) return jsonResponse({ ok: false, error: 'Missing Authorization header' }, 401);
   const supaUser = createClient(env('SUPABASE_URL')!, env('SUPABASE_ANON_KEY')!, {
     global: { headers: { Authorization: `Bearer ${auth}` } },
   });
   const { data: { user }, error: userErr } = await supaUser.auth.getUser();
-  if (userErr || !user) return textResponse('Invalid token', 401);
+  if (userErr || !user) return jsonResponse({ ok: false, error: 'Invalid token' }, 401);
 
   let body: { observation_id?: string };
-  try { body = await req.json(); } catch { return textResponse('Invalid JSON', 400); }
+  try { body = await req.json(); } catch { return jsonResponse({ ok: false, error: 'Invalid JSON' }, 400); }
   const obsId = body?.observation_id;
-  if (!obsId || typeof obsId !== 'string') return textResponse('Missing observation_id', 400);
+  if (!obsId || typeof obsId !== 'string') return jsonResponse({ ok: false, error: 'Missing observation_id' }, 400);
 
   // Ownership check + media key lookup. We use the user's JWT so RLS
   // gates the read — a non-owner can't even probe whether an obs id
@@ -100,16 +100,16 @@ export async function handler(req: Request): Promise<Response> {
     .select('id, observer_id')
     .eq('id', obsId)
     .maybeSingle();
-  if (obsErr) return textResponse('Lookup failed: ' + obsErr.message, 500);
-  if (!obs) return textResponse('Observation not found', 404);
-  if (obs.observer_id !== user.id) return textResponse('Not the observer', 403);
+  if (obsErr) return jsonResponse({ ok: false, error: 'Lookup failed: ' + obsErr.message }, 500);
+  if (!obs) return jsonResponse({ ok: false, error: 'Observation not found' }, 404);
+  if (obs.observer_id !== user.id) return jsonResponse({ ok: false, error: 'Not the observer' }, 403);
 
   // List media_files keys to delete.
   const { data: media, error: mediaErr } = await supaUser
     .from('media_files')
     .select('url')
     .eq('observation_id', obsId);
-  if (mediaErr) return textResponse('Media list failed: ' + mediaErr.message, 500);
+  if (mediaErr) return jsonResponse({ ok: false, error: 'Media list failed: ' + mediaErr.message }, 500);
   const publicBase = env('R2_PUBLIC_URL') ?? null;
   const r2Keys: string[] = [];
   for (const m of (media ?? [])) {
