@@ -1,18 +1,12 @@
 /**
- * Chat dispatch: Gemma 4 E2B by default, Llama-3.2-1B as fallback.
- * Implements a streaming + 1-round tool-call loop. Emits typed events
- * the UI consumes: text deltas, tool calls, tool results, engine fallbacks.
+ * Chat dispatch: Gemini 2.0 Flash via the `chat` Edge Function.
+ * Falls back to a user-supplied BYO key when the server quota is exhausted.
  *
- * The model is expected to either (a) emit prose, or (b) emit a single
- * JSON object `{"tool": "<name>", "args": { ... }}` with no surrounding
- * prose. We detect (b) by looking for a `{"tool":` substring at the start
- * of accumulated output. Anything else is treated as prose.
+ * Emits typed StreamEvents consumed by ChatView.astro.
  */
 import { runTool, toolDefinitions, buildUpdateNotesAction } from './chat-tools';
 import type { ChatAction } from './chat-tools';
-// NOTE: local-ai is dynamically imported below — a static import would
-// drag the ~5.8 MB WebLLM bundle into the initial load graph. The
-// static-import guard test enforces this.
+import { getSupabase, getSupabaseUrl } from './supabase';
 
 export type ChatMessage = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string };
 
@@ -23,79 +17,44 @@ export type StreamEvent =
   | { type: 'engine_fallback'; engine: 'llama'; reason: string }
   | { type: 'circuit_break'; reason: string }
   | { type: 'action_suggestion'; action: ChatAction }
+  | { type: 'quota_exceeded' }
   | { type: 'error'; message: string };
 
 export interface StreamChatInput {
   messages: ChatMessage[];
-  /** Optional override; default tries Gemma then Llama. */
+  /** Optional BYO Gemini API key from localStorage. */
+  geminiKey?: string;
+  /** @deprecated kept for callers that still pass this — ignored. */
   prefer?: 'gemma' | 'llama';
 }
 
 const TOOL_RE = /^\s*\{\s*"tool"\s*:/;
 const ACTION_SUGGEST_RE = /^\s*\{\s*"suggest_action"\s*:/;
 const MAX_TOOL_ROUNDS = 3;
-// TOKEN_BUDGET_CHARS is a per-user-turn global budget across all tool rounds.
-// If round 0 emits 4000 chars of prose, subsequent rounds cannot emit more.
-// This is intentionally conservative for v1 — prevents runaway multi-round verbosity.
-// Raise or make per-round if users report truncated responses in deep tool chains.
 const TOKEN_BUDGET_CHARS = 4000;
 const SYSTEM_TOOLS_PROMPT = `You may emit a JSON tool call to look up data. Tools available:\n%TOOLS%\nWhen calling a tool, respond with ONLY a JSON object: {"tool": "<name>", "args": { ... }}. Otherwise reply in prose. Use tools sparingly.`;
+
+export const BYO_GEMINI_KEY = 'rastrum.byoKeys.gemini';
+
+export function readByoGeminiKey(): string | null {
+  try {
+    return localStorage.getItem(BYO_GEMINI_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeByoGeminiKey(key: string): void {
+  try { localStorage.setItem(BYO_GEMINI_KEY, key); } catch { /* ignore */ }
+}
+
+export function clearByoGeminiKey(): void {
+  try { localStorage.removeItem(BYO_GEMINI_KEY); } catch { /* ignore */ }
+}
 
 function withToolPrompt(messages: ChatMessage[]): ChatMessage[] {
   const sys = SYSTEM_TOOLS_PROMPT.replace('%TOOLS%', toolDefinitions());
   return [{ role: 'system', content: sys }, ...messages];
-}
-
-async function* streamGemma(messages: ChatMessage[]): AsyncIterable<{ delta?: string }> {
-  const { loadGemmaTextEngine } = await import('./local-ai');
-  const eng = await loadGemmaTextEngine(() => {});
-  for await (const chunk of eng.generate(messages, { max_tokens: 512, stream: true })) {
-    const c = chunk.choices?.[0];
-    const delta = c?.delta?.content ?? c?.message?.content ?? '';
-    if (delta) yield { delta };
-  }
-}
-
-async function* streamLlama(messages: ChatMessage[]): AsyncIterable<{ delta?: string }> {
-  const { loadTextEngine } = await import('./local-ai');
-  const eng = await loadTextEngine(() => {});
-  // Llama doesn't recognise the 'tool' role natively; flatten tool messages
-  // into user-prefixed text so the conversation still parses.
-  const flattened = messages.map(m => m.role === 'tool'
-    ? { role: 'user' as const, content: `[tool_result]\n${m.content}` }
-    : { role: m.role as 'system' | 'user' | 'assistant', content: m.content });
-  const stream = await eng.chat.completions.create({
-    messages: flattened,
-    max_tokens: 512,
-    stream: true,
-  });
-  for await (const chunk of stream as AsyncIterable<{ choices?: Array<{ delta?: { content?: string } }> }>) {
-    const delta = chunk.choices?.[0]?.delta?.content ?? '';
-    if (delta) yield { delta };
-  }
-}
-
-async function* runOnce(
-  messages: ChatMessage[],
-  prefer: 'gemma' | 'llama' | undefined,
-): AsyncIterable<StreamEvent> {
-  if (prefer === 'llama') {
-    for await (const c of streamLlama(messages)) {
-      if (c.delta) yield { type: 'text', delta: c.delta };
-    }
-    return;
-  }
-  // Gemma path with Llama fallback on load error.
-  try {
-    for await (const c of streamGemma(messages)) {
-      if (c.delta) yield { type: 'text', delta: c.delta };
-    }
-  } catch (e) {
-    yield { type: 'engine_fallback', engine: 'llama', reason: e instanceof Error ? e.message : String(e) };
-    for await (const c of streamLlama(messages)) {
-      if (c.delta) yield { type: 'text', delta: c.delta };
-    }
-  }
 }
 
 /** Levenshtein distance between two strings (capped at maxDist for speed). */
@@ -116,19 +75,94 @@ function levenshtein(a: string, b: string, maxDist = 100): number {
   return row[b.length];
 }
 
+async function* streamGeminiEdge(
+  messages: ChatMessage[],
+  geminiKey?: string,
+): AsyncIterable<StreamEvent> {
+  const supabase = getSupabase();
+  const body: Record<string, unknown> = { messages };
+  if (geminiKey) body['client_gemini_key'] = geminiKey;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'Accept': 'text/event-stream',
+  };
+  if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+
+  const url = `${getSupabaseUrl()}/functions/v1/chat`;
+
+  let response: Response;
+  try {
+    const ac = new AbortController();
+    const timeout = setTimeout(() => ac.abort(), 35_000);
+    response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: ac.signal,
+    }).finally(() => clearTimeout(timeout));
+  } catch (e) {
+    yield { type: 'error', message: e instanceof Error ? e.message : String(e) };
+    return;
+  }
+
+  if (response.status === 429 || response.status === 402) {
+    yield { type: 'quota_exceeded' };
+    return;
+  }
+  if (!response.ok) {
+    const text = await response.text().catch(() => `HTTP ${response.status}`);
+    yield { type: 'error', message: text };
+    return;
+  }
+
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') return;
+        try {
+          const parsed = JSON.parse(raw) as { delta?: string; error?: string };
+          if (parsed.delta) yield { type: 'text', delta: parsed.delta };
+          if (parsed.error === 'RATE_LIMITED') {
+            yield { type: 'quota_exceeded' };
+            return;
+          }
+        } catch {
+          // skip malformed lines
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 /**
  * Streaming chat with a multi-round tool-call loop. Yields:
  *   { type: 'text', delta }            — model text deltas
  *   { type: 'tool_call', tool, args }  — when the model emitted a tool
  *   { type: 'tool_result', tool, … }   — after tool dispatch
- *   { type: 'engine_fallback', … }     — when Gemma fell back to Llama
+ *   { type: 'quota_exceeded' }         — server quota hit, prompt BYO key
  *   { type: 'error', message }         — terminal error
  */
 export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamEvent> {
   const messages = withToolPrompt(input.messages);
+  const geminiKey = input.geminiKey ?? readByoGeminiKey() ?? undefined;
   let toolRounds = 0;
   let accumulatedTextChars = 0;
-  // Circuit breaker: track (toolName, stringifiedArgs) pairs called this turn.
   const calledTools: Array<{ tool: string; argsStr: string }> = [];
 
   while (true) {
@@ -136,17 +170,23 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
     let toolCallText: string | null = null;
     const buffered: StreamEvent[] = [];
 
-    for await (const ev of runOnce(messages, input.prefer)) {
+    for await (const ev of streamGeminiEdge(messages, geminiKey)) {
+      if (ev.type === 'quota_exceeded') {
+        yield ev;
+        return;
+      }
+      if (ev.type === 'error') {
+        yield ev;
+        return;
+      }
       if (ev.type === 'text') {
         accumulated += ev.delta;
         if (toolCallText === null && accumulated.length >= 16 && !TOOL_RE.test(accumulated) && !ACTION_SUGGEST_RE.test(accumulated)) {
-          // Definitely prose — flush buffered + this delta.
           for (const b of buffered) yield b;
           buffered.length = 0;
           yield ev;
           accumulatedTextChars += ev.delta.length;
         } else if (toolCallText === null) {
-          // Still ambiguous — buffer.
           buffered.push(ev);
         }
         if (TOOL_RE.test(accumulated)) toolCallText = accumulated;
@@ -158,7 +198,6 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
       }
     }
 
-    // Per-turn token budget check.
     if (accumulatedTextChars >= TOKEN_BUDGET_CHARS) {
       for (const b of buffered) yield b;
       return;
@@ -172,7 +211,6 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
         return;
       }
 
-      // Handle action suggestion (write op requiring confirmation)
       if (parsed.suggest_action === 'update_notes' && parsed.observation_id && parsed.notes) {
         const action = buildUpdateNotesAction(parsed.observation_id, parsed.notes);
         yield { type: 'action_suggestion', action };
@@ -185,8 +223,6 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
         return;
       }
 
-      // Circuit breaker: check if this tool+args combo is suspiciously similar
-      // to a previous call in this turn.
       const argsStr = JSON.stringify(parsed.args ?? {});
       const isDuplicate = calledTools.some(prev => {
         if (prev.tool !== parsed!.tool) return false;

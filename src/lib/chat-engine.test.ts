@@ -1,56 +1,74 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const loadGemmaMock = vi.fn();
-const loadLlamaMock = vi.fn();
-vi.mock('./local-ai', () => ({
-  loadGemmaTextEngine: () => loadGemmaMock(),
-  loadTextEngine: () => loadLlamaMock(),
-  localAISupported: () => true,
-}));
-
 const runToolMock = vi.fn();
 vi.mock('./chat-tools', () => ({
   runTool: (...a: unknown[]) => runToolMock(...a),
   toolDefinitions: () => '[]',
   listTools: () => [],
+  buildUpdateNotesAction: (obsId: string, notes: string) => ({
+    id: `update-notes-${obsId}`,
+    label: { en: 'Update notes', es: 'Actualizar notas' },
+    tool: 'chat_update_observation_notes',
+    args: { observation_id: obsId, notes },
+    requiresConfirmation: true,
+    undoable: true,
+  }),
+}));
+
+vi.mock('./supabase', () => ({
+  getSupabase: () => ({
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null } }),
+    },
+  }),
+  getSupabaseUrl: () => 'https://test.supabase.co',
 }));
 
 import { streamChat } from './chat-engine';
 
-function fakeStream(chunks: string[]) {
-  return {
-    async *generate() {
-      for (const c of chunks) yield { choices: [{ delta: { content: c } }] };
+function createSseResponse(chunks: string[], status = 200) {
+  if (status !== 200) {
+    return new Response(JSON.stringify({ ok: false, error: 'failed' }), { status });
+  }
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const c of chunks) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta: c })}\n\n`));
+      }
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      controller.close();
     },
-  };
+  });
+  return new Response(stream, { status: 200 });
 }
 
 beforeEach(() => {
-  loadGemmaMock.mockReset();
-  loadLlamaMock.mockReset();
   runToolMock.mockReset();
+  vi.restoreAllMocks();
 });
 
-describe('streamChat', () => {
-  it('streams pure prose from Gemma when no tool call', async () => {
-    loadGemmaMock.mockResolvedValue(fakeStream(['Hello there friend, how can I help today?']));
+describe('streamChat (Gemini Flash SSE)', () => {
+  it('streams pure prose from Gemini Flash when no tool call', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      createSseResponse(['Hello there friend, ', 'how can I help today?'])
+    );
+
     const out: string[] = [];
     for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'hi' }] })) {
       if (chunk.type === 'text') out.push(chunk.delta);
     }
-    expect(out.join('')).toContain('Hello there friend');
+    expect(out.join('')).toContain('Hello there friend, how can I help today?');
   });
 
   it('detects a tool call, dispatches, re-prompts, returns final prose', async () => {
-    let callIdx = 0;
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        if (callIdx++ === 0) {
-          yield { choices: [{ delta: { content: '{"tool":"find_species","args":{"p_query":"magnolia"}}' } }] };
-        } else {
-          yield { choices: [{ delta: { content: 'Found Magnolia grandiflora in the seeded list.' } }] };
-        }
-      },
+    let fetchCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      fetchCount++;
+      if (fetchCount === 1) {
+        return createSseResponse(['{"tool":"find_species","args":{"p_query":"magnolia"}}']);
+      }
+      return createSseResponse(['Found Magnolia grandiflora in the seeded list.']);
     });
     runToolMock.mockResolvedValue({ ok: true, data: [{ scientific_name: 'Magnolia grandiflora' }] });
 
@@ -63,51 +81,40 @@ describe('streamChat', () => {
   });
 
   it('supports multi-round tool chains up to MAX_TOOL_ROUNDS', async () => {
-    let callIdx = 0;
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        if (callIdx === 0) {
-          callIdx++;
-          yield { choices: [{ delta: { content: '{"tool":"find_species","args":{"p_query":"magnolia"}}' } }] };
-        } else if (callIdx === 1) {
-          callIdx++;
-          yield { choices: [{ delta: { content: '{"tool":"find_observations","args":{"p_filters":{},"p_limit":5}}' } }] };
-        } else if (callIdx === 2) {
-          callIdx++;
-          yield { choices: [{ delta: { content: '{"tool":"find_projects","args":{"p_query":"conservation"}}' } }] };
-        } else {
-          callIdx++;
-          yield { choices: [{ delta: { content: 'Found all species, observations, and projects.' } }] };
-        }
-      },
+    let fetchCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      fetchCount++;
+      if (fetchCount === 1) {
+        return createSseResponse(['{"tool":"find_species","args":{"p_query":"magnolia"}}']);
+      } else if (fetchCount === 2) {
+        return createSseResponse(['{"tool":"find_observations","args":{"p_filters":{},"p_limit":5}}']);
+      } else if (fetchCount === 3) {
+        return createSseResponse(['{"tool":"find_projects","args":{"p_query":"conservation"}}']);
+      }
+      return createSseResponse(['Found all species, observations, and projects.']);
     });
     runToolMock.mockResolvedValue({ ok: true, data: [] });
 
-    const events: Array<{ type: string; round?: number }> = [];
+    const events: Array<{ type: string; round?: number; delta?: string }> = [];
     for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'find species chains' }] })) {
       events.push(chunk);
     }
     const toolCalls = events.filter(e => e.type === 'tool_call');
-    // 3 rounds allowed
-    expect(toolCalls.length).toBeGreaterThanOrEqual(3);
-    // rounds are indexed
+    expect(toolCalls.length).toBe(3);
     expect(toolCalls[0].round).toBe(0);
     expect(toolCalls[1].round).toBe(1);
     expect(toolCalls[2].round).toBe(2);
-    // final prose
-    expect(events.filter(e => e.type === 'text').map((e: any) => e.delta).join('')).toContain('Found');
+    expect(events.filter(e => e.type === 'text').map(e => e.delta).join('')).toContain('Found all');
   });
 
   it('tool_call and tool_result events include round index', async () => {
-    let callIdx = 0;
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        if (callIdx++ === 0) {
-          yield { choices: [{ delta: { content: '{"tool":"find_species","args":{"p_query":"oak"}}' } }] };
-        } else {
-          yield { choices: [{ delta: { content: 'Oak found.' } }] };
-        }
-      },
+    let fetchCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      fetchCount++;
+      if (fetchCount === 1) {
+        return createSseResponse(['{"tool":"find_species","args":{"p_query":"oak"}}']);
+      }
+      return createSseResponse(['Oak found.']);
     });
     runToolMock.mockResolvedValue({ ok: true, data: [] });
 
@@ -122,13 +129,8 @@ describe('streamChat', () => {
   });
 
   it('circuit breaker stops repeated similar tool calls', async () => {
-    let callIdx = 0;
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        // Always emit the same tool with identical args — triggers circuit breaker on 2nd call
-        callIdx++;
-        yield { choices: [{ delta: { content: '{"tool":"find_species","args":{"p_query":"samequery"}}' } }] };
-      },
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      return createSseResponse(['{"tool":"find_species","args":{"p_query":"samequery"}}']);
     });
     runToolMock.mockResolvedValue({ ok: true, data: [] });
 
@@ -136,53 +138,17 @@ describe('streamChat', () => {
     for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'loop' }] })) {
       events.push(chunk);
     }
-    // Only 1 tool_call before circuit break
     expect(events.filter(e => e.type === 'tool_call')).toHaveLength(1);
     expect(events.some(e => e.type === 'circuit_break')).toBe(true);
   });
 
-  it('token budget stops tool loop after prose exceeds threshold', async () => {
-    let callIdx = 0;
-    const bigText = 'x'.repeat(5000); // exceeds TOKEN_BUDGET_CHARS=4000
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        if (callIdx++ === 0) {
-          // First call: emit big prose (not a tool call)
-          yield { choices: [{ delta: { content: bigText } }] };
-        } else {
-          yield { choices: [{ delta: { content: '{"tool":"find_species","args":{"p_query":"after"}}' } }] };
-        }
-      },
-    });
-    runToolMock.mockResolvedValue({ ok: true, data: [] });
+  it('emits quota_exceeded when edge function returns 429', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('Rate limited', { status: 429 }));
 
     const events: Array<{ type: string }> = [];
-    for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'big response' }] })) {
+    for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'hello' }] })) {
       events.push(chunk);
     }
-    // No tool calls — budget was already consumed by the big prose
-    expect(events.filter(e => e.type === 'tool_call')).toHaveLength(0);
-  });
-
-  it('falls back to Llama when Gemma load fails', async () => {
-    loadGemmaMock.mockRejectedValue(new Error('webgpu init failed'));
-    loadLlamaMock.mockResolvedValue({
-      chat: {
-        completions: {
-          create: async () => ({
-            async *[Symbol.asyncIterator]() {
-              yield { choices: [{ delta: { content: 'fallback response from llama as backup engine' } }] };
-            },
-          }),
-        },
-      },
-    });
-
-    const events: Array<{ type: string; delta?: string; engine?: string }> = [];
-    for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'x' }] })) {
-      events.push(chunk);
-    }
-    expect(events.find(e => e.type === 'engine_fallback')?.engine).toBe('llama');
-    expect(events.filter(e => e.type === 'text').map(e => e.delta).join('')).toContain('fallback');
+    expect(events.some(e => e.type === 'quota_exceeded')).toBe(true);
   });
 });

@@ -157,6 +157,7 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           RESEND_API_KEY:       ${{ secrets.RESEND_API_KEY }}
           OPERATOR_EMAIL:       ${{ secrets.OPERATOR_EMAIL }}
+          GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
         run: |
           set -e
 
@@ -192,6 +193,8 @@ jobs:
           # ANTHROPIC_API_KEY no longer synced — module 27 removed the
           # operator-key fallback in identify; only BYO + sponsorship
           # credentials reach Claude now.
+
+          push_secret GEMINI_API_KEY        "${GEMINI_API_KEY:-}"
 
           push_secret VAPID_PRIVATE_KEY     "${VAPID_PRIVATE_KEY:-}"
           push_secret VAPID_PUBLIC_KEY      "${VAPID_PUBLIC_KEY:-}"
@@ -239,10 +242,11 @@ jobs:
           #                  calls auth.getUser(), returns 401 itself. Edge
           #                  verify_jwt gated the OPTIONS preflight before code
           #                  ran → browser "Failed to fetch" (#1093).
+          #    chat        — public SSE endpoint, self-gates or handles API keys internally
           #
           # Module 26 functions (follow / react / report) DO verify JWT.
           CRON_ONLY="${{ steps.classify.outputs.cron_only }}"
-          OTHER_NO_JWT="share-card mcp api identify sponsorships delete-observation"
+          OTHER_NO_JWT="share-card mcp api identify sponsorships delete-observation chat"
           for fn in ${{ steps.targets.outputs.fns }}; do
             EXTRA_FLAGS=""
             if echo " $CRON_ONLY " | grep -q " $fn "; then

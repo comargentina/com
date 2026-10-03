@@ -8,16 +8,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // --- mock supabase (for executeAction) ---
 const rpcMock = vi.fn();
 vi.mock('../../src/lib/supabase', () => ({
-  getSupabase: () => ({ rpc: rpcMock }),
+  getSupabase: () => ({
+    rpc: rpcMock,
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null } }),
+    },
+  }),
+  getSupabaseUrl: () => 'https://test.supabase.co',
 }));
 
-// --- mock local-ai and chat-tools for streamChat ---
-const loadGemmaMock = vi.fn();
-vi.mock('../../src/lib/local-ai', () => ({
-  loadGemmaTextEngine: () => loadGemmaMock(),
-  loadTextEngine: vi.fn(),
-  localAISupported: () => true,
-}));
 const runToolMock = vi.fn();
 vi.mock('../../src/lib/chat-tools', async () => {
   const actual = await vi.importActual<typeof import('../../src/lib/chat-tools')>('../../src/lib/chat-tools');
@@ -35,10 +34,24 @@ import {
 } from '../../src/lib/chat-tools';
 import { streamChat } from '../../src/lib/chat-engine';
 
+function createSseResponse(chunks: string[]) {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const c of chunks) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta: c })}\n\n`));
+      }
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      controller.close();
+    },
+  });
+  return new Response(stream, { status: 200 });
+}
+
 beforeEach(() => {
   rpcMock.mockReset();
-  loadGemmaMock.mockReset();
   runToolMock.mockReset();
+  vi.restoreAllMocks();
 });
 
 describe('buildUpdateNotesAction', () => {
@@ -108,21 +121,15 @@ describe('executeAction', () => {
 
 describe('streamChat action_suggestion', () => {
   it('emits action_suggestion event when model outputs suggest_action JSON', async () => {
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        yield {
-          choices: [{
-            delta: {
-              content: JSON.stringify({
-                suggest_action: 'update_notes',
-                observation_id: 'obs-001',
-                notes: 'Spotted near the river at dusk',
-              }),
-            },
-          }],
-        };
-      },
-    });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      createSseResponse([
+        JSON.stringify({
+          suggest_action: 'update_notes',
+          observation_id: 'obs-001',
+          notes: 'Spotted near the river at dusk',
+        }),
+      ])
+    );
 
     const events: Array<{ type: string; action?: ChatAction }> = [];
     for await (const ev of streamChat({ messages: [{ role: 'user', content: 'update my notes' }] })) {
@@ -144,14 +151,11 @@ describe('streamChat action_suggestion', () => {
 
   it('does not emit action_suggestion for regular tool calls', async () => {
     let callIdx = 0;
-    loadGemmaMock.mockResolvedValue({
-      async *generate() {
-        if (callIdx++ === 0) {
-          yield { choices: [{ delta: { content: '{"tool":"find_species","args":{"p_query":"oak"}}' } }] };
-        } else {
-          yield { choices: [{ delta: { content: 'Found oak species.' } }] };
-        }
-      },
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      if (callIdx++ === 0) {
+        return createSseResponse(['{"tool":"find_species","args":{"p_query":"oak"}}']);
+      }
+      return createSseResponse(['Found oak species.']);
     });
     runToolMock.mockResolvedValue({ ok: true, data: [] });
 

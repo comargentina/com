@@ -32,64 +32,35 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   </div>
   <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">{tr.chat.subtitle}</p>
 
-  <!-- Consent / setup gate -->
-  <div id="chat-consent" class="hidden rounded-xl border border-amber-300 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/10 p-4 mb-4">
-    <p class="text-sm text-amber-900 dark:text-amber-100">
+  <!-- Quota exceeded / BYO key prompt — hidden unless quota is hit -->
+  <div id="chat-quota-banner" class="hidden rounded-xl border border-amber-300 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/10 p-4 mb-4">
+    <p class="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
       {lang === 'es'
-        ? 'El chat se ejecuta totalmente en tu navegador. Elige un modelo:'
-        : 'Chat runs entirely in your browser. Pick a model to download once:'}
+        ? '⚡ Límite de uso alcanzado. Para seguir chateando, ingresá tu clave gratuita de Google AI Studio:'
+        : '⚡ Usage limit reached. To keep chatting, enter your free Google AI Studio key:'}
     </p>
-    <p id="chat-unsup" class="hidden mt-2 text-xs text-amber-900 dark:text-amber-200">{tr.chat.consent_unsupported}</p>
-    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div class="flex gap-2">
+      <input
+        id="chat-byo-key-input"
+        type="password"
+        placeholder="AIzaSy..."
+        autocomplete="off"
+        class="flex-1 min-h-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      />
       <button
-        id="chat-gemma-download-btn"
+        id="chat-byo-key-save"
         type="button"
-        class="group inline-flex flex-col items-start min-h-11 rounded-lg bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-white disabled:opacity-50"
+        class="min-h-10 rounded-lg bg-emerald-700 px-4 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
       >
-        <span class="flex items-center gap-2">
-          <span aria-hidden="true">✨</span>
-          <span class="text-sm font-semibold">Gemma 4 E2B</span>
-          <span class="rounded-full bg-emerald-900/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider">
-            {lang === 'es' ? 'Recomendado' : 'Recommended'}
-          </span>
-        </span>
-        <span class="text-[11px] font-normal text-white/95 mt-0.5">
-          {lang === 'es'
-            ? '~500 MB · razona mejor · también para fotos'
-            : '~500 MB · stronger reasoning · works for photos too'}
-        </span>
-      </button>
-      <button
-        id="chat-download-btn"
-        type="button"
-        class="group inline-flex flex-col items-start min-h-11 rounded-lg border border-amber-400/60 dark:border-amber-700/60 bg-white dark:bg-zinc-900 px-4 py-2.5 text-zinc-800 dark:text-zinc-200 hover:bg-amber-100/50 dark:hover:bg-zinc-800 disabled:opacity-50"
-      >
-        <span class="flex items-center gap-2">
-          <span aria-hidden="true">🦙</span>
-          <span class="text-sm font-semibold">Llama 3.2 1B</span>
-          <span class="rounded-full bg-zinc-200 dark:bg-zinc-700 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-            {lang === 'es' ? 'Más ligero' : 'Lighter'}
-          </span>
-        </span>
-        <span class="text-[11px] font-normal text-zinc-600 dark:text-zinc-300 mt-0.5">
-          <span data-cdl>{lang === 'es' ? '~880 MB · más pequeño · solo texto' : '~880 MB · smaller · text only'}</span>
-        </span>
+        {lang === 'es' ? 'Guardar' : 'Save'}
       </button>
     </div>
     <p class="mt-2 text-[11px] text-amber-800 dark:text-amber-300/80">
       {lang === 'es'
-        ? 'Ambos corren totalmente en tu dispositivo — tus mensajes nunca salen del navegador.'
-        : 'Both run fully on-device — your messages never leave the browser.'}
+        ? 'La clave se guarda solo en este dispositivo. Obtené una gratis en '
+        : 'Key is stored only on this device. Get one free at '}
+      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="underline">aistudio.google.com/apikey</a>
     </p>
-    <div class="mt-2 flex flex-wrap gap-2 items-center text-xs">
-      <a
-        href={`/${lang}/${lang === 'es' ? 'perfil/editar' : 'profile/edit'}/`}
-        class="text-emerald-700 dark:text-emerald-400 hover:underline"
-      >
-        {tr.chat.consent_open_settings}
-      </a>
-    </div>
-    <p id="chat-dl-progress" class="hidden mt-3 text-xs text-zinc-700 dark:text-zinc-300 font-mono"></p>
   </div>
 
   <!-- Scrollable message list -->
@@ -164,6 +135,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     pending?: boolean;
   }
 
+  // Photo model picker is still used for the cascade identifier choice.
   type ModelPickerChoice =
     | 'auto'
     | 'plantnet'
@@ -183,20 +155,6 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     if (typeof localStorage !== 'undefined') localStorage.setItem(MODEL_PICKER_KEY, v);
   }
 
-  type ChatEngineChoice = 'gemma' | 'llama';
-  const CHAT_ENGINE_KEY = 'rastrum.chat.engine';
-  const MODEL_DISPLAY_NAMES: Record<ChatEngineChoice, string> = {
-    gemma: 'Gemma 4 E2B',
-    llama: 'Llama 3.2 1B',
-  };
-  function readChatEngine(): ChatEngineChoice | null {
-    if (typeof localStorage === 'undefined') return null;
-    const v = localStorage.getItem(CHAT_ENGINE_KEY);
-    return v === 'gemma' || v === 'llama' ? v : null;
-  }
-  function writeChatEngine(v: ChatEngineChoice): void {
-    if (typeof localStorage !== 'undefined') localStorage.setItem(CHAT_ENGINE_KEY, v);
-  }
 
   const isEs = (document.documentElement.lang === 'es');
   const docLocale: ChatLocale = detectLocaleFromDoc();
@@ -204,46 +162,44 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   const i18nBag = document.getElementById('chat-i18n');
   const i18nGet = (k: string) => i18nBag?.dataset[camelize(k)] ?? '';
 
-  const consentBox      = document.getElementById('chat-consent');
-  const unsupNote       = document.getElementById('chat-unsup');
-  const downloadBtn     = document.getElementById('chat-download-btn') as HTMLButtonElement | null;
-  const downloadLabel   = downloadBtn?.querySelector('[data-cdl]') as HTMLElement | null;
-  const dlProgress      = document.getElementById('chat-dl-progress');
-  const historyEl       = document.getElementById('chat-history');
-  const emptyState      = document.getElementById('chat-empty');
-  const formEl          = document.getElementById('chat-form') as HTMLFormElement | null;
-  const inputEl         = document.getElementById('chat-input') as HTMLTextAreaElement | null;
-  const sendBtn         = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
-  const sendLabel       = sendBtn?.querySelector('[data-csl]') as HTMLElement | null;
-  const clearBtn        = document.getElementById('chat-clear-btn') as HTMLButtonElement | null;
+  const quotaBanner    = document.getElementById('chat-quota-banner');
+  const byoKeyInput    = document.getElementById('chat-byo-key-input') as HTMLInputElement | null;
+  const byoKeySave     = document.getElementById('chat-byo-key-save') as HTMLButtonElement | null;
+  const historyEl      = document.getElementById('chat-history');
+  const emptyState     = document.getElementById('chat-empty');
+  const formEl         = document.getElementById('chat-form') as HTMLFormElement | null;
+  const inputEl        = document.getElementById('chat-input') as HTMLTextAreaElement | null;
+  const sendBtn        = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+  const sendLabel      = sendBtn?.querySelector('[data-csl]') as HTMLElement | null;
+  const clearBtn       = document.getElementById('chat-clear-btn') as HTMLButtonElement | null;
 
-  const photoBtn        = document.getElementById('chat-photo-btn') as HTMLButtonElement | null;
-  const photoInput      = document.getElementById('chat-photo-input') as HTMLInputElement | null;
-  const galleryBtn      = document.getElementById('chat-gallery-btn') as HTMLButtonElement | null;
-  const galleryInput    = document.getElementById('chat-gallery-input') as HTMLInputElement | null;
-  const audioBtn        = document.getElementById('chat-audio-btn') as HTMLButtonElement | null;
-  const audioBtnLabel   = audioBtn?.querySelector('[data-audio-label]') as HTMLElement | null;
-  const audioElapsedEl  = document.getElementById('chat-audio-elapsed');
-  const attachChip      = document.getElementById('chat-attachment-chip');
-  const attachThumb     = document.getElementById('chat-attachment-thumb');
-  const attachLabel     = document.getElementById('chat-attachment-label');
-  const attachMeta      = document.getElementById('chat-attachment-meta');
-  const attachRemove    = document.getElementById('chat-attachment-remove');
-  const attachErr       = document.getElementById('chat-attach-error');
-  const modelPickerEl   = document.getElementById('chat-model-picker');
-  const visionDialog    = document.getElementById('chat-vision-dialog') as HTMLDialogElement | null;
-  const voiceBtn        = document.getElementById('chat-voice-btn') as HTMLButtonElement | null;
-  const voiceBtnLabel   = voiceBtn?.querySelector('[data-voice-label]') as HTMLElement | null;
-  const chatStore       = defaultChatStore();
+  const photoBtn       = document.getElementById('chat-photo-btn') as HTMLButtonElement | null;
+  const photoInput     = document.getElementById('chat-photo-input') as HTMLInputElement | null;
+  const galleryBtn     = document.getElementById('chat-gallery-btn') as HTMLButtonElement | null;
+  const galleryInput   = document.getElementById('chat-gallery-input') as HTMLInputElement | null;
+  const audioBtn       = document.getElementById('chat-audio-btn') as HTMLButtonElement | null;
+  const audioBtnLabel  = audioBtn?.querySelector('[data-audio-label]') as HTMLElement | null;
+  const audioElapsedEl = document.getElementById('chat-audio-elapsed');
+  const attachChip     = document.getElementById('chat-attachment-chip');
+  const attachThumb    = document.getElementById('chat-attachment-thumb');
+  const attachLabel    = document.getElementById('chat-attachment-label');
+  const attachMeta     = document.getElementById('chat-attachment-meta');
+  const attachRemove   = document.getElementById('chat-attachment-remove');
+  const attachErr      = document.getElementById('chat-attach-error');
+  const modelPickerEl  = document.getElementById('chat-model-picker');
+  const visionDialog   = document.getElementById('chat-vision-dialog') as HTMLDialogElement | null;
+  const voiceBtn       = document.getElementById('chat-voice-btn') as HTMLButtonElement | null;
+  const voiceBtnLabel  = voiceBtn?.querySelector('[data-voice-label]') as HTMLElement | null;
+  const chatStore      = defaultChatStore();
 
-  const SEND_DEFAULT  = sendLabel?.textContent ?? 'Send';
-  const SEND_BUSY     = isEs ? 'Pensando…' : 'Thinking…';
-  const DL_DEFAULT    = downloadLabel?.textContent ?? 'Download';
+  const SEND_DEFAULT = sendLabel?.textContent ?? 'Send';
+  const SEND_BUSY    = isEs ? 'Pensando…' : 'Thinking…';
 
-  let modelReady = false;
+  // Gemini Flash is always ready — no download needed.
   let busy = false;
-  const conversation: ChatTurn[] = [];
+
   let pendingAttachment: ChatAttachment | null = null;
+
 
   // Audio recorder state (attachment buttons)
   let mediaRecorder: MediaRecorder | null = null;
@@ -523,45 +479,30 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     });
   });
 
-  // ── Chat model badge ──
-  // Reflects the user's chat-engine choice in <localStorage[rastrum.chat.engine]>.
-  // Falls back to a "Choose a model" anchor pointing at the in-page picker.
+
+  // ── Chat model badge — always Gemini Flash ──
   const badgeContainer = document.getElementById('chat-model-badge');
-  const BADGE_SUFFIX   = i18nGet('badge-suffix')   || (isEs ? 'en el dispositivo' : 'on-device');
-  const BADGE_UNSET    = i18nGet('badge-unset')    || (isEs ? 'Elige un modelo'   : 'Choose a model');
-  const BADGE_FALLBACK = i18nGet('badge-fallback') || (isEs ? 'En el dispositivo' : 'On-device');
-  function paintModelBadge(): void {
-    if (!badgeContainer) return;
-    const engine = readChatEngine();
-    if (engine) {
-      const name = MODEL_DISPLAY_NAMES[engine];
-      badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <span id="chat-model-badge-text">${name} · ${BADGE_SUFFIX}</span>`;
-      badgeContainer.removeAttribute('aria-describedby');
-      return;
-    }
-    const consentVisible = !document.getElementById('chat-consent')?.classList.contains('hidden');
-    if (!consentVisible) {
-      badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <span id="chat-model-badge-text">${BADGE_FALLBACK}</span>`;
-      badgeContainer.removeAttribute('aria-describedby');
-      return;
-    }
-    badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <a id="chat-model-badge-text" href="#chat-consent" class="underline decoration-dotted underline-offset-2">${BADGE_UNSET}</a> <span>· ${BADGE_SUFFIX}</span>`;
-    badgeContainer.setAttribute('aria-describedby', 'chat-consent');
+  if (badgeContainer) {
+    badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <span id="chat-model-badge-text">Gemini Flash</span>`;
   }
-  paintModelBadge();
-  // Back-compat: a user who downloaded Gemma before this code shipped has
-  // the cache populated but no engine key. Probe once and backfill.
-  if (readChatEngine() === null) {
-    void import('../lib/onnx-vision').then(async (lib) => {
-      try {
-        const status = await lib.getGemmaCacheStatus();
-        if (status.cached) {
-          writeChatEngine('gemma');
-          paintModelBadge();
-        }
-      } catch { /* ignore */ }
-    });
-  }
+
+  // ── BYO key banner — show if a key is already saved ──
+  // Pre-fill the input if the user previously saved a key.
+  const { readByoGeminiKey, writeByoGeminiKey } = await import('../lib/chat-engine');
+  const savedKey = readByoGeminiKey();
+  if (savedKey && byoKeyInput) byoKeyInput.value = savedKey;
+
+  byoKeySave?.addEventListener('click', () => {
+    const key = byoKeyInput?.value.trim() ?? '';
+    if (!key) return;
+    writeByoGeminiKey(key);
+    quotaBanner?.classList.add('hidden');
+  });
+
+  // ── Chat init — always ready with Gemini Flash ──
+  await restoreChatHistory();
+  paintConversation();
+
 
   // ── File pickers ──
   photoBtn?.addEventListener('click', () => photoInput?.click());
@@ -676,63 +617,6 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     void clearChatHistory(chatStore).catch(() => { /* best effort */ });
   });
 
-  // ── Consent + setup ──
-  async function refreshState() {
-    try {
-      const lib = await import('../lib/local-ai');
-      if (!lib.localAISupported()) {
-        consentBox?.classList.remove('hidden');
-        unsupNote?.classList.remove('hidden');
-        if (downloadBtn) downloadBtn.disabled = true;
-        if (gemmaDownloadBtn) gemmaDownloadBtn.disabled = true;
-        return;
-      }
-      const llamaStatus = await lib.getModelCacheStatus(lib.TEXT_MODEL_ID);
-      // Also probe Gemma cache — if the user already downloaded it from
-      // Profile → AI settings (or the consent gate), the chat is ready.
-      let gemmaCached = false;
-      try {
-        const ov = await import('../lib/onnx-vision');
-        const g = await ov.getGemmaCacheStatus();
-        gemmaCached = g.cached;
-      } catch {
-        // transformers.js not yet loaded — that's fine.
-      }
-      if (llamaStatus.cached || gemmaCached) {
-        modelReady = true;
-        consentBox?.classList.add('hidden');
-        historyEl?.classList.remove('hidden');
-        formEl?.classList.remove('hidden');
-        await restoreChatHistory();
-        paintConversation();
-        // chat-phi-autoload: when Phi-3.5-vision weights are already cached
-        // from a previous session, warm the engine in the background so the
-        // first vision-attachment send doesn't trigger a consent modal.
-        autoloadVisionEngineIfCached();
-      } else {
-        consentBox?.classList.remove('hidden');
-        historyEl?.classList.add('hidden');
-        formEl?.classList.add('hidden');
-      }
-    } catch {
-      consentBox?.classList.remove('hidden');
-    }
-  }
-  refreshState();
-
-  /** Load the Phi-vision engine silently when its weights are already cached. */
-  function autoloadVisionEngineIfCached(): void {
-    void (async () => {
-      try {
-        const lib = await import('../lib/local-ai');
-        if (!lib.localAISupported()) return;
-        const status = await lib.getModelCacheStatus(lib.VISION_MODEL_ID);
-        if (!status.cached) return;
-        await lib.loadVisionEngine(() => { /* silent — already cached */ });
-      } catch { /* best effort */ }
-    })();
-  }
-
   async function restoreChatHistory(): Promise<void> {
     try {
       const recent = await readRecentTurns(chatStore);
@@ -796,67 +680,6 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       attachments,
     }).catch(() => { /* best effort */ });
   }
-
-  function formatGpuError(err: unknown): string {
-    const msg = err instanceof Error ? err.message : String(err);
-    const isEs = document.documentElement.lang === 'es';
-    if (/compatible GPU|WebGPU|GPUAdapter|requestAdapter/i.test(msg)) {
-      return isEs
-        ? 'No se pudo iniciar la GPU. Si estás en Chrome, verifica en Configuración → Sistema (chrome://settings/system) que la "Aceleración por hardware" esté activada.'
-        : 'Could not start GPU. In Chrome, check Settings → System (chrome://settings/system) to ensure "Use hardware acceleration" is enabled.';
-    }
-    return msg;
-  }
-
-  downloadBtn?.addEventListener('click', async () => {
-    if (!downloadBtn || !downloadLabel) return;
-    downloadBtn.disabled = true;
-    downloadLabel.textContent = isEs ? 'Descargando…' : 'Downloading…';
-    if (dlProgress) dlProgress.classList.remove('hidden');
-    try {
-      const lib = await import('../lib/local-ai');
-      await lib.loadTextEngine((p) => {
-        if (dlProgress) dlProgress.textContent = `${Math.round((p.progress ?? 0) * 100)}%  ${p.text ?? ''}`;
-      });
-      writeChatEngine('llama');
-      paintModelBadge();
-      modelReady = true;
-      consentBox?.classList.add('hidden');
-      historyEl?.classList.remove('hidden');
-      formEl?.classList.remove('hidden');
-      paintConversation();
-    } catch (err) {
-      if (dlProgress) dlProgress.textContent = formatGpuError(err);
-    } finally {
-      downloadBtn.disabled = false;
-      downloadLabel.textContent = DL_DEFAULT;
-    }
-  });
-
-  // Gemma 4 download — same model the vision identifier uses.
-  const gemmaDownloadBtn = document.getElementById('chat-gemma-download-btn') as HTMLButtonElement | null;
-  gemmaDownloadBtn?.addEventListener('click', async () => {
-    if (!gemmaDownloadBtn) return;
-    gemmaDownloadBtn.disabled = true;
-    if (dlProgress) dlProgress.classList.remove('hidden');
-    try {
-      const lib = await import('../lib/local-ai');
-      await lib.loadGemmaTextEngine((p) => {
-        if (dlProgress) dlProgress.textContent = `${Math.round((p.progress ?? 0) * 100)}%  ${p.text ?? ''}`;
-      });
-      writeChatEngine('gemma');
-      paintModelBadge();
-      modelReady = true;
-      consentBox?.classList.add('hidden');
-      historyEl?.classList.remove('hidden');
-      formEl?.classList.remove('hidden');
-      paintConversation();
-    } catch (err) {
-      if (dlProgress) dlProgress.textContent = formatGpuError(err);
-    } finally {
-      gemmaDownloadBtn.disabled = false;
-    }
-  });
 
   // ── Cascade helpers ──
   async function runAttachmentCascade(att: ChatAttachment, currentTurnText: string): Promise<{
@@ -1161,7 +984,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         conversation[placeholderIdx].content = '';
         conversation[placeholderIdx].pending = false;
         paintConversation();
-        await streamLlamaInterpretation(placeholderIdx, att, text, result, []);
+        await streamGeminiInterpretation(placeholderIdx, att, text, result, []);
       } catch (err) {
         conversation[placeholderIdx].content = (isEs ? 'Modelo no disponible: ' : 'Model unavailable: ') + (err instanceof Error ? err.message : String(err));
         conversation[placeholderIdx].pending = false;
@@ -1198,7 +1021,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
           conversation[placeholderIdx].content = '';
           conversation[placeholderIdx].pending = false;
           paintConversation();
-          await streamLlamaInterpretation(placeholderIdx, att, text, best, alternates);
+          await streamGeminiInterpretation(placeholderIdx, att, text, best, alternates);
         } else {
           // Cascade failed → try vision fallback (photo only).
           if (att.kind === 'photo') {
@@ -1251,9 +1074,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         persistAssistantTurn(conversation[placeholderIdx]);
       }
     } else {
-      // Text-only flow. When an entity is attached, route through chat-engine
-      // (Gemma 4 default + 1-round tool-call loop + Llama fallback). Without
-      // an entity, keep the lighter Llama-only path that already works.
+      // Text-only flow via Gemini Flash
       conversation.push({ role: 'assistant', content: '' });
       paintConversation();
       const assistantIdx = conversation.length - 1;
@@ -1262,61 +1083,12 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         | null
         | undefined;
 
-      if (attached) {
-        try {
-          const { streamChat } = await import('../lib/chat-engine');
-          type ChatMsg = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string };
-          const messages: ChatMsg[] = [
-            { role: 'system', content: CHAT_SYSTEM_PROMPT },
-            { role: 'system', content: `[Context — attached ${attached.kind}]\n${attached.summary_text}` },
-            ...conversation
-              .slice(0, -1)
-              .filter(t => !t.attachment)
-              .slice(-6)
-              .map(t => ({ role: t.role as ChatMsg['role'], content: t.content.slice(0, 600) })),
-          ];
-
-          let assembled = '';
-          for await (const event of streamChat({ messages })) {
-            if (event.type === 'text') {
-              assembled += event.delta;
-              conversation[assistantIdx].content = assembled;
-              setBubbleStreaming(assistantIdx, assembled);
-            } else if (event.type === 'tool_call') {
-              window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
-                detail: { type: 'chat.tool.called', tool_name: event.tool, ok: true },
-              }));
-            } else if (event.type === 'tool_result') {
-              const r = event.result as { error?: string };
-              if (r.error) {
-                window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
-                  detail: { type: 'chat.tool.failed', tool_name: event.tool, reason: r.error },
-                }));
-              }
-            } else if (event.type === 'engine_fallback') {
-              window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
-                detail: { type: 'chat.engine.fallback', from: 'gemma', to: event.engine },
-              }));
-            }
-          }
-          paintConversation();
-          persistAssistantTurn(conversation[assistantIdx]);
-        } catch (err) {
-          conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + (err instanceof Error ? err.message : String(err));
-          paintConversation();
-          persistAssistantTurn(conversation[assistantIdx]);
-        }
-        busy = false;
-        sendBtn.disabled = false;
-        sendLabel.textContent = SEND_DEFAULT;
-        return;
-      }
-
       try {
         const { streamChat } = await import('../lib/chat-engine');
         type ChatMsg = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string };
         const messages: ChatMsg[] = [
           { role: 'system', content: CHAT_SYSTEM_PROMPT },
+          ...(attached ? [{ role: 'system' as const, content: `[Context — attached ${attached.kind}]\n${attached.summary_text}` }] : []),
           ...conversation
             .slice(0, -1)
             .filter(t => !t.attachment)
@@ -1325,12 +1097,28 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         ];
 
         let assembled = '';
-        const preferEngine = readChatEngine() ?? undefined;
-        for await (const event of streamChat({ messages, prefer: preferEngine })) {
+        for await (const event of streamChat({ messages })) {
           if (event.type === 'text') {
             assembled += event.delta;
             conversation[assistantIdx].content = assembled;
             setBubbleStreaming(assistantIdx, assembled);
+          } else if (event.type === 'quota_exceeded') {
+            quotaBanner?.classList.remove('hidden');
+            conversation[assistantIdx].content = isEs
+              ? '⚡ Límite de uso gratuito alcanzado. Por favor ingresá tu clave de Google AI Studio arriba para continuar.'
+              : '⚡ Free usage limit reached. Please enter your Google AI Studio key above to continue.';
+            paintConversation();
+          } else if (event.type === 'tool_call') {
+            window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
+              detail: { type: 'chat.tool.called', tool_name: event.tool, ok: true },
+            }));
+          } else if (event.type === 'tool_result') {
+            const r = event.result as { error?: string };
+            if (r.error) {
+              window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
+                detail: { type: 'chat.tool.failed', tool_name: event.tool, reason: r.error },
+              }));
+            }
           }
         }
         paintConversation();
@@ -1347,47 +1135,36 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     sendLabel.textContent = SEND_DEFAULT;
   });
 
-  /** Stream a Llama interpretation of the cascade result into a specific bubble. */
-  async function streamLlamaInterpretation(
+  /** Stream a Gemini interpretation of the cascade result into a specific bubble. */
+  async function streamGeminiInterpretation(
     idx: number,
     att: ChatAttachment,
     userText: string,
     best: CascadeCandidate,
     alternates: CascadeCandidate[],
   ): Promise<void> {
-    const lib = await import('../lib/local-ai');
-    const engine = await lib.loadTextEngine(() => {});
     const prompt = buildCascadeInterpretationPrompt({
       kind: att.kind, userText, locale: docLocale, best, alternates,
     });
+    const { streamChat } = await import('../lib/chat-engine');
     let assembled = '';
     try {
-      const stream = await engine.chat.completions.create({
+      for await (const ev of streamChat({
         messages: [
-          { role: 'system' as const, content: CHAT_SYSTEM_PROMPT },
-          { role: 'user' as const, content: prompt },
+          { role: 'system', content: CHAT_SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
         ],
-        max_tokens: 320,
-        stream: true,
-      });
-      for await (const chunk of stream as AsyncIterable<{ choices?: Array<{ delta?: { content?: string } }> }>) {
-        const delta = chunk.choices?.[0]?.delta?.content ?? '';
-        if (!delta) continue;
-        assembled += delta;
-        conversation[idx].content = assembled;
-        setBubbleStreaming(idx, assembled);
+      })) {
+        if (ev.type === 'text') {
+          assembled += ev.delta;
+          conversation[idx].content = assembled;
+          setBubbleStreaming(idx, assembled);
+        } else if (ev.type === 'quota_exceeded') {
+          quotaBanner?.classList.remove('hidden');
+        }
       }
     } catch {
-      const reply = await engine.chat.completions.create({
-        messages: [
-          { role: 'system' as const, content: CHAT_SYSTEM_PROMPT },
-          { role: 'user' as const, content: prompt },
-        ],
-        max_tokens: 320,
-      });
-      const raw = reply.choices?.[0]?.message?.content ?? '';
-      assembled = typeof raw === 'string' ? raw : '';
-      conversation[idx].content = assembled;
+      // ignore
     }
     conversation[idx].pending = false;
     paintConversation();
