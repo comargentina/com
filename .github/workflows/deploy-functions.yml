@@ -26,6 +26,7 @@ on:
         options:
           - all
           - admin
+          - chat
           - get-upload-url
           - identify
           - enrich-environment
