@@ -6,23 +6,22 @@ const lang = 'en';
 const tr = t(lang);
 
 const matrix = [
-  { feature: 'Photo ID',              rastrum: true,  inat: true,      merlin: true,      plantnet: true,      wi: false,     arbimon: false },
-  { feature: 'Audio ID',              rastrum: true,  inat: 'partial', merlin: true,      plantnet: false,     wi: false,     arbimon: true  },
-  { feature: 'Video',                 rastrum: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
-  { feature: 'Ecological evidence',   rastrum: true,  inat: 'partial', merlin: false,     plantnet: false,     wi: false,     arbimon: false },
-  { feature: 'Camera traps',          rastrum: true,  inat: false,     merlin: false,     plantnet: false,     wi: true,      arbimon: false },
-  { feature: 'Offline-first',         rastrum: true,  inat: 'partial', merlin: 'partial', plantnet: 'partial', wi: false,     arbimon: false },
-  { feature: 'Indigenous languages',  rastrum: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
-  { feature: 'GBIF export',           rastrum: true,  inat: true,      merlin: false,     plantnet: 'partial', wi: true,      arbimon: false },
-  { feature: 'CONABIO / CONANP',      rastrum: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
-  { feature: 'PITs / QR anchors',     rastrum: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
-  { feature: 'Free / open-source',    rastrum: true,  inat: true,      merlin: false,     plantnet: true,      wi: 'partial', arbimon: false },
+  { feature: 'Photo ID',              com: true,  inat: true,      merlin: true,      plantnet: true,      wi: false,     arbimon: false },
+  { feature: 'Audio ID',              com: true,  inat: 'partial', merlin: true,      plantnet: false,     wi: false,     arbimon: true  },
+  { feature: 'Video',                 com: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
+  { feature: 'Ecological evidence',   com: true,  inat: 'partial', merlin: false,     plantnet: false,     wi: false,     arbimon: false },
+  { feature: 'Camera traps',          com: true,  inat: false,     merlin: false,     plantnet: false,     wi: true,      arbimon: false },
+  { feature: 'Offline-first',         com: true,  inat: 'partial', merlin: 'partial', plantnet: 'partial', wi: false,     arbimon: false },
+  { feature: 'GBIF export',           com: true,  inat: true,      merlin: false,     plantnet: 'partial', wi: true,      arbimon: false },
+  { feature: 'CONABIO / CONANP',      com: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
+  { feature: 'PITs / QR anchors',     com: true,  inat: false,     merlin: false,     plantnet: false,     wi: false,     arbimon: false },
+  { feature: 'Free / open-source',    com: true,  inat: true,      merlin: false,     plantnet: true,      wi: 'partial', arbimon: false },
 ];
 
 function cellDisplay(v: boolean | string) {
   if (v === true)      return { text: '\u2713', cls: 'text-emerald-600 dark:text-emerald-400 font-bold' };
   if (v === 'partial') return { text: '~',      cls: 'text-yellow-600 dark:text-yellow-400' };
-  return                       { text: '\u2717', cls: 'text-zinc-600 dark:text-zinc-600 dark:text-zinc-400' };
+  return                       { text: '\u2717', cls: 'text-zinc-600 dark:text-zinc-400' };
 }
 ---
 
@@ -41,9 +40,9 @@ function cellDisplay(v: boolean | string) {
       <div class="not-prose overflow-x-auto">
         <table class="w-full text-sm border-collapse">
           <thead>
-            <tr class="border-b border-zinc-200 dark:border-zinc-200 dark:border-zinc-800">
+            <tr class="border-b border-zinc-200 dark:border-zinc-800">
               <th class="text-left py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">Feature</th>
-              <th class="py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold">Rastrum</th>
+              <th class="py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold">COM</th>
               <th class="py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">iNaturalist</th>
               <th class="py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">Merlin</th>
               <th class="py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">PlantNet</th>
@@ -55,7 +54,7 @@ function cellDisplay(v: boolean | string) {
             {matrix.map((row, i) => (
               <tr class:list={["border-b border-zinc-100 dark:border-zinc-900", i % 2 === 0 ? "bg-zinc-50/50 dark:bg-zinc-950/50" : ""]}>
                 <td class="py-2 px-3 text-zinc-700 dark:text-zinc-300">{row.feature}</td>
-                {[row.rastrum, row.inat, row.merlin, row.plantnet, row.wi, row.arbimon].map((v, j) => {
+                {[row.com, row.inat, row.merlin, row.plantnet, row.wi, row.arbimon].map((v, j) => {
                   const c = cellDisplay(v);
                   return <td class:list={["py-2 px-3 text-center", c.cls, j === 0 ? "bg-emerald-500/5" : ""]}>{c.text}</td>;
                 })}
@@ -63,84 +62,12 @@ function cellDisplay(v: boolean | string) {
             ))}
           </tbody>
         </table>
-        <p class="text-xs text-zinc-600 dark:text-zinc-600 dark:text-zinc-400 mt-2">
+        <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2">
           <span class="text-emerald-600 dark:text-emerald-400 font-bold">{'\u2713'}</span> full support
-          <span class="mx-2 text-zinc-700 dark:text-zinc-300 dark:text-zinc-700">|</span>
+          <span class="mx-2 text-zinc-700 dark:text-zinc-300">|</span>
           <span class="text-yellow-600 dark:text-yellow-400">~</span> partial
-          <span class="mx-2 text-zinc-700 dark:text-zinc-300 dark:text-zinc-700">|</span>
-          <span class="text-zinc-600 dark:text-zinc-600 dark:text-zinc-400">{'\u2717'}</span> not supported
-        </p>
-      </div>
-    </section>
-
-    <!-- Market Sizing -->
-    <section>
-      <h2 id="market-sizing" class="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-        <a href="#market-sizing" class="text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 transition-colors">#</a> Market Sizing
-      </h2>
-      <div class="not-prose overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-zinc-200 dark:border-zinc-200 dark:border-zinc-800">
-              <th class="text-left py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">Segment</th>
-              <th class="text-right py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">2024</th>
-              <th class="text-right py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">2033</th>
-              <th class="text-right py-2 px-3 text-zinc-600 dark:text-zinc-400 font-medium">CAGR</th>
-            </tr>
-          </thead>
-          <tbody class="text-zinc-700 dark:text-zinc-300">
-            <tr class="border-b border-zinc-100 dark:border-zinc-900">
-              <td class="py-2 px-3">Global citizen science platforms</td>
-              <td class="py-2 px-3 text-right font-mono">$1.23B</td>
-              <td class="py-2 px-3 text-right font-mono">$3.84B</td>
-              <td class="py-2 px-3 text-right font-mono">13.7%</td>
-            </tr>
-            <tr class="border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/50">
-              <td class="py-2 px-3">Mexico ecotourism</td>
-              <td class="py-2 px-3 text-right font-mono">$3.8B</td>
-              <td class="py-2 px-3 text-right font-mono">$10B</td>
-              <td class="py-2 px-3 text-right font-mono">~15%</td>
-            </tr>
-            <tr class="border-b border-zinc-100 dark:border-zinc-900">
-              <td class="py-2 px-3">Mexico birdwatching tourism</td>
-              <td class="py-2 px-3 text-right font-mono">$1.9B</td>
-              <td class="py-2 px-3 text-right font-mono">$3.1B</td>
-              <td class="py-2 px-3 text-right font-mono">8.6%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Why LATAM -->
-    <section>
-      <h2 id="why-latam" class="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-        <a href="#why-latam" class="text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 transition-colors">#</a> Why LATAM, Why Offline-First
-      </h2>
-      <div class="space-y-3 text-zinc-700 dark:text-zinc-300">
-        <p>
-          <span class="font-semibold text-zinc-900 dark:text-zinc-100">Connectivity gap:</span> INEGI ENDUTIH 2024 reports 83.1% national internet connectivity but only 62.5% in Oaxaca and 56.7% in Chiapas. The least-connected states are the most biodiverse. 31.5% of target users cannot use cloud-dependent tools.
-        </p>
-        <p>
-          <span class="font-semibold text-zinc-900 dark:text-zinc-100">NaturaLista MX:</span> 138K users, 5M observations, 45K species — but growing at only 16%/year vs iNat's near-doubling globally. The 2024 CONABIO autonomy reduction opens space for a private/NGO complement.
-        </p>
-        <p>
-          <span class="font-semibold text-zinc-900 dark:text-zinc-100">City Nature Challenge 2024:</span> Monterrey ranked #2 globally by observations, La Paz Bolivia #1 — LATAM dominates citizen science per capita.
-        </p>
-      </div>
-    </section>
-
-    <!-- PITs as Moat -->
-    <section>
-      <h2 id="pits-moat" class="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-        <a href="#pits-moat" class="text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 transition-colors">#</a> PITs as Foursquare Moat
-      </h2>
-      <div class="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-zinc-700 dark:text-zinc-300">
-        <p class="mb-3">
-          QR/NFC "Puntos de Informacion Territorial" (PITs) anchors have <span class="font-semibold text-emerald-600 dark:text-emerald-400">zero competition</span>. Whoever installs the most physical nodes in Mexican parks and trails creates the biological version of Foursquare: a network effect where every QR label installed makes the platform more valuable.
-        </p>
-        <p>
-          First-mover advantage is physical (a QR sticker on a tree), not just digital. Each installed PIT links a geographic location to a living, growing species observation page — creating permanent infrastructure that competitors cannot replicate from code alone.
+          <span class="mx-2 text-zinc-700 dark:text-zinc-300">|</span>
+          <span class="text-zinc-600 dark:text-zinc-400">{'\u2717'}</span> not supported
         </p>
       </div>
     </section>
