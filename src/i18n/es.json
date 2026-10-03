@@ -339,7 +339,7 @@
       "what_costs": [
         "Supabase capa gratuita (base de datos, auth, storage) — actualmente $0 USD/mes",
         "Cloudflare R2 (medios + alojamiento de modelos ML) — pocos dólares al mes",
-        "Dominio (rastrum.org) — aproximadamente $12 USD por año",
+        "Dominio — aproximadamente $12 USD por año",
         "Llamadas de IA para identificación — pago por uso vía tus propias claves BYO, o cupos donados a un fondo comunitario"
       ],
       "byo_keys_note": "Por defecto, la identificación con IA (Claude Vision, PlantNet) usa tus propias claves API. Tus fotos van a esos proveedores bajo tu cuenta; nunca guardamos las claves del lado del servidor. La página de Privacidad describe el flujo completo.",
@@ -4084,7 +4084,7 @@
     "col_obs": "Obs",
     "no_waypoints": "No hay puntos registrados.",
     "footer_generated": "COM Argentina · Guía de campo generada el",
-    "footer_suffix": "· rastrum.org",
+    "footer_suffix": "· COM Argentina",
     "title_suffix": "— Guía de campo | COM Argentina"
   },
   "pit_landing": {

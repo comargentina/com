@@ -27,64 +27,18 @@ function extractButtonClass(id: string): string {
   return match[1];
 }
 
-describe('PBI 5.2 — passkey button styling parity', () => {
-  const passkeyClass = extractButtonClass('passkey-btn');
-  const googleClass = extractButtonClass('google-btn');
-  const githubClass = extractButtonClass('github-btn');
-
-  it('passkey button has no emerald-tinted background', () => {
-    expect(passkeyClass.toLowerCase()).not.toMatch(/\bbg-emerald-\d+/);
-    // dark:bg-emerald-* counts too
-    expect(passkeyClass.toLowerCase()).not.toMatch(/bg-emerald-\d/);
+describe('PBI 5.2 — signin provider cleanup', () => {
+  it('passkey button is removed', () => {
+    expect(componentSrc).not.toContain('id="passkey-btn"');
   });
 
-  it('passkey button has no emerald-tinted border', () => {
-    expect(passkeyClass.toLowerCase()).not.toMatch(/border-emerald/);
+  it('github button is removed', () => {
+    expect(componentSrc).not.toContain('id="github-btn"');
   });
 
-  it('passkey button has no emerald-tinted text', () => {
-    expect(passkeyClass.toLowerCase()).not.toMatch(/\btext-emerald-\d+/);
-  });
-
-  it('passkey button has no emerald-tinted hover state', () => {
-    expect(passkeyClass.toLowerCase()).not.toMatch(/hover:bg-emerald/);
-  });
-
-  it('passkey button uses the same neutral OAuth surface as Google', () => {
-    // The neutral OAuth surface: white background, zinc border, zinc text.
-    const expectedTokens = [
-      'bg-white',
-      'dark:bg-zinc-900',
-      'border-zinc-300',
-      'dark:border-zinc-700',
-      'text-zinc-700',
-      'dark:text-zinc-200',
-      'hover:bg-zinc-50',
-      'dark:hover:bg-zinc-800/40',
-    ];
-    for (const token of expectedTokens) {
-      expect(passkeyClass).toContain(token);
-      expect(googleClass).toContain(token);
-    }
-  });
-
-  it('passkey button matches GitHub button on the OAuth surface tokens', () => {
-    const surfaceTokens = [
-      'bg-white',
-      'dark:bg-zinc-900',
-      'border-zinc-300',
-      'dark:border-zinc-700',
-    ];
-    for (const token of surfaceTokens) {
-      expect(passkeyClass).toContain(token);
-      expect(githubClass).toContain(token);
-    }
-  });
-
-  it('passkey button keeps its hidden-until-WebAuthn-detected default', () => {
-    // The reveal logic flips this off via classList.remove('hidden')
-    // when passkeySupported() is true — regression guard for the prior
-    // visibility contract.
-    expect(passkeyClass).toMatch(/\bhidden\b/);
+  it('google button is retained with neutral OAuth styling', () => {
+    const googleClass = extractButtonClass('google-btn');
+    expect(googleClass).toContain('bg-white');
+    expect(googleClass).toContain('dark:bg-zinc-900');
   });
 });

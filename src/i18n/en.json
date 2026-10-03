@@ -339,7 +339,7 @@
       "what_costs": [
         "Supabase Free tier (database, auth, storage) — currently $0/mo",
         "Cloudflare R2 (media + ML model hosting) — single-digit dollars per month",
-        "Domain (rastrum.org) — about $12 per year",
+        "Domain — about $12 per year",
         "AI identification calls — pay-as-you-go via your own BYO API keys, or sponsored slots in a community pool"
       ],
       "byo_keys_note": "AI identification (Claude Vision, PlantNet) uses your own API keys by default. Your photos are sent to those providers under your account; we never store the keys server-side. See the Privacy page for the full data flow.",
@@ -2832,7 +2832,7 @@
     "api_30d_heading": "Last 30 days",
     "api_empty": "No quota data yet. Cron 'plantnet-quota-daily' fills this nightly.",
     "cron_heading": "Cron / Edge functions",
-    "cron_intro": "Schedule + last-run status of rastrum's nightly cron jobs.",
+    "cron_intro": "Schedule + last-run status of COM's nightly cron jobs.",
     "cron_col_jobname": "Job",
     "cron_col_schedule": "Schedule",
     "cron_col_last_run": "Last run",
@@ -4084,7 +4084,7 @@
     "col_obs": "Obs",
     "no_waypoints": "No waypoints recorded.",
     "footer_generated": "COM Argentina · Field guide generated",
-    "footer_suffix": "· rastrum.org",
+    "footer_suffix": "· COM Argentina",
     "title_suffix": "— Field Guide | COM Argentina"
   },
   "pit_landing": {

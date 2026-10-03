@@ -167,7 +167,7 @@ const sections: Section[] = [
       { title: isEs ? 'Reacciones por target'              : 'Per-target reactions',           desc: isEs ? 'observation/photo/identification'    : 'observation/photo/identification' },
       { title: isEs ? 'Bandeja /inbox'                     : '/inbox in-app inbox',            desc: isEs ? 'Campana con badge y poda 90 días'    : 'Bell badge + 90-day prune cron' },
       { title: isEs ? 'ReportDialog + ConfirmDialog'       : 'ReportDialog + ConfirmDialog',   desc: isEs ? 'Modales globales reutilizables'      : 'Global reusable modals' },
-      { title: isEs ? 'Strip de reacciones en /share/obs/' : 'Reaction strip on /share/obs/',  desc: isEs ? 'Auto-hidrata vía rastrum:reactions-ready' : 'Self-hydrates via rastrum:reactions-ready' },
+      { title: isEs ? 'Strip de reacciones en /share/obs/' : 'Reaction strip on /share/obs/',  desc: isEs ? 'Auto-hidrata vía com:reactions-ready' : 'Self-hydrates via com:reactions-ready' },
     ],
   },
   {
@@ -195,7 +195,7 @@ const sections: Section[] = [
     iconColor: 'text-orange-500',
     features: [
       { title: isEs ? 'Proyectos /projects/'             : '/projects/ ANP polygons',     desc: isEs ? 'Polígono auto-etiqueta observaciones'      : 'Polygon auto-tags observations' },
-      { title: isEs ? 'CLI rastrum-import'                : 'rastrum-import CLI',          desc: isEs ? 'Walker recursivo + EXIF + reanudable'      : 'Recursive walker + EXIF + resumable' },
+      { title: isEs ? 'CLI com-import'                    : 'com-import CLI',              desc: isEs ? 'Walker recursivo + EXIF + reanudable'      : 'Recursive walker + EXIF + resumable' },
       { title: 'POST /api/upload-url',                                                       desc: isEs ? 'URL R2 prefirmada con scope token'        : 'R2 presigned URL with scoped token' },
       { title: isEs ? 'Estaciones cámara'                 : 'Camera stations schema',      desc: isEs ? 'Períodos activos + station_trap_nights()'  : 'Active periods + station_trap_nights()' },
       { title: isEs ? 'Índices de muestreo'              : 'Sampling effort indices',      desc: isEs ? 'RAI / detección por 100 trap-nights'       : 'RAI / detection per 100 trap-nights' },
@@ -253,7 +253,7 @@ const sections: Section[] = [
   },
 ];
 
-const heroTitle = isEs ? 'Lo que entrega Rastrum hoy' : 'What Rastrum ships today';
+const heroTitle = isEs ? 'Lo que entrega COM hoy' : 'What COM ships today';
 const heroSub = isEs
   ? 'v0.1 → v1.2: 158 ítems hechos en producción a través de 33 specs de módulo. Cada fila se mapea a un módulo con spec dedicado y código en main.'
   : 'v0.1 → v1.2: 158 items shipped to production across 33 module specs. Every row maps to a module with a dedicated spec and code on main.';
