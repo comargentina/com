@@ -389,48 +389,48 @@ export function getRouteParent(key: string): string | undefined {
  */
 export const docPageMeta = {
   vision: {
-    en: "Why Rastrum exists: making every living thing identifiable by anyone, anywhere — even offline, even in indigenous languages, even for tracks and scat.",
-    es: "Por qué existe Rastrum: hacer cada ser vivo identificable por cualquier persona, en cualquier lugar — sin conexión, en lenguas indígenas, hasta huellas y excrementos.",
+    en: "Why COM Argentina exists: making every living thing identifiable by anyone, anywhere — even offline.",
+    es: "Por qué existe COM Argentina: hacer cada ser vivo identificable por cualquier persona, en cualquier lugar — sin conexión.",
   },
   features: {
-    en: "What Rastrum does today: photo + audio + video identification, multi-modal cascade (PlantNet → Claude → on-device), offline-first PWA, Darwin Core export.",
-    es: "Lo que Rastrum hace hoy: identificación con foto, audio y video, cascade multi-modal (PlantNet → Claude → en dispositivo), PWA sin conexión, export Darwin Core.",
+    en: "What COM Argentina does today: photo + audio + video identification, multi-modal cascade (PlantNet → Claude → on-device), offline-first PWA, Darwin Core export.",
+    es: "Lo que COM Argentina hace hoy: identificación con foto, audio y video, cascade multi-modal (PlantNet → Claude → en dispositivo), PWA sin conexión, export Darwin Core.",
   },
   roadmap: {
-    en: "What's next on Rastrum's roadmap. v1.0 shipped — chrome revamp, parallel cascade. v1.1+: account hub, command palette, onboarding tour, species pages.",
-    es: "Qué sigue en la hoja de ruta de Rastrum. v1.0 listo — renovación de chrome, cascade paralelo. v1.1+: hub de cuenta, paleta de comandos, tour, páginas de especies.",
+    en: "What's next on COM Argentina's roadmap. v1.0 shipped — chrome revamp, parallel cascade. v1.1+: account hub, command palette, onboarding tour, species pages.",
+    es: "Qué sigue en la hoja de ruta de COM Argentina. v1.0 listo — renovación de chrome, cascade paralelo. v1.1+: hub de cuenta, paleta de comandos, tour, páginas de especies.",
   },
   tasks: {
     en: "Current implementation tasks across all roadmap items. Live status from docs/tasks.json — see what's in progress, what's done, what's deferred.",
     es: "Tareas actuales de implementación en cada ítem de hoja de ruta. Estado en vivo desde docs/tasks.json — ve qué está en curso, listo o diferido.",
   },
   market: {
-    en: "How Rastrum compares to iNaturalist, Pl@ntNet, and Merlin Bird ID. Positioning, differentiators, and target Latin American biodiversity research community.",
-    es: "Cómo se compara Rastrum con iNaturalist, Pl@ntNet y Merlin Bird ID. Posicionamiento, diferenciadores y la comunidad latinoamericana de investigación en biodiversidad.",
+    en: "How COM Argentina compares to iNaturalist, Pl@ntNet, and Merlin Bird ID. Positioning, differentiators, and target Latin American biodiversity research community.",
+    es: "Cómo se compara COM Argentina con iNaturalist, Pl@ntNet y Merlin Bird ID. Posicionamiento, diferenciadores y la comunidad latinoamericana de investigación en biodiversidad.",
   },
   architecture: {
-    en: "How Rastrum's identifier cascade, offline outbox, R2 media storage, and Darwin Core pipeline fit together. Block diagram, data flows, decisions.",
-    es: "Cómo se integran el cascade de identificadores, outbox offline, almacén de medios R2 y pipeline Darwin Core de Rastrum. Diagrama de bloques, flujos, decisiones.",
+    en: "How COM Argentina's identifier cascade, offline outbox, R2 media storage, and Darwin Core pipeline fit together. Block diagram, data flows, decisions.",
+    es: "Cómo se integran el cascade de identificadores, outbox offline, almacén de medios R2 y pipeline Darwin Core de COM Argentina. Diagrama de bloques, flujos, decisiones.",
   },
   funding: {
-    en: "How Rastrum is funded today (zero-cost, BYO-key model) and how to support development. Grant outreach, GitHub Sponsors, operator-paid project keys.",
-    es: "Cómo se financia Rastrum hoy (modelo zero-cost con tus propias keys) y cómo apoyar su desarrollo. Subvenciones, GitHub Sponsors, claves de proyecto pagadas por el operador.",
+    en: "How COM Argentina is funded today (zero-cost, BYO-key model) and how to support development. Grant outreach, GitHub Sponsors, operator-paid project keys.",
+    es: "Cómo se financia COM Argentina hoy (modelo zero-cost con tus propias keys) y cómo apoyar su desarrollo. Subvenciones, GitHub Sponsors, claves de proyecto pagadas por el operador.",
   },
   contribute: {
-    en: "How to contribute to Rastrum: code (PRs welcome), translations, indigenous-language partnerships, observation data, and bug reports via the in-app reporter.",
-    es: "Cómo contribuir a Rastrum: código (PRs bienvenidos), traducciones, alianzas con lenguas indígenas, datos de observación, y reportes de bugs desde la app.",
+    en: "How to contribute to COM Argentina: code (PRs welcome), translations, observation data, and bug reports via the in-app reporter.",
+    es: "Cómo contribuir a COM Argentina: código (PRs bienvenidos), traducciones, datos de observación, y reportes de bugs desde la app.",
   },
   faq: {
-    en: "Frequently asked questions about Rastrum: identification accuracy, privacy, sensitive species, offline mode, BYO API keys, and how to contribute.",
-    es: "Preguntas frecuentes sobre Rastrum: precisión de identificación, privacidad, especies sensibles, modo sin conexión, claves API propias y cómo contribuir.",
+    en: "Frequently asked questions about COM Argentina: identification accuracy, privacy, sensitive species, offline mode, BYO API keys, and how to contribute.",
+    es: "Preguntas frecuentes sobre COM Argentina: precisión de identificación, privacidad, especies sensibles, modo sin conexión, claves API propias y cómo contribuir.",
   },
   privacy: {
-    en: "Rastrum's privacy policy. What we collect, how we store it, and what we never log — your API keys, your queries, your precise location.",
-    es: "Política de privacidad de Rastrum. Qué recopilamos, cómo lo almacenamos, y qué nunca registramos — tus claves API, consultas, ubicación precisa.",
+    en: "COM Argentina's privacy policy. What we collect, how we store it, and what we never log — your API keys, your queries, your precise location.",
+    es: "Política de privacidad de COM Argentina. Qué recopilamos, cómo lo almacenamos, y qué nunca registramos — tus claves API, consultas, ubicación precisa.",
   },
   terms: {
-    en: "Rastrum's terms of service. Open-source under MIT (code) and AGPL-3.0 (server). Per-observation Creative Commons licensing — BY, BY-NC, or CC0.",
-    es: "Términos de servicio de Rastrum. Open-source bajo MIT (código) y AGPL-3.0 (servidor). Licencias Creative Commons por observación — BY, BY-NC o CC0.",
+    en: "COM Argentina's terms of service. Open-source under MIT (code) and AGPL-3.0 (server). Per-observation Creative Commons licensing — BY, BY-NC, or CC0.",
+    es: "Términos de servicio de COM Argentina. Open-source bajo MIT (código) y AGPL-3.0 (servidor). Licencias Creative Commons por observación — BY, BY-NC o CC0.",
   },
   console: {
     en: "Privileged-actions surface for admin, moderator, and expert roles. Role model, audit log, and per-action runbooks.",
@@ -441,12 +441,12 @@ export const docPageMeta = {
     es: "Comparte tu credencial Anthropic con amigos, con límite mensual y auditoría. Cómo funcionan los patrocinios para sponsors y beneficiarios.",
   },
   mcp: {
-    en: "Connect AI agents to Rastrum via the Model Context Protocol. Setup guide for Claude Desktop, Cursor, OpenClaw, and the Claude Code CLI.",
-    es: "Conecta agentes de IA a Rastrum mediante el Model Context Protocol. Guía de configuración para Claude Desktop, Cursor, OpenClaw y Claude Code CLI.",
+    en: "Connect AI agents to COM Argentina via the Model Context Protocol. Setup guide for Claude Desktop, Cursor, OpenClaw, and the Claude Code CLI.",
+    es: "Conecta agentes de IA a COM Argentina mediante el Model Context Protocol. Guía de configuración para Claude Desktop, Cursor, OpenClaw y Claude Code CLI.",
   },
   changelog: {
-    en: "Version history and significant changes in Rastrum. What shipped per version, with PR links and summaries.",
-    es: "Historial de versiones y cambios significativos en Rastrum. Lo que se entregó por versión, con enlaces a PRs y resúmenes.",
+    en: "Version history and significant changes in COM Argentina. What shipped per version, with PR links and summaries.",
+    es: "Historial de versiones y cambios significativos en COM Argentina. Lo que se entregó por versión, con enlaces a PRs y resúmenes.",
   },
   community: {
     en: "Community discovery: find observers, experts, and naturalists. Filter by country, taxon, activity, and nearby — with privacy-first centroid gating.",
@@ -469,8 +469,8 @@ export const docPageMeta = {
     es: "Tablero público de SLA de triage: issues abiertas, tiempo medio a primer comentario en los últimos 30 días y resoluciones recientes.",
   },
   algorithms: {
-    en: "Every ranked surface in Rastrum, with the inputs it uses, the time window, and the settings that change its behavior.",
-    es: "Cada superficie ordenada en Rastrum, con las entradas que usa, la ventana de tiempo y los ajustes que cambian su comportamiento.",
+    en: "Every ranked surface in COM Argentina, with the inputs it uses, the time window, and the settings that change its behavior.",
+    es: "Cada superficie ordenada en COM Argentina, con las entradas que usa, la ventana de tiempo y los ajustes que cambian su comportamiento.",
   },
   surprises: {
     en: "Field surprises: a transparent, opt-in catalog of variable rewards. 3 fixed kinds, 1-per-day cap, full disclosure of how each fires.",
