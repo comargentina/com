@@ -197,7 +197,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
 
   // Gemini Flash is always ready — no download needed.
   let busy = false;
-
+  const conversation: ChatTurn[] = [];
   let pendingAttachment: ChatAttachment | null = null;
 
 
