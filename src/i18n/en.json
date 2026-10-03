@@ -2021,7 +2021,7 @@
       "surprises": "Field surprises"
     },
     "descriptions": {
-      "vision": "Mission, problem statement, and why Oaxaca is the right place to start.",
+      "vision": "Mission, problem statement, and approach of COM Argentina.",
       "features": "What v1.0 ships today: identification cascade, observation logging, social and curation, data export, offline PWA, and privacy.",
       "roadmap": "Six milestones from v0.1 MVP to v2.5 AI assistant over 30 months.",
       "tasks": "Per-roadmap-item subtask breakdown with status, dependencies, and module references.",
