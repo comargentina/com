@@ -116,13 +116,9 @@ serve(async (req: Request) => {
 
   if (!geminiRes.ok) {
     const errText = await geminiRes.text().catch(() => 'unknown');
-    // 429 = quota exceeded on operator key → tell client to use their own key
-    if (geminiRes.status === 429) {
-      return jsonErr('RATE_LIMITED', 429);
-    }
-    if (geminiRes.status === 401 || geminiRes.status === 403) {
-      return jsonErr('INVALID_API_KEY', 401);
-    }
+    if (geminiRes.status === 429) return jsonErr('RATE_LIMITED', 429);
+    if (geminiRes.status === 400) return jsonErr(`Gemini 400 (bad request / invalid key format): ${errText}`, 502);
+    if (geminiRes.status === 401 || geminiRes.status === 403) return jsonErr(`Gemini ${geminiRes.status} (invalid API key): ${errText}`, 401);
     return jsonErr(`Gemini error ${geminiRes.status}: ${errText}`, 502);
   }
 
