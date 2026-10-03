@@ -52,6 +52,7 @@ interface Props {
 const { title, description = 'Species identification platform', lang = 'en', ogImage, ogType, robots } = Astro.props;
 const currentPath = Astro.url.pathname;
 const installLang: 'en' | 'es' = lang === 'es' ? 'es' : 'en';
+const isChat = currentPath.includes('/chat');
 
 // Warn at build time if a console-prefixed path slips through to BaseLayout.
 // The chrome (sidebar + role pills + keybindings) is part of the console
@@ -385,15 +386,15 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
     <ConsentBanner lang={installLang} />
     <OfflineBanner lang={installLang} />
     <Header lang={lang} currentPath={currentPath} />
-    <InstallDiscoveryHint lang={installLang} />
+    {!isChat && <InstallDiscoveryHint lang={installLang} />}
     <main class="max-w-5xl mx-auto px-4 py-8">
       <Breadcrumbs lang={installLang} currentPath={currentPath} />
       <slot />
     </main>
     <Footer lang={lang} currentPath={currentPath} />
     <CommandPalette lang={lang} />
-    <InstallPwaButton lang={installLang} />
-    <ReportIssueButton lang={lang} />
+    {!isChat && <InstallPwaButton lang={installLang} />}
+    {!isChat && <ReportIssueButton lang={lang} />}
     <GlobalShareFab lang={lang} currentPath={currentPath} />
     <OnboardingTour lang={installLang} />
     <JourneyGuideLoader lang={installLang} currentPath={currentPath} />
