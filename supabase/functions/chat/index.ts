@@ -102,11 +102,10 @@ serve(async (req: Request) => {
   // Using x-goog-api-key header works for both formats.
   const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
 
-  let geminiRes: Response;
-  try {
+  const fetchGemini = async (): Promise<Response> => {
     const ac = new AbortController();
     const timeout = setTimeout(() => ac.abort(), 30_000);
-    geminiRes = await fetch(url, {
+    return fetch(url, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -115,17 +114,29 @@ serve(async (req: Request) => {
       body: JSON.stringify(geminiBody),
       signal: ac.signal,
     }).finally(() => clearTimeout(timeout));
-  } catch (e) {
-    return jsonErr(`Gemini fetch failed: ${e instanceof Error ? e.message : String(e)}`, 502);
+  };
+
+  let geminiRes: Response;
+  const MAX_RETRIES = 3;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      geminiRes = await fetchGemini();
+    } catch (e) {
+      return jsonErr(`Gemini fetch failed: ${e instanceof Error ? e.message : String(e)}`, 502);
+    }
+    if (geminiRes.status !== 503 || attempt === MAX_RETRIES) break;
+    // 503 = model overloaded; wait 1 second and retry
+    await new Promise<void>((r) => setTimeout(r, 1000 * attempt));
   }
 
-  if (!geminiRes.ok) {
-    const errText = await geminiRes.text().catch(() => 'unknown');
-    console.error(`[chat] Gemini error status=${geminiRes.status} body=${errText} keyPrefix=${apiKey.slice(0,6)}`);
-    if (geminiRes.status === 429) return jsonErr('RATE_LIMITED', 429);
-    if (geminiRes.status === 400) return jsonErr(`Gemini 400 (bad request / invalid key format): ${errText}`, 502);
-    if (geminiRes.status === 401 || geminiRes.status === 403) return jsonErr(`Gemini ${geminiRes.status} (invalid API key): ${errText}`, 401);
-    return jsonErr(`Gemini error ${geminiRes.status}: ${errText}`, 502);
+  if (!geminiRes!.ok) {
+    const errText = await geminiRes!.text().catch(() => 'unknown');
+    console.error(`[chat] Gemini error status=${geminiRes!.status} body=${errText} keyPrefix=${apiKey.slice(0,6)}`);
+    if (geminiRes!.status === 429) return jsonErr('RATE_LIMITED', 429);
+    if (geminiRes!.status === 503) return jsonErr('MODEL_OVERLOADED', 503);
+    if (geminiRes!.status === 400) return jsonErr(`Gemini 400 (bad request / invalid key format): ${errText}`, 502);
+    if (geminiRes!.status === 401 || geminiRes!.status === 403) return jsonErr(`Gemini ${geminiRes!.status} (invalid API key): ${errText}`, 401);
+    return jsonErr(`Gemini error ${geminiRes!.status}: ${errText}`, 502);
   }
 
   // Stream the SSE from Gemini back to the client, extracting text deltas.

@@ -114,6 +114,10 @@ async function* streamGeminiEdge(
     yield { type: 'quota_exceeded' };
     return;
   }
+  if (response.status === 503) {
+    yield { type: 'error', message: 'El modelo está sobrecargado en este momento. Intentá de nuevo en unos segundos.' };
+    return;
+  }
   if (!response.ok) {
     const text = await response.text().catch(() => `HTTP ${response.status}`);
     yield { type: 'error', message: text };
