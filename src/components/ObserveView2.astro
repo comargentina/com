@@ -13,13 +13,14 @@ import AudioSkippedWarning from "./observe/AudioSkippedWarning.astro";
 import CapabilityCaption from "./observe/CapabilityCaption.astro";
 import AiModeSelector from "./observe/AiModeSelector.astro";
 import { t } from "../i18n/utils";
-import { HABITATS, WEATHERS } from "../lib/observation-enums";
+import { HABITATS, WEATHERS, labelFor } from "../lib/observation-enums";
 
 interface Props { lang: "en" | "es"; }
 const { lang } = Astro.props;
 const isEs = lang === "es";
 const tr = t(lang);
 
+const observeTree = tr.observe as unknown;
 const observeStr = tr.observe as Record<string, string>;
 const habitats = HABITATS;
 const weathers = WEATHERS;
@@ -203,7 +204,7 @@ const weathers = WEATHERS;
           </label>
           <select id="obs2-habitat" class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
             <option value="">{isEs ? "No especificado" : "Not specified"}</option>
-            {habitats.map(h => <option value={h}>{h}</option>)}
+            {habitats.map(h => <option value={h}>{labelFor(observeTree, 'habitat_options', h)}</option>)}
           </select>
         </div>
         <!-- Weather -->
@@ -213,7 +214,7 @@ const weathers = WEATHERS;
           </label>
           <select id="obs2-weather" class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
             <option value="">{isEs ? "No especificado" : "Not specified"}</option>
-            {weathers.map(w => <option value={w}>{w}</option>)}
+            {weathers.map(w => <option value={w}>{labelFor(observeTree, 'weather_options', w)}</option>)}
           </select>
         </div>
         <!-- License -->
