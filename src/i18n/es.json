@@ -1621,6 +1621,11 @@
       "kind_follow_request": "{{actor}} solicitó seguirte",
       "kind_follow_accepted": "{{actor}} aceptó tu solicitud de seguidor",
       "kind_reaction": "{{actor}} reaccionó a tu observación",
+      "kind_comment": "{{actor}} comentó en tu observación",
+      "kind_comment_reply": "{{actor}} respondió a tu comentario",
+      "kind_mention": "{{actor}} te mencionó en un comentario",
+      "kind_identification": "{{actor}} sugirió una identificación en tu observación",
+      "kind_badge": "¡Ganaste una nueva insignia!",
       "kind_vertex_token_expiring": "Tu access token de Vertex AI expira en pocos minutos — abre Patrocinios para rotarlo"
     },
     "report": {

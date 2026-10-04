@@ -204,7 +204,7 @@ const sgReportLabel = sgTree.socialgraph.report.button;
       .map(r => nodeMarkup(r, authors, currentUserId, lang, labels, true))
       .join('');
     return `
-      <li class="comment-item ${indent}" data-comment-id="${node.id}">
+      <li id="comment-${node.id}" class="comment-item ${indent}" data-comment-id="${node.id}">
         <article class="flex gap-3">
           ${avatarHtml}
           <div class="flex-1 min-w-0">
@@ -332,6 +332,18 @@ const sgReportLabel = sgTree.socialgraph.report.button;
         .join('');
       paintBodies();
       wireRowActions();
+      if (window.location.hash) {
+        try {
+          const targetEl = document.querySelector(window.location.hash);
+          if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetEl.classList.add('ring-2', 'ring-emerald-500', 'rounded-lg', 'transition-all');
+            setTimeout(() => {
+              targetEl.classList.remove('ring-2', 'ring-emerald-500');
+            }, 3000);
+          }
+        } catch (_) {}
+      }
     }
 
     function wireRowActions() {

@@ -1621,6 +1621,11 @@
       "kind_follow_request": "{{actor}} requested to follow you",
       "kind_follow_accepted": "{{actor}} accepted your follow request",
       "kind_reaction": "{{actor}} reacted to your observation",
+      "kind_comment": "{{actor}} commented on your observation",
+      "kind_comment_reply": "{{actor}} replied to your comment",
+      "kind_mention": "{{actor}} mentioned you in a comment",
+      "kind_identification": "{{actor}} suggested an identification on your observation",
+      "kind_badge": "You earned a new badge!",
       "kind_vertex_token_expiring": "Your Vertex AI access token expires in a few minutes — open Sponsoring to rotate it"
     },
     "report": {

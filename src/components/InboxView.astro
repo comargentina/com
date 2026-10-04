@@ -43,6 +43,11 @@ const subtitleCopy = lang === 'es'
     data-label-kind-follow-request={inboxTr.kind_follow_request}
     data-label-kind-follow-accepted={inboxTr.kind_follow_accepted}
     data-label-kind-reaction={inboxTr.kind_reaction}
+    data-label-kind-comment={(inboxTr as unknown as Record<string, string>).kind_comment ?? (lang === 'es' ? '{{actor}} comentó en tu observación' : '{{actor}} commented on your observation')}
+    data-label-kind-comment-reply={(inboxTr as unknown as Record<string, string>).kind_comment_reply ?? (lang === 'es' ? '{{actor}} respondió a tu comentario' : '{{actor}} replied to your comment')}
+    data-label-kind-mention={(inboxTr as unknown as Record<string, string>).kind_mention ?? (lang === 'es' ? '{{actor}} te mencionó en un comentario' : '{{actor}} mentioned you in a comment')}
+    data-label-kind-identification={(inboxTr as unknown as Record<string, string>).kind_identification ?? (lang === 'es' ? '{{actor}} sugirió una identificación en tu observación' : '{{actor}} suggested an identification on your observation')}
+    data-label-kind-badge={(inboxTr as unknown as Record<string, string>).kind_badge ?? (lang === 'es' ? '¡Ganaste una nueva insignia!' : 'You earned a new badge!')}
     data-label-kind-vertex-token-expiring={inboxTr.kind_vertex_token_expiring}
     data-label-empty={inboxTr.empty}
     data-label-mark-read={lang === 'es' ? 'Marcar leído' : 'Mark read'}
@@ -170,14 +175,27 @@ const subtitleCopy = lang === 'es'
     return new Date(iso).toLocaleDateString(lang);
   }
 
-  function templateFor(kind: string): string {
+  function templateFor(n: NotificationRow): string {
     if (!root) return '';
+    const kind = n.kind;
+    const p = (n.payload ?? {}) as Record<string, unknown>;
     if (kind === 'follow') return root.dataset.labelKindFollow ?? '';
     if (kind === 'follow_request') return root.dataset.labelKindFollowRequest ?? '';
     if (kind === 'follow_accepted') return root.dataset.labelKindFollowAccepted ?? '';
     if (kind === 'reaction') return root.dataset.labelKindReaction ?? '';
+    if (kind === 'comment') {
+      if (p.is_reply) {
+        return root.dataset.labelKindCommentReply ?? root.dataset.labelKindComment ?? '';
+      }
+      return root.dataset.labelKindComment ?? '';
+    }
+    if (kind === 'mention') return root.dataset.labelKindMention ?? '';
+    if (kind === 'identification') return root.dataset.labelKindIdentification ?? '';
+    if (kind === 'badge') return root.dataset.labelKindBadge ?? '';
     if (kind === 'vertex_token_expiring') return root.dataset.labelKindVertexTokenExpiring ?? '';
-    return '';
+    if (typeof p.message === 'string') return p.message;
+    if (typeof p.title === 'string') return p.title;
+    return lang === 'es' ? 'Nueva notificación' : 'New notification';
   }
 
   function iconFor(kind: string): string {
@@ -234,12 +252,31 @@ const subtitleCopy = lang === 'es'
       if (handle) return `/${lang === 'es' ? 'es/perfil' : 'en/profile'}/u/?username=${encodeURIComponent(handle)}`;
     }
     if (n.kind === 'reaction') {
-      const obsId = typeof p.target_id === 'string' ? (p.target_id as string) : '';
+      const obsId = (typeof p.target_id === 'string' ? (p.target_id as string) : '')
+        || (typeof p.observation_id === 'string' ? (p.observation_id as string) : '');
+      if (obsId) return `/share/obs/?id=${encodeURIComponent(obsId)}`;
+    }
+    if (n.kind === 'comment' || n.kind === 'mention') {
+      const obsId = (typeof p.observation_id === 'string' ? (p.observation_id as string) : '')
+        || (typeof p.target_id === 'string' ? (p.target_id as string) : '');
+      const commentId = typeof p.comment_id === 'string' ? (p.comment_id as string) : '';
+      if (obsId) {
+        return commentId
+          ? `/share/obs/?id=${encodeURIComponent(obsId)}#comment-${encodeURIComponent(commentId)}`
+          : `/share/obs/?id=${encodeURIComponent(obsId)}`;
+      }
+    }
+    if (n.kind === 'identification') {
+      const obsId = (typeof p.observation_id === 'string' ? (p.observation_id as string) : '')
+        || (typeof p.target_id === 'string' ? (p.target_id as string) : '');
       if (obsId) return `/share/obs/?id=${encodeURIComponent(obsId)}`;
     }
     if (n.kind === 'vertex_token_expiring') {
       // Land the sponsor on their credentials page so they can rotate.
       return `/${lang === 'es' ? 'es/perfil/patrocinios' : 'en/profile/sponsoring'}/`;
+    }
+    if (n.kind === 'badge') {
+      return `/${lang === 'es' ? 'es/perfil' : 'en/profile'}/`;
     }
     return '#';
   }
@@ -262,8 +299,10 @@ const subtitleCopy = lang === 'es'
     actor: ActorInfo | null,
     thumbUrl: string | null,
   ): string {
-    const tpl = templateFor(n.kind);
-    const text = tpl ? tpl.replace('{{actor}}', `<span class="font-semibold text-zinc-900 dark:text-zinc-100">${escapeText(actorLabel(n, actor))}</span>`) : '';
+    const tpl = templateFor(n);
+    const text = tpl.includes('{{actor}}')
+      ? tpl.replace('{{actor}}', `<span class="font-semibold text-zinc-900 dark:text-zinc-100">${escapeText(actorLabel(n, actor))}</span>`)
+      : escapeText(tpl);
     const href = rowHref(n, actor);
     const when = timeAgo(n.created_at);
     const unread = !n.read_at;
@@ -276,10 +315,7 @@ const subtitleCopy = lang === 'es'
     const thumb = thumbUrl ? targetThumb(thumbUrl) : '';
 
     // Build a screen-reader-friendly label that summarises the row.
-    // Strips HTML from the templated text and appends the relative time
-    // and unread state. Without this, AT users hear only the time/avatar
-    // and have to dive into the row to learn what kind of notification it is.
-    const plainText = (tpl ? tpl.replace('{{actor}}', actorLabel(n, actor)) : '').replace(/\s+/g, ' ').trim();
+    const plainText = (tpl.includes('{{actor}}') ? tpl.replace('{{actor}}', actorLabel(n, actor)) : tpl).replace(/\s+/g, ' ').trim();
     const unreadSuffix = unread
       ? (lang === 'es' ? ' — sin leer' : ' — unread')
       : '';
@@ -295,7 +331,7 @@ const subtitleCopy = lang === 'es'
             <div class="text-sm leading-snug text-zinc-700 dark:text-zinc-300">${text}</div>
             <div class="mt-0.5 flex items-center gap-2 text-[11px] text-zinc-600 dark:text-zinc-300">
               <span class="tabular-nums">${escapeText(when)}</span>
-              ${unread ? `<span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-500" aria-label="${escapeText(lang === 'es' ? 'no leído' : 'unread')}"></span>` : ''}
+              ${unread ? `<span class="unread-dot inline-block h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-500" aria-label="${escapeText(lang === 'es' ? 'no leído' : 'unread')}"></span>` : ''}
             </div>
           </div>
           ${thumb}
@@ -371,10 +407,14 @@ const subtitleCopy = lang === 'es'
     const obsIds = new Set<string>();
     for (const r of rows) {
       const p = (r.payload ?? {}) as Record<string, unknown>;
-      if (typeof p.actor_id === 'string') actorIds.add(p.actor_id);
-      if (r.kind === 'reaction' && typeof p.target_id === 'string') {
-        obsIds.add(p.target_id);
-      }
+      const actorId = (typeof p.actor_id === 'string' ? p.actor_id : null)
+        ?? (typeof p.commenter_id === 'string' ? p.commenter_id : null)
+        ?? (typeof p.author_id === 'string' ? p.author_id : null);
+      if (actorId) actorIds.add(actorId);
+
+      const obsId = (typeof p.observation_id === 'string' ? p.observation_id : null)
+        ?? (typeof p.target_id === 'string' ? p.target_id : null);
+      if (obsId) obsIds.add(obsId);
     }
 
     const actorById = new Map<string, ActorInfo>();
@@ -405,10 +445,13 @@ const subtitleCopy = lang === 'es'
     const html = rows.map((n) => {
       if (!n.read_at) unread++;
       const p = (n.payload ?? {}) as Record<string, unknown>;
-      const actor = (typeof p.actor_id === 'string') ? (actorById.get(p.actor_id as string) ?? null) : null;
-      const target = (n.kind === 'reaction' && typeof p.target_id === 'string')
-        ? (thumbByObsId.get(p.target_id as string) ?? null)
-        : null;
+      const actorId = (typeof p.actor_id === 'string' ? p.actor_id : null)
+        ?? (typeof p.commenter_id === 'string' ? p.commenter_id : null)
+        ?? (typeof p.author_id === 'string' ? p.author_id : null);
+      const actor = actorId ? (actorById.get(actorId) ?? null) : null;
+      const obsId = (typeof p.observation_id === 'string' ? p.observation_id : null)
+        ?? (typeof p.target_id === 'string' ? p.target_id : null);
+      const target = obsId ? (thumbByObsId.get(obsId) ?? null) : null;
       return renderRow(n, actor, target);
     }).join('');
     showList(html, unread);
@@ -419,6 +462,9 @@ const subtitleCopy = lang === 'es'
       row.addEventListener('click', () => {
         const id = row.dataset.id;
         if (!id) return;
+        row.querySelector('.unread-dot')?.remove();
+        row.classList.remove('bg-white', 'dark:bg-zinc-900', 'ring-emerald-200', 'dark:ring-emerald-900/60', 'shadow-[inset_3px_0_0_0]', 'shadow-emerald-600', 'dark:shadow-emerald-500');
+        row.classList.add('bg-zinc-50/70', 'dark:bg-zinc-900/40', 'ring-zinc-200/60', 'dark:ring-zinc-800/60');
         getSupabase().from('notifications')
           .update({ read_at: new Date().toISOString() })
           .eq('id', id)
