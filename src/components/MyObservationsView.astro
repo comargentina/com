@@ -342,7 +342,7 @@ const tabs = [
     }
     const shareBtn = actionBtn;
     // Ask Rastrum deep-link — only for synced rows (those have a real Supabase id).
-    const askRastrumLabel = lang === 'es' ? 'Preguntar a Rastrum' : 'Ask Rastrum';
+    const askRastrumLabel = lang === 'es' ? 'Preguntar a la IA del COM' : 'Ask COM AI';
     const askRastrumHref = `/${lang}/chat/?attach=observation:${encodeURIComponent(r.id)}`;
     const askRastrumBtn = isSynced
       ? `<a href="${askRastrumHref}" class="shrink-0 inline-flex items-center gap-1 min-h-9 rounded-lg border border-emerald-600/60 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10" aria-label="${askRastrumLabel}" title="${askRastrumLabel}" data-ask-rastrum-btn data-obs-id="${escapeText(r.id)}"><span aria-hidden="true">💬</span></a>`

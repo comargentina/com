@@ -15,7 +15,7 @@ interface Props {
 }
 
 const { lang, kind, id, variant = 'ghost', display = 'full' } = Astro.props;
-const label = lang === 'es' ? 'Pregunta a Rastrum' : 'Ask Rastrum';
+const label = lang === 'es' ? 'Pregunta a la IA del COM' : 'Ask COM AI';
 const href = `/${lang}/chat/?attach=${encodeURIComponent(kind)}:${encodeURIComponent(id)}`;
 
 const cls = variant === 'primary'

@@ -59,7 +59,7 @@ const railColour = (role: UserRole): string => {
   }
 };
 
-const PAGE_TITLE = title ?? (lang === 'es' ? 'Consola — Rastrum' : 'Console — Rastrum');
+const PAGE_TITLE = title ?? (lang === 'es' ? 'Consola — COM' : 'Console — COM');
 
 function trAt(path: string): string {
   const parts = path.split('.');
@@ -153,7 +153,7 @@ const knownPills: Set<UserRole> | null = allRoles ?? null;
           <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <a href={exitHref} class="font-bold tracking-tight text-emerald-700 dark:text-emerald-400">
-          Rastrum
+          COM
         </a>
         <span class="ml-1 hidden sm:inline-block text-xs text-zinc-600 dark:text-zinc-300 uppercase tracking-wide">
           {tr.console.nav}
@@ -262,7 +262,7 @@ const knownPills: Set<UserRole> | null = allRoles ?? null;
       >
         <div class="flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-800">
           <span class="font-bold tracking-tight text-emerald-700 dark:text-emerald-400">
-            Rastrum
+            COM
           </span>
           <button
             type="button"
