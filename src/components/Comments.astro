@@ -20,6 +20,8 @@ interface Props {
 
 const { lang, observationId } = Astro.props;
 const tr = t(lang);
+const trEn = t('en');
+const trEs = t('es');
 const signInPath = getLocalizedPath(lang, routes.signIn[lang] + '/');
 const sgTree = tr as unknown as {
   socialgraph: {
@@ -59,7 +61,8 @@ const sgReportLabel = sgTree.socialgraph.report.button;
   data-label-block-commenter-aria={sgCards.block_commenter_aria}
   data-label-thread-locked={tr.social.thread_locked_banner}
 >
-  <h2 class="text-lg md:text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+  <h2 class="text-lg md:text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4"
+      data-i18n data-en={trEn.social.comments_title} data-es={trEs.social.comments_title}>
     {tr.social.comments_title}
   </h2>
 
@@ -69,38 +72,47 @@ const sgReportLabel = sgTree.socialgraph.report.button;
     <span>{tr.social.thread_locked_banner}</span>
   </div>
 
-  <div class="comments-loading text-sm text-zinc-600 dark:text-zinc-400 py-3">
+  <div class="comments-loading text-sm text-zinc-600 dark:text-zinc-400 py-3"
+       data-i18n data-en={trEn.social.loading} data-es={trEs.social.loading}>
     {tr.social.loading}
   </div>
 
   <ul class="comments-list space-y-4 hidden"></ul>
 
-  <p class="comments-empty hidden rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 p-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
+  <p class="comments-empty hidden rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 p-6 text-center text-sm text-zinc-600 dark:text-zinc-400"
+     data-i18n data-en={trEn.social.empty_comments} data-es={trEs.social.empty_comments}>
     {tr.social.empty_comments}
   </p>
 
   <button
     type="button"
     class="comments-load-more hidden mt-4 inline-flex items-center justify-center min-h-[44px] rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+    data-i18n data-en={trEn.social.load_more} data-es={trEs.social.load_more}
   >
     {tr.social.load_more}
   </button>
 
   <!-- Composer (auth) -->
   <form class="comments-composer hidden mt-6 space-y-2">
-    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+           data-i18n data-en={trEn.social.compose_label} data-es={trEs.social.compose_label}>
       {tr.social.compose_label}
     </label>
     <textarea
       class="composer-input w-full min-h-[96px] rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 text-base text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
       placeholder={tr.social.compose_placeholder}
+      data-i18n-placeholder
+      data-en-placeholder={trEn.social.compose_placeholder}
+      data-es-placeholder={trEs.social.compose_placeholder}
       maxlength="2000"
     ></textarea>
     <div class="flex items-center justify-between flex-wrap gap-2">
-      <p class="text-xs text-zinc-600 dark:text-zinc-300">{tr.social.markdown_hint}</p>
+      <p class="text-xs text-zinc-600 dark:text-zinc-300"
+         data-i18n data-en={trEn.social.markdown_hint} data-es={trEs.social.markdown_hint}>{tr.social.markdown_hint}</p>
       <button
         type="submit"
         class="composer-submit inline-flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-700 hover:bg-emerald-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+        data-i18n data-en={trEn.social.submit} data-es={trEs.social.submit}
       >
         {tr.social.submit}
       </button>
@@ -110,10 +122,12 @@ const sgReportLabel = sgTree.socialgraph.report.button;
 
   <!-- Sign-in CTA (anon) -->
   <div class="comments-signin hidden mt-6 rounded-lg border border-zinc-300 dark:border-zinc-700 p-4 text-sm text-zinc-700 dark:text-zinc-300 flex flex-wrap items-center justify-between gap-3">
-    <span>{tr.social.signin_to_comment}</span>
+    <span data-i18n data-en={trEn.social.signin_to_comment} data-es={trEs.social.signin_to_comment}>{tr.social.signin_to_comment}</span>
     <a
       href={signInPath}
+      id="ci-signin-link"
       class="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-600/60 px-3 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+      data-i18n data-en={trEn.auth.sign_in} data-es={trEs.auth.sign_in}
     >
       {tr.auth.sign_in}
     </a>

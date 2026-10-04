@@ -58,8 +58,10 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
           <img src="/com-logo.jpg" alt="COM Logo" class="w-8 h-8 rounded-full object-cover" width="32" height="32" loading="lazy" />
           COM Argentina
         </a>
-        <p class="text-sm text-zinc-600 dark:text-zinc-400">{tr.footer.tagline}</p>
-        <p class="text-xs text-zinc-400 dark:text-zinc-300 max-w-xs">{tr.footer.description_short}</p>
+        <p class="text-sm text-zinc-600 dark:text-zinc-400"
+           data-i18n data-en={t('en').footer.tagline} data-es={t('es').footer.tagline}>{tr.footer.tagline}</p>
+        <p class="text-xs text-zinc-400 dark:text-zinc-300 max-w-xs"
+           data-i18n data-en={t('en').footer.description_short} data-es={t('es').footer.description_short}>{tr.footer.description_short}</p>
         <div class="flex items-center gap-4 pt-1 text-xs">
           <a href="#" class={linkClass}>{ftLinks.mastodon}</a>
           <a href="#" class={linkClass}>{ftLinks.rss}</a>
@@ -125,7 +127,8 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
           <img src="/com-logo.jpg" alt="" class="w-5 h-5 rounded-full object-cover" width="20" height="20" loading="lazy" />
           COM Argentina
         </a>
-        <p class="text-xs text-zinc-400 dark:text-zinc-300">{tr.footer.tagline}</p>
+        <p class="text-xs text-zinc-400 dark:text-zinc-300"
+           data-i18n data-en={t('en').footer.tagline} data-es={t('es').footer.tagline}>{tr.footer.tagline}</p>
         <div class="flex items-center gap-3 text-xs">
           <a href="#" class={mLinkClass}>{ftLinks.mastodon}</a>
           <a href="#" class={mLinkClass}>{ftLinks.rss}</a>
@@ -213,9 +216,36 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
   });
 
   document.querySelectorAll('[data-lang-switch]').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', (e) => {
       const target = (el as HTMLElement).dataset.langSwitch;
-      if (target) localStorage.setItem('rastrum.lang', target);
+      if (target) {
+        localStorage.setItem('rastrum.lang', target);
+        // On locale-neutral paths (no /en/ or /es/ prefix) the href points to
+        // the same URL, so navigation won't reload the page. Trigger applyLang
+        // directly so data-i18n elements switch immediately.
+        const path = window.location.pathname;
+        const isLocaleless = !path.startsWith('/en/') && !path.startsWith('/es/');
+        if (isLocaleless) {
+          e.preventDefault();
+          document.documentElement.lang = target;
+          document.querySelectorAll('[data-i18n]').forEach(node => {
+            const text = node.getAttribute('data-' + target);
+            if (text) node.textContent = text;
+          });
+          document.querySelectorAll('[data-i18n-placeholder]').forEach(node => {
+            const ph = node.getAttribute('data-' + target + '-placeholder');
+            if (ph) (node as HTMLInputElement).placeholder = ph;
+          });
+          // Update active state on lang buttons
+          document.querySelectorAll('[data-lang-switch]').forEach(btn => {
+            const btnTarget = (btn as HTMLElement).dataset.langSwitch;
+            const isActive = btnTarget === target;
+            btn.classList.toggle('bg-zinc-100', isActive);
+            btn.classList.toggle('dark:bg-zinc-800', isActive);
+            btn.classList.toggle('font-medium', isActive);
+          });
+        }
+      }
     });
   });
 </script>

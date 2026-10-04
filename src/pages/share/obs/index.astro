@@ -43,6 +43,11 @@ const lang: 'en' | 'es' = 'en';
           var text = el.getAttribute('data-' + lang);
           if (text) el.textContent = text;
         });
+        // Swap placeholder attributes for textarea/input
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+          var ph = el.getAttribute('data-' + lang + '-placeholder');
+          if (ph) el.setAttribute('placeholder', ph);
+        });
         // Fix sign-in link lang prefix
         var signInLink = document.getElementById('ci-signin-link');
         if (signInLink) signInLink.setAttribute('href', '/' + lang + '/sign-in/');
