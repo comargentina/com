@@ -12,23 +12,16 @@ const isEs = lang === 'es';
       : 'This is a plain-language description of what we do with your data, not a legally reviewed document. Consult a lawyer before treating this as a binding agreement.'}
   </blockquote>
 
-  <p class="text-sm text-zinc-600 dark:text-zinc-300">{isEs ? 'Última actualización: 2026-04-25.' : 'Last updated: 2026-04-25.'}</p>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300">{isEs ? 'Última actualización: 03/10/2026.' : 'Last updated: 03/10/2026.'}</p>
 
   <p>
     {isEs
-      ? 'Rastrum se construye sobre la idea de que observar la biodiversidad no debería implicar ceder el control de tus datos. Esta página describe — sin lenguaje legal — qué recopilamos, a dónde va, qué nunca vemos y qué puedes hacer al respecto.'
-      : 'Rastrum is built around the idea that observing biodiversity should not require giving up control of your data. This page describes — without legalese — what we collect, where it goes, what we never see, and what you can do about any of it.'}
-  </p>
-  <p>
-    {isEs ? 'Si algo aquí te sorprende, ' : 'If something here surprises you, '}
-    <a href="https://github.com/ArtemioPadilla/rastrum/issues" target="_blank" rel="noopener">
-      {isEs ? 'abre un issue' : 'open an issue'}
-    </a>
-    {isEs ? ' y lo arreglamos.' : ' and we\'ll fix it.'}
+      ? 'COM se construye sobre la idea de que observar la biodiversidad no debería implicar ceder el control de tus datos. Esta página describe — sin lenguaje legal — qué recopilamos, a dónde va, qué nunca vemos y qué puedes hacer al respecto.'
+      : 'COM is built around the idea that observing biodiversity should not require giving up control of your data. This page describes — without legalese — what we collect, where it goes, what we never see, and what you can do about any of it.'}
   </p>
 
   <h2>{isEs ? 'Qué recopilamos' : 'What we collect'}</h2>
-  <p>{isEs ? 'Cuando usas Rastrum, podemos recibir o generar los siguientes datos:' : 'When you use Rastrum, we may receive or generate the following data:'}</p>
+  <p>{isEs ? 'Cuando usas COM, podemos recibir o generar los siguientes datos:' : 'When you use COM, we may receive or generate the following data:'}</p>
   <ul>
     <li><strong>{isEs ? 'Correo electrónico' : 'Email address'}</strong>{isEs ? ' — solo si inicias sesión. El modo invitado no requiere cuenta.' : ' — only if you sign in. Guest mode requires no account.'}</li>
     <li><strong>{isEs ? 'Fotos y clips de audio cortos' : 'Photos and short audio clips'}</strong>{isEs ? ' que adjuntas a tus observaciones.' : ' you attach to observations.'}</li>
@@ -40,8 +33,8 @@ const isEs = lang === 'es';
   </ul>
   <p>
     {isEs
-      ? 'No corremos analíticas de terceros, redes publicitarias, librerías de fingerprinting ni herramientas de session replay. No hay píxel de tracking de Rastrum.'
-      : 'We do not run third-party analytics, ad networks, fingerprinting libraries, or session-replay tools. There is no Rastrum tracking pixel.'}
+      ? 'No corremos analíticas de terceros, redes publicitarias, librerías de fingerprinting ni herramientas de session replay. No hay píxel de tracking de COM.'
+      : 'We do not run third-party analytics, ad networks, fingerprinting libraries, or session-replay tools. There is no COM tracking pixel.'}
   </p>
 
   <h2>{isEs ? 'A dónde van' : 'Where it goes'}</h2>
@@ -66,13 +59,13 @@ const isEs = lang === 'es';
       </tr>
       <tr>
         <td>{isEs ? 'Fotos y clips de audio' : 'Photos and audio blobs'}</td>
-        <td>Cloudflare R2 (<code>media.rastrum.org</code>)</td>
+        <td>Cloudflare R2</td>
         <td>{isEs ? 'Almacenamiento durable y barato sin egress fees.' : 'Cheap, durable media storage with no egress fees.'}</td>
       </tr>
       <tr>
         <td>{isEs ? 'App shell del service worker' : 'Service-worker app shell'}</td>
         <td>{isEs ? 'Solo en tu dispositivo' : 'Your device only'}</td>
-        <td>{isEs ? 'Para que Rastrum funcione offline.' : 'So Rastrum works offline.'}</td>
+        <td>{isEs ? 'Para que COM funcione offline.' : 'So COM works offline.'}</td>
       </tr>
       <tr>
         <td>{isEs ? 'Outbox (observaciones pendientes)' : 'Outbox (pending observations)'}</td>
@@ -91,8 +84,8 @@ const isEs = lang === 'es';
     <li>{isEs
       ? 'Una foto puede enviarse a la API '
       : 'A photo may be sent to the '}<strong>{isEs ? 'Anthropic Claude' : 'Anthropic Claude API'}</strong>{isEs
-      ? ' — solo cuando trajiste tu propia clave (BYO) en Perfil → Editar. La clave se guarda en localStorage del navegador y se reenvía por llamada. Los servidores de Rastrum nunca la guardan ni la registran.'
-      : ' — only when you have brought your own (BYO) key in Profile → Edit. The key is stored in your browser\'s localStorage and forwarded per call. Rastrum servers never store it or log it.'}</li>
+      ? ' — solo cuando trajiste tu propia clave (BYO) en Perfil → Editar. La clave se guarda en localStorage del navegador y se reenvía por llamada. Los servidores de COM nunca la guardan ni la registran.'
+      : ' — only when you have brought your own (BYO) key in Profile → Edit. The key is stored in your browser\'s localStorage and forwarded per call. COM servers never store it or log it.'}</li>
     <li>{isEs
       ? 'El audio se procesa siempre '
       : 'Audio is only ever processed '}<strong>{isEs ? 'en tu dispositivo' : 'on your device'}</strong>{isEs
@@ -114,8 +107,8 @@ const isEs = lang === 'es';
   <h2>{isEs ? 'Especies sensibles y oscurecimiento de coordenadas' : 'Sensitive species and coordinate obscuration'}</h2>
   <p>
     {isEs
-      ? 'Rastrum aplica oscurecimiento de coordenadas para especies protegidas bajo NOM-059-SEMARNAT-2010 y los apéndices de CITES. Si registras una especie sensible:'
-      : 'Rastrum enforces coordinate obscuration for species protected under NOM-059-SEMARNAT-2010 and CITES appendices. If you log a sensitive species:'}
+      ? 'COM aplica oscurecimiento de coordenadas para especies protegidas o amenazadas. Si registras una especie sensible:'
+      : 'COM enforces coordinate obscuration for protected species. If you log a sensitive species:'}
   </p>
   <ul>
     <li>{isEs ? 'Las vistas de lectura pública ven la ubicación recortada a aproximadamente un cuadrado de 10×10 km (' : 'Public-readable views see the location coarsened to roughly a 10×10 km square ('}<code>obscure_level = 'public'</code>).</li>
@@ -123,15 +116,6 @@ const isEs = lang === 'es';
     <li>{isEs ? 'El oscurecimiento se aplica vía un trigger de base de datos que setea una columna ' : 'The obscuration is enforced by a database trigger that sets a separate '}<code>location_obscured</code>{isEs ? ' separada al insert/update, así la vista pública nunca tiene siquiera el valor crudo.' : ' column at insert/update time, so the public view never even has the raw value.'}</li>
   </ul>
   <p>{isEs ? 'También puedes optar por oscurecer coordenadas voluntariamente para cualquier observación, sensible o no — el mismo mecanismo aplica.' : 'You can also opt to obscure coordinates voluntarily for any observation, sensitive or not — the same mechanism applies.'}</p>
-
-  <h2>{isEs ? 'Datos indígenas y CARE / FPIC' : 'Indigenous data and CARE / FPIC'}</h2>
-  <p>{isEs ? 'Para observaciones realizadas en territorio indígena o que documentan especies culturalmente significativas, Rastrum se compromete a:' : 'For observations made on Indigenous territory, or that document culturally-significant species, Rastrum is committed to:'}</p>
-  <ul>
-    <li><strong>{isEs ? 'Principios CARE' : 'CARE principles'}</strong>{isEs ? ' — Beneficio Colectivo, Autoridad para controlar, Responsabilidad, Ética. Complementan los principios FAIR para datos abiertos.' : ' — Collective benefit, Authority to control, Responsibility, Ethics. These complement the FAIR principles for open data.'}</li>
-    <li><strong>{isEs ? 'Consentimiento Libre, Previo e Informado (FPIC)' : 'Free, Prior, and Informed Consent (FPIC)'}</strong>{isEs ? ' — las observaciones vinculadas a territorio indígena requieren consentimiento comunitario antes de hacerse públicas o exportarse a agregadores externos (GBIF, iNaturalist).' : ' — observations linked to Indigenous territory require community consent before they are made public or exported to third-party aggregators (GBIF, iNaturalist).'}</li>
-    <li><strong>{isEs ? 'Avisos BC/TK de Local Contexts' : 'Local Contexts BC/TK Notices'}</strong>{isEs ? ' — cuando una comunidad ha etiquetado un registro con un aviso Biocultural o de Conocimiento Tradicional, el aviso se muestra junto a la observación y se propaga en la exportación Darwin Core.' : ' — when a community has labeled a record with a Biocultural or Traditional Knowledge notice, the notice is shown alongside the observation and propagated through the Darwin Core export.'}</li>
-  </ul>
-  <p>{isEs ? 'Este trabajo está en etapas iniciales. Esperamos que evolucione conforme se forme el consejo asesor CARI y comunidades aliadas definan lo que necesitan.' : 'This work is in early stages. Expect it to evolve as the CARI advisory council forms and partner communities define what they need.'}</p>
 
   <h2>{isEs ? 'Derecho a eliminar' : 'Right to delete'}</h2>
   <p>{isEs ? 'Puedes eliminar tu cuenta en cualquier momento:' : 'You can delete your account at any time:'}</p>
@@ -147,19 +131,9 @@ const isEs = lang === 'es';
     <li>{isEs ? 'Tus fotos en R2 se ponen en cola para eliminarse en 30 días. Los clips de audio se eliminan inmediatamente.' : 'Your photos in R2 are queued for deletion within 30 days. Audio clips are deleted immediately.'}</li>
     <li>{isEs ? 'Las identificaciones y comentarios que hiciste se conservan pero se anonimizan.' : 'Identifications and comments you made are kept but anonymised.'}</li>
   </ul>
-  <p>
-    {isEs ? 'Si quieres una ' : 'If you want a '}<strong>{isEs ? 'exportación completa antes de eliminar' : 'full export before deleting'}</strong>{isEs ? ', usa ' : ', use '}<code>/{lang === 'es' ? 'perfil/exportar' : 'profile/export'}/</code>{isEs ? ' primero — eso te da un CSV Darwin Core más un ZIP de tus medios.' : ' first — that hands you a Darwin Core CSV plus a ZIP of your media.'}
-  </p>
-  <p>
-    {isEs
-      ? 'Si necesitas que observaciones que ya publicaste se eliminen completamente (no solo anonimizadas), '
-      : 'If you need observations that you have already published completely removed (not just anonymised), '}
-    <a href="https://github.com/ArtemioPadilla/rastrum/issues" target="_blank" rel="noopener">{isEs ? 'abre un issue' : 'open an issue'}</a>
-    {isEs ? ' y trabajamos contigo el alcance correcto.' : ' and we will work with you on the right scope.'}
-  </p>
 
   <h2>{isEs ? 'Cookies y almacenamiento local' : 'Cookies and local storage'}</h2>
-  <p>{isEs ? 'Rastrum usa ' : 'Rastrum uses '}<code>localStorage</code>{isEs ? ' (no cookies) para:' : ' (not cookies) for:'}</p>
+  <p>{isEs ? 'COM usa ' : 'COM uses '}<code>localStorage</code>{isEs ? ' (no cookies) para:' : ' (not cookies) for:'}</p>
   <ul>
     <li>{isEs ? 'Tu token de sesión de auth (manejado por Supabase).' : 'Your authentication session token (managed by Supabase).'}</li>
     <li>{isEs ? 'Tus claves API propias (BYO) para PlantNet y Anthropic, si las configuras. Guardadas bajo la clave ' : 'Your bring-your-own (BYO) API keys for PlantNet and Anthropic, if you set them. Stored under the '}<code>rastrum.byoKeys</code>{isEs ? '. Solo se borran al cerrar sesión si también las limpias vía la UI; ' : ' key. Cleared on sign-out only if you also clear them via the UI; '}<code>localStorage</code>{isEs ? ' sobrevive al sign-out por defecto.' : ' survives sign-out by default.'}</li>
@@ -170,15 +144,9 @@ const isEs = lang === 'es';
 
   <h2>{isEs ? 'Niños' : 'Children'}</h2>
   <p>
-    {isEs ? 'Rastrum no está dirigido a usuarios menores de ' : 'Rastrum is not directed at users under '}<strong>{isEs ? '13 años' : '13 years of age'}</strong>
+    {isEs ? 'COM no está dirigido a usuarios menores de ' : 'COM is not directed at users under '}<strong>{isEs ? '13 años' : '13 years of age'}</strong>
     {isEs ? '. Si te enteras de que un menor de 13 ha creado una cuenta, contáctanos para eliminarla. Algunas jurisdicciones tienen un umbral más alto (16 en gran parte de la UE); los tutores deben aplicar la regla local.' : '. If you are aware that a child under 13 has created an account, please contact us so we can remove it. Some jurisdictions set a higher threshold (16 in much of the EU); guardians should apply the local rule.'}
   </p>
 
-  <h2>{isEs ? 'Contacto' : 'Contact'}</h2>
-  <p>{isEs ? 'Para reportar un problema de privacidad, pedir una exportación, solicitar una eliminación o reportar una sospecha de filtración:' : 'To raise a privacy issue, ask for an export, request a deletion, or report a suspected leak:'}</p>
-  <ul>
-    <li>{isEs ? 'Abre un issue en ' : 'Open an issue at '}<a href="https://github.com/ArtemioPadilla/rastrum/issues" target="_blank" rel="noopener">github.com/ArtemioPadilla/rastrum/issues</a>{isEs ? ' — issues públicos para preguntas generales, advisories de seguridad para temas sensibles (usa el enlace "Report a vulnerability" en la pestaña Security del repo).' : ' — public issues for general questions, security advisories for sensitive matters (use the "Report a vulnerability" link in that repo\'s Security tab).'}</li>
-    <li>{isEs ? 'Para preguntas urgentes de privacidad, menciona ' : 'For urgent privacy questions, mention '}<code>@ArtemioPadilla</code>{isEs ? ' directamente en un issue.' : ' directly in an issue.'}</li>
-  </ul>
-  <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-8">{isEs ? 'Última actualización: 2026-04-25.' : 'Last updated: 2026-04-25.'}</p>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-8">{isEs ? 'Última actualización: 03/10/2026.' : 'Last updated: 03/10/2026.'}</p>
 </article>

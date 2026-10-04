@@ -29,11 +29,11 @@ const copiedLabel = isEs ? 'Copiado' : 'Copied';
 
 <article class="prose prose-zinc dark:prose-invert max-w-none">
 
-  <h2>{isEs ? '¿Qué es el servidor MCP de Rastrum?' : 'What is the Rastrum MCP server?'}</h2>
+  <h2>{isEs ? '¿Qué es el servidor MCP de COM?' : 'What is the COM MCP server?'}</h2>
   <p>
     {isEs
       ? 'El servidor MCP (Model Context Protocol) permite que agentes de IA — Claude Desktop, Cursor, OpenClaw, Copilot y cualquier cliente compatible — accedan a tus datos de biodiversidad directamente, sin copiar y pegar.'
-      : 'The Rastrum MCP server lets AI agents — Claude Desktop, Cursor, OpenClaw, Copilot, and any compatible client — access your biodiversity data directly, without copy-pasting.'}
+      : 'The COM MCP server lets AI agents — Claude Desktop, Cursor, OpenClaw, Copilot, and any compatible client — access your biodiversity data directly, without copy-pasting.'}
   </p>
 
   <h2>{isEs ? 'URL del servidor' : 'Server URL'}</h2>
@@ -87,7 +87,7 @@ const copiedLabel = isEs ? 'Copiado' : 'Copied';
   <h3>OpenClaw / Claude Desktop</h3>
   <pre><code>{`{
   "mcpServers": {
-    "rastrum": {
+    "com": {
       "type": "http",
       "url": "${MCP_URL}",
       "headers": { "Authorization": "Bearer rst_..." }
@@ -98,14 +98,14 @@ const copiedLabel = isEs ? 'Copiado' : 'Copied';
   <h3>Cursor</h3>
   <p>{isEs ? 'En' : 'In'} <code>~/.cursor/mcp.json</code>:</p>
   <pre><code>{`{
-  "rastrum": {
+  "com": {
     "url": "${MCP_URL}",
     "headers": { "Authorization": "Bearer rst_..." }
   }
 }`}</code></pre>
 
   <h3>Claude Code (CLI)</h3>
-  <pre><code>{`claude mcp add rastrum --transport http "${MCP_URL}" \\
+  <pre><code>{`claude mcp add com --transport http "${MCP_URL}" \\
   --header "Authorization: Bearer rst_..."`}</code></pre>
 
   <h2>{isEs ? 'Scopes y permisos' : 'Scopes & permissions'}</h2>
