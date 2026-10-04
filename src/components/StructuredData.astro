@@ -7,7 +7,7 @@ interface BreadcrumbProps { type: 'breadcrumb'; items: BreadcrumbItem[] }
 type Props = OrganizationProps | WebSiteProps | BreadcrumbProps;
 const props = Astro.props;
 
-const SITE = 'https://rastrum.org';
+const SITE = 'https://com.ar';
 
 let json: Record<string, unknown> = {};
 
@@ -15,11 +15,10 @@ if (props.type === 'organization') {
   json = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Rastrum',
+    name: 'COM Argentina',
     url: SITE,
     logo: `${SITE}/com-logo-512.png`,
-    sameAs: ['https://github.com/ArtemioPadilla/rastrum'],
-    description: 'Open-source biodiversity observation platform for Latin America. Multi-modal AI species identification, offline-first, indigenous-language ready.',
+    description: 'Plataforma abierta de observación de biodiversidad en Argentina. Club de Observadores de Mariposas.',
   };
 } else if (props.type === 'website') {
   const localeRoot = `${SITE}/${props.lang}/`;
@@ -27,15 +26,15 @@ if (props.type === 'organization') {
   json = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Rastrum',
+    name: 'COM Argentina',
     url: localeRoot,
     inLanguage: isEn ? 'en' : 'es',
     description: isEn
-      ? 'Open-source biodiversity observation platform built for Latin America. Multi-modal AI species ID, offline-first, indigenous-language ready, GBIF-aligned.'
-      : 'Plataforma open-source de observación de biodiversidad construida para América Latina. ID multi-modal con IA, offline-first, lenguas indígenas, alineada con GBIF.',
+      ? 'Open community to observe, learn about, value, and protect Argentine biodiversity. Butterfly Observers Club.'
+      : 'Comunidad abierta para observar, conocer, valorar y proteger la biodiversidad de Argentina. Club de Observadores de Mariposas.',
     publisher: {
       '@type': 'Organization',
-      name: 'Rastrum',
+      name: 'COM Argentina',
       url: SITE,
     },
   };
