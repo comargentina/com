@@ -366,7 +366,7 @@ const isEs = lang === 'es';
 const tr = t(lang);
 
 let pipelineState: PipelineState | null = null;
-let location: { lat: number; lng: number; accuracyM: number; altitudeM: number | null } | null = null;
+let location: { lat: number; lng: number; accuracyM: number; altitudeM: number | null; capturedFrom?: 'gps' | 'exif' | 'manual' } | null = null;
 let bestResult: { scientific_name: string; common_name_en: string | null; confidence: number; source: string } | null = null;
 let identifyErrorReason: string | null = null;
 let cardAttempts: import('../lib/identify-cascade-client').IdentifyAttempt[] = [];
@@ -1108,10 +1108,11 @@ function startGPS() {
         lng: pos.coords.longitude,
         accuracyM: pos.coords.accuracy,
         altitudeM: pos.coords.altitude,
+        capturedFrom: 'gps',
       };
       if (gpsStatus) gpsStatus.textContent = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)} (±${Math.round(location.accuracyM)}m)`;
       // Notify map picker
-      window.dispatchEvent(new CustomEvent('rastrum:mappicker-set', {
+      window.dispatchEvent(new CustomEvent('rastrum:mappicker-set-initial', {
         detail: { id: 'obs2-map', coords: { lat: location.lat, lng: location.lng } },
       }));
       // Notify contextual chip strip (#723) — only on the first GPS fix per visit.
@@ -1133,6 +1134,48 @@ function startGPS() {
     { enableHighAccuracy: true, timeout: 20000 },
   );
 }
+
+// Listen for MapPicker confirmation ('Usar esta ubicación')
+window.addEventListener('rastrum:mappicker-save', (ev) => {
+  const e = ev as CustomEvent<{ id: string; coords: { lat: number; lng: number } }>;
+  if (e.detail.id !== 'obs2-map') return;
+  location = {
+    lat: e.detail.coords.lat,
+    lng: e.detail.coords.lng,
+    accuracyM: 50,
+    altitudeM: null,
+    capturedFrom: 'manual',
+  };
+  if (gpsStatus) {
+    gpsStatus.textContent = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)} (${isEs ? 'Mapa' : 'Map'})`;
+  }
+  // Sync back to modal data-attrs
+  window.dispatchEvent(new CustomEvent('rastrum:mappicker-set-initial', {
+    detail: { id: 'obs2-map', coords: { lat: location.lat, lng: location.lng } },
+  }));
+  // Notify contextual chip strip (#723)
+  window.dispatchEvent(new CustomEvent('rastrum:observe-location-ready', {
+    detail: { lat: location.lat, lng: location.lng },
+  }));
+  // Update location node
+  if (pipelineState) {
+    const locNode = pipelineState.nodes.find(n => n.kind === 'location');
+    if (locNode) setNodeState(pipelineState, locNode.id, 'done');
+  }
+});
+
+// Sync initial coords when the user clicks 'Elegir en el mapa'
+const obs2MapModal = document.querySelector<HTMLElement>('[data-mappicker-modal="obs2-map"]');
+document.addEventListener('click', (ev) => {
+  const target = ev.target as Element | null;
+  if (!target) return;
+  if (target.closest('[data-mappicker-open="obs2-map"]')) {
+    if (obs2MapModal && location) {
+      obs2MapModal.dataset.mappickerInitialLat = String(location.lat);
+      obs2MapModal.dataset.mappickerInitialLng = String(location.lng);
+    }
+  }
+}, { capture: true });
 
 // ── Show post form ─────────────────────────────────────────────────────────
 function showPostForm() {
@@ -1250,7 +1293,13 @@ postForm?.addEventListener('submit', async (e) => {
     const obs = await saveObservationToOutbox({
       observerRef,
       media: mediaInputs,
-      location: location ?? { lat: 0, lng: 0, accuracyM: 0, altitudeM: null, capturedFrom: 'gps' },
+      location: location ? {
+        lat: location.lat,
+        lng: location.lng,
+        accuracyM: location.accuracyM,
+        altitudeM: location.altitudeM,
+        capturedFrom: location.capturedFrom ?? 'manual',
+      } : { lat: 0, lng: 0, accuracyM: 0, altitudeM: null, capturedFrom: 'manual' },
       identification: identifiedSpecies ? {
         scientificName: identifiedSpecies,
         confidence: observerOwned ? 0 : (bestResult?.confidence ?? 0),
