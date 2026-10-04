@@ -581,19 +581,6 @@ function showModeToast(msg: string): void {
   } catch { /* selector stays hidden */ }
 })();
 
-// ── First-time onboarding toast (#274) ────────────────────────────────────
-const ONBOARDING_KEY = 'rastrum.obs2.onboarding_shown';
-if (!localStorage.getItem(ONBOARDING_KEY)) {
-  localStorage.setItem(ONBOARDING_KEY, '1');
-  const toast = document.createElement('div');
-  toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-5 py-3 text-sm shadow-lg max-w-[340px] text-center pointer-events-none';
-  toast.textContent = isEs
-    ? 'Rastrum identifica especies automáticamente. Configura tus modelos de IA en Perfil → Ajustes IA para mejores resultados.'
-    : 'Rastrum identifies species automatically. Set up your AI models in Profile → AI Settings for best results.';
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 5000);
-}
-
 // ── Capability caption (#274 → #942 PR5 redo) ─────────────────────────────
 // Single positive line: lists only providers that ARE ready, plus a
 // "configure more" link when the user is still missing some. The prior
