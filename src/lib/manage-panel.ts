@@ -17,6 +17,7 @@ import { t } from '../i18n/utils';
 import { openConfirmDialog } from './confirm-dialog';
 import { createDeleteConfirmController } from './delete-confirm';
 import { correctIdentificationName } from './taxonomy-synonyms';
+import { parseLocationToGeoJSON } from './geo';
 
 type Ident = { scientific_name?: string; is_primary?: boolean } | undefined;
 
@@ -101,6 +102,11 @@ export async function wireManagePanelDetails(
   panel.classList.remove('hidden');
 
   const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
+  panel.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
+    const text = el.getAttribute(`data-${lang}`);
+    if (text) el.textContent = text;
+  });
+
   const copy: SaveCopy = lang === 'es'
     ? { saving: 'Guardando...' }
     : { saving: 'Saving...' };
@@ -725,10 +731,9 @@ export async function wireManagePanelLocation(
     : { saveFailed: 'Failed to save location.',         invalidCoords: 'Invalid coordinates.' };
 
   // Pre-populate both pickers (view + edit modal) with the current coords
-  // pulled off the loaded observation. The location is a GeoJSON Point;
-  // PostgREST returns it as { coordinates: [lng, lat] }.
-  const loc = obs.location as { coordinates?: [number, number] } | null | undefined;
-  const coords = loc?.coordinates;
+  // pulled off the loaded observation. The location is a PostgREST EWKB hex or GeoJSON Point.
+  const parsed = parseLocationToGeoJSON(obs.location);
+  const coords = parsed?.coordinates;
   if (Array.isArray(coords) && coords.length >= 2) {
     const lng = coords[0];
     const lat = coords[1];

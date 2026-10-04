@@ -56,6 +56,7 @@ type ObsDetailTree = {
   manage_establishment_label: string;
   add_photo: string;
   delete_photo: string;
+  drop_to_add?: string;
   gallery: { no_photos: string };
   location: {
     current_heading: string;
@@ -72,6 +73,8 @@ type ObserveTree = {
   establishment_means_options: Record<string, string>;
 };
 
+const trEn    = t('en') as { obs_detail: ObsDetailTree; observe: ObserveTree };
+const trEs    = t('es') as { obs_detail: ObsDetailTree; observe: ObserveTree };
 const tr      = t(lang) as { obs_detail: ObsDetailTree; observe: ObserveTree };
 const od      = tr.obs_detail;
 const v       = od.view;
@@ -84,10 +87,20 @@ const observe = tr.observe;
   data-show-when="owner"
   class="hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-4 space-y-3"
 >
-  <h2 class="text-sm font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+  <h2
+    data-i18n
+    data-en={trEn.obs_detail.view.manage_heading}
+    data-es={trEs.obs_detail.view.manage_heading}
+    class="text-sm font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider"
+  >
     {v.manage_heading}
   </h2>
-  <p class="text-xs text-zinc-600 dark:text-zinc-400">{v.manage_private}</p>
+  <p
+    data-i18n
+    data-en={trEn.obs_detail.view.manage_private}
+    data-es={trEs.obs_detail.view.manage_private}
+    class="text-xs text-zinc-600 dark:text-zinc-400"
+  >{v.manage_private}</p>
 
   <div role="tablist" aria-label={v.manage_heading} class="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
     <button
@@ -98,6 +111,9 @@ const observe = tr.observe;
       aria-controls="m-panel-details"
       tabindex="0"
       data-tab-button="details"
+      data-i18n
+      data-en={trEn.obs_detail.tabs.details}
+      data-es={trEs.obs_detail.tabs.details}
       class="px-3 py-1.5 text-sm font-medium border-b-2 border-emerald-700 text-emerald-700 dark:text-emerald-400 -mb-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-t"
     >{od.tabs.details}</button>
     <button
@@ -108,6 +124,9 @@ const observe = tr.observe;
       aria-controls="m-panel-location"
       tabindex="-1"
       data-tab-button="location"
+      data-i18n
+      data-en={trEn.obs_detail.tabs.location}
+      data-es={trEs.obs_detail.tabs.location}
       class="px-3 py-1.5 text-sm font-medium border-b-2 border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 -mb-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-t"
     >{od.tabs.location}</button>
     <button
@@ -118,6 +137,9 @@ const observe = tr.observe;
       aria-controls="m-panel-photos"
       tabindex="-1"
       data-tab-button="photos"
+      data-i18n
+      data-en={trEn.obs_detail.tabs.photos}
+      data-es={trEs.obs_detail.tabs.photos}
       class="px-3 py-1.5 text-sm font-medium border-b-2 border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 -mb-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-t"
     >{od.tabs.photos}</button>
   </div>
@@ -131,7 +153,13 @@ const observe = tr.observe;
   >
     <form id="manage-form" class="space-y-3" novalidate>
       <div>
-        <label for="m-observed-at" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{od.manage_date_label}</label>
+        <label
+          for="m-observed-at"
+          data-i18n
+          data-en={trEn.obs_detail.manage_date_label}
+          data-es={trEs.obs_detail.manage_date_label}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{od.manage_date_label}</label>
         <input
           id="m-observed-at"
           type="datetime-local"
@@ -140,52 +168,108 @@ const observe = tr.observe;
       </div>
 
       <div>
-        <label for="m-habitat" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{od.manage_habitat_label}</label>
+        <label
+          for="m-habitat"
+          data-i18n
+          data-en={trEn.obs_detail.manage_habitat_label}
+          data-es={trEs.obs_detail.manage_habitat_label}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{od.manage_habitat_label}</label>
         <select
           id="m-habitat"
           class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
         >
           <option value="">—</option>
-          {HABITATS.map((h) => <option value={h}>{labelFor(observe, 'habitat_options', h)}</option>)}
+          {HABITATS.map((h) => (
+            <option
+              value={h}
+              data-i18n
+              data-en={labelFor(trEn.observe, 'habitat_options', h)}
+              data-es={labelFor(trEs.observe, 'habitat_options', h)}
+            >{labelFor(observe, 'habitat_options', h)}</option>
+          ))}
         </select>
       </div>
 
       <div>
-        <label for="m-weather" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{od.manage_weather_label}</label>
+        <label
+          for="m-weather"
+          data-i18n
+          data-en={trEn.obs_detail.manage_weather_label}
+          data-es={trEs.obs_detail.manage_weather_label}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{od.manage_weather_label}</label>
         <select
           id="m-weather"
           class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
         >
           <option value="">—</option>
-          {WEATHERS.map((w) => <option value={w}>{labelFor(observe, 'weather_options', w)}</option>)}
+          {WEATHERS.map((w) => (
+            <option
+              value={w}
+              data-i18n
+              data-en={labelFor(trEn.observe, 'weather_options', w)}
+              data-es={labelFor(trEs.observe, 'weather_options', w)}
+            >{labelFor(observe, 'weather_options', w)}</option>
+          ))}
         </select>
       </div>
 
       <div>
-        <label for="m-establishment" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{od.manage_establishment_label}</label>
+        <label
+          for="m-establishment"
+          data-i18n
+          data-en={trEn.obs_detail.manage_establishment_label}
+          data-es={trEs.obs_detail.manage_establishment_label}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{od.manage_establishment_label}</label>
         <select
           id="m-establishment"
           class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
         >
           <option value="">—</option>
-          {ESTABLISHMENT_MEANS.map((e) => <option value={e}>{labelFor(observe, 'establishment_means_options', e)}</option>)}
+          {ESTABLISHMENT_MEANS.map((e) => (
+            <option
+              value={e}
+              data-i18n
+              data-en={labelFor(trEn.observe, 'establishment_means_options', e)}
+              data-es={labelFor(trEs.observe, 'establishment_means_options', e)}
+            >{labelFor(observe, 'establishment_means_options', e)}</option>
+          ))}
         </select>
       </div>
 
       <div>
-        <label for="m-sci" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{v.scientific_name}</label>
+        <label
+          for="m-sci"
+          data-i18n
+          data-en={trEn.obs_detail.view.scientific_name}
+          data-es={trEs.obs_detail.view.scientific_name}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{v.scientific_name}</label>
         <input
           id="m-sci"
           type="text"
           autocomplete="off"
-          placeholder="e.g. Quercus oleoides"
+          placeholder="e.g. Morpho epistrophus"
           class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm font-mono italic"
         />
-        <p class="mt-1 text-[11px] text-zinc-600 dark:text-zinc-400">{v.scientific_help}</p>
+        <p
+          data-i18n
+          data-en={trEn.obs_detail.view.scientific_help}
+          data-es={trEs.obs_detail.view.scientific_help}
+          class="mt-1 text-[11px] text-zinc-600 dark:text-zinc-400"
+        >{v.scientific_help}</p>
       </div>
 
       <div>
-        <label for="m-notes" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{v.notes}</label>
+        <label
+          for="m-notes"
+          data-i18n
+          data-en={trEn.obs_detail.view.notes}
+          data-es={trEs.obs_detail.view.notes}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{v.notes}</label>
         <textarea
           id="m-notes"
           rows="3"
@@ -195,31 +279,50 @@ const observe = tr.observe;
       </div>
 
       <div>
-        <label for="m-obscure" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">{v.location_privacy}</label>
+        <label
+          for="m-obscure"
+          data-i18n
+          data-en={trEn.obs_detail.view.location_privacy}
+          data-es={trEs.obs_detail.view.location_privacy}
+          class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+        >{v.location_privacy}</label>
         <select
           id="m-obscure"
           class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
         >
-          <option value="none">{v.privacy_show}</option>
-          <option value="0.1deg">{v.privacy_10km}</option>
-          <option value="0.2deg">{v.privacy_20km}</option>
-          <option value="5km">{v.privacy_5km}</option>
-          <option value="full">{v.privacy_hide}</option>
+          <option value="none" data-i18n data-en={trEn.obs_detail.view.privacy_show} data-es={trEs.obs_detail.view.privacy_show}>{v.privacy_show}</option>
+          <option value="0.1deg" data-i18n data-en={trEn.obs_detail.view.privacy_10km} data-es={trEs.obs_detail.view.privacy_10km}>{v.privacy_10km}</option>
+          <option value="0.2deg" data-i18n data-en={trEn.obs_detail.view.privacy_20km} data-es={trEs.obs_detail.view.privacy_20km}>{v.privacy_20km}</option>
+          <option value="5km" data-i18n data-en={trEn.obs_detail.view.privacy_5km} data-es={trEs.obs_detail.view.privacy_5km}>{v.privacy_5km}</option>
+          <option value="full" data-i18n data-en={trEn.obs_detail.view.privacy_hide} data-es={trEs.obs_detail.view.privacy_hide}>{v.privacy_hide}</option>
         </select>
       </div>
 
       <p id="m-error" class="hidden text-xs text-red-600 dark:text-red-400" role="alert"></p>
-      <p id="m-saved" class="hidden text-xs text-emerald-700 dark:text-emerald-400" aria-live="polite">{od.saved}</p>
+      <p
+        id="m-saved"
+        data-i18n
+        data-en={trEn.obs_detail.saved}
+        data-es={trEs.obs_detail.saved}
+        class="hidden text-xs text-emerald-700 dark:text-emerald-400"
+        aria-live="polite"
+      >{od.saved}</p>
 
       <div id="m-action-row" class="flex flex-wrap items-center gap-2 pt-2">
         <button
           type="submit"
           id="m-save"
+          data-i18n
+          data-en={trEn.obs_detail.save_changes}
+          data-es={trEs.obs_detail.save_changes}
           class="rounded-lg bg-emerald-700 hover:bg-emerald-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >{od.save_changes}</button>
         <button
           type="button"
           id="m-delete"
+          data-i18n
+          data-en={trEn.obs_detail.view.delete_obs}
+          data-es={trEs.obs_detail.view.delete_obs}
           class="rounded-lg border border-red-300 dark:border-red-800 px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
         >{v.delete_obs}</button>
       </div>
@@ -230,15 +333,26 @@ const observe = tr.observe;
         aria-label={od.delete_obs_confirm}
         class="hidden flex-wrap items-center gap-2 pt-2 rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-3"
       >
-        <p class="w-full text-sm font-medium text-red-700 dark:text-red-300">{od.delete_obs_confirm}</p>
+        <p
+          data-i18n
+          data-en={trEn.obs_detail.delete_obs_confirm}
+          data-es={trEs.obs_detail.delete_obs_confirm}
+          class="w-full text-sm font-medium text-red-700 dark:text-red-300"
+        >{od.delete_obs_confirm}</p>
         <button
           type="button"
           id="m-delete-confirm-yes"
+          data-i18n
+          data-en={trEn.obs_detail.delete_obs_confirm_yes}
+          data-es={trEs.obs_detail.delete_obs_confirm_yes}
           class="rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >{od.delete_obs_confirm_yes}</button>
         <button
           type="button"
           id="m-delete-confirm-cancel"
+          data-i18n
+          data-en={trEn.obs_detail.delete_obs_confirm_cancel}
+          data-es={trEs.obs_detail.delete_obs_confirm_cancel}
           class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
         >{od.delete_obs_confirm_cancel}</button>
       </div>
@@ -253,12 +367,22 @@ const observe = tr.observe;
     class="hidden space-y-3"
   >
     <div class="space-y-2">
-      <h3 class="text-xs font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">{od.location.current_heading}</h3>
+      <h3
+        data-i18n
+        data-en={trEn.obs_detail.location.current_heading}
+        data-es={trEs.obs_detail.location.current_heading}
+        class="text-xs font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider"
+      >{od.location.current_heading}</h3>
       <MapPicker mode="view" lang={lang} pickerId="obs-detail-loc-view" initialCoords={null} />
       <p data-loc-coords class="text-xs text-zinc-600 dark:text-zinc-400" aria-live="polite"></p>
     </div>
 
-    <p class="text-xs text-zinc-600 dark:text-zinc-400">{od.location.edit_intro}</p>
+    <p
+      data-i18n
+      data-en={trEn.obs_detail.location.edit_intro}
+      data-es={trEs.obs_detail.location.edit_intro}
+      class="text-xs text-zinc-600 dark:text-zinc-400"
+    >{od.location.edit_intro}</p>
 
     <div class="flex flex-wrap items-center gap-2">
       <button
@@ -267,7 +391,7 @@ const observe = tr.observe;
         class="hidden inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white"
       >
         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-        {lang === 'es' ? 'Usar mi ubicación GPS' : 'Use my GPS location'}
+        <span data-i18n data-en="Use my GPS location" data-es="Usar mi ubicación GPS">{lang === 'es' ? 'Usar mi ubicación GPS' : 'Use my GPS location'}</span>
       </button>
       <MapPicker
         mode="edit"
@@ -276,8 +400,22 @@ const observe = tr.observe;
         initialCoords={null}
         openLabel={od.location.edit_button}
       />
-      <span id="m-loc-saving" class="hidden text-xs text-zinc-600 dark:text-zinc-400" aria-live="polite">{od.location.saving}</span>
-      <span id="m-loc-saved"  class="hidden text-xs text-emerald-700 dark:text-emerald-400" aria-live="polite">{od.saved}</span>
+      <span
+        id="m-loc-saving"
+        data-i18n
+        data-en={trEn.obs_detail.location.saving}
+        data-es={trEs.obs_detail.location.saving}
+        class="hidden text-xs text-zinc-600 dark:text-zinc-400"
+        aria-live="polite"
+      >{od.location.saving}</span>
+      <span
+        id="m-loc-saved"
+        data-i18n
+        data-en={trEn.obs_detail.saved}
+        data-es={trEs.obs_detail.saved}
+        class="hidden text-xs text-emerald-700 dark:text-emerald-400"
+        aria-live="polite"
+      >{od.saved}</span>
     </div>
     <p id="m-loc-gps-status" class="hidden text-xs text-zinc-600 dark:text-zinc-400" aria-live="polite"></p>
     <p id="m-loc-error" class="hidden text-xs text-red-600 dark:text-red-400" role="alert"></p>
@@ -295,7 +433,12 @@ const observe = tr.observe;
       <!-- Drag-active overlay -->
       <div id="m-photos-drop-overlay"
         class="hidden absolute inset-0 z-10 rounded-xl border-2 border-dashed border-emerald-500 bg-emerald-500/5 items-center justify-center pointer-events-none">
-        <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+        <span
+          data-i18n
+          data-en={trEn.obs_detail.drop_to_add ?? 'Drop to add photos'}
+          data-es={trEs.obs_detail.drop_to_add ?? 'Suelta para agregar fotos'}
+          class="text-sm font-medium text-emerald-700 dark:text-emerald-300"
+        >
           {od.drop_to_add ?? (lang === 'es' ? 'Suelta para agregar fotos' : 'Drop to add photos')}
         </span>
       </div>
@@ -309,6 +452,9 @@ const observe = tr.observe;
     </div>
     <p
       id="m-photos-empty"
+      data-i18n
+      data-en={trEn.obs_detail.gallery.no_photos}
+      data-es={trEs.obs_detail.gallery.no_photos}
       class="hidden text-xs text-zinc-600 dark:text-zinc-400 italic"
     >{tr.obs_detail.gallery.no_photos}</p>
     <p
@@ -328,6 +474,9 @@ const observe = tr.observe;
         type="button"
         id="m-photos-add"
         data-add-photo
+        data-i18n
+        data-en={trEn.obs_detail.add_photo}
+        data-es={trEs.obs_detail.add_photo}
         class="rounded-lg border border-emerald-600/60 px-3 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
       >{od.add_photo}</button>
       <span
@@ -364,6 +513,9 @@ const observe = tr.observe;
       }
       for (const p of panels) {
         p.classList.toggle('hidden', p.dataset.tab !== target);
+      }
+      if (target === 'location') {
+        window.dispatchEvent(new CustomEvent('rastrum:mappicker-resize', { detail: { id: 'obs-detail-loc-view' } }));
       }
     }
 
