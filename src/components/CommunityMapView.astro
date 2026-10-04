@@ -2,7 +2,7 @@
 /**
  * CommunityMapView — aggregated heatmap of observer activity.
  *
- * Privacy invariant: minimum 3 observers per hex cell to render.
+ * Privacy invariant: minimum 1 observer per hex cell to render.
  * Anonymous users see data from `community_observers` (no centroid).
  * Authenticated users get centroid data from `community_observers_with_centroid`.
  * Individual centroids are never exposed — only aggregated hex cells.
@@ -183,7 +183,7 @@ const stringsJson = JSON.stringify({
     return [lng, lat];
   }
 
-  const MIN_OBSERVERS_PER_CELL = 3;
+  const MIN_OBSERVERS_PER_CELL = 1;
 
   const root = document.getElementById('community-map-root');
   if (!root) throw new Error('CommunityMapView: missing #community-map-root');
