@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 
@@ -42,6 +42,7 @@ describe('bundle-imports — MapLibre is dynamically imported off map routes', (
     const violators: string[] = [];
     for (const rel of files) {
       const abs = resolve(REPO_ROOT, rel);
+      if (!existsSync(abs)) continue;
       const src = readFileSync(abs, 'utf8');
       if (!staticImportRe.test(src)) continue;
       if (!STATIC_IMPORT_ALLOWLIST.has(rel)) violators.push(rel);
@@ -56,6 +57,7 @@ describe('bundle-imports — MapLibre is dynamically imported off map routes', (
     for (const rel of files) {
       if (STATIC_IMPORT_ALLOWLIST.has(rel)) continue;
       const abs = resolve(REPO_ROOT, rel);
+      if (!existsSync(abs)) continue;
       const src = readFileSync(abs, 'utf8');
       if (!consumerRe.test(src)) continue;
       // Files that only reference the package via a type-only `import('maplibre-gl').X`

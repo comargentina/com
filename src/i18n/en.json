@@ -109,11 +109,7 @@
       },
       {
         "title": "Multi-Modal ID",
-        "description": "Photo, audio, video, and ecological evidence — tracks, scat, burrows — all in one platform."
-      },
-      {
-        "title": "Indigenous Languages",
-        "description": "Zapoteco, Mixteco, Náhuatl, Maya, Tsotsil/Tseltal. Built with CARE principles and community consent."
+        "description": "Photo, audio, video, and ecological evidence — all in one platform."
       },
       {
         "title": "LATAM-Focused",
@@ -125,7 +121,7 @@
       },
       {
         "title": "Conservation Pipeline",
-        "description": "Direct exports to GBIF, CONABIO, CONANP, and regional herbaria across Latin America."
+        "description": "Direct exports to GBIF and regional herbaria across Latin America."
       }
     ],
     "docs_cta": "Read the Docs",

@@ -227,7 +227,7 @@ export const routes: Record<string, Record<Locale, string>> = {
 
 export const docPages = [
   'vision', 'features', 'roadmap', 'tasks', 'market',
-  'architecture', 'funding', 'contribute',
+  'architecture', 'contribute',
   'faq', 'privacy', 'terms', 'console', 'sponsorships', 'mcp',
   'changelog', 'community', 'camera-stations', 'sponsor-pools',
   'obs-detail', 'status', 'algorithms', 'surprises',
@@ -411,10 +411,6 @@ export const docPageMeta = {
   architecture: {
     en: "How COM Argentina's identifier cascade, offline outbox, R2 media storage, and Darwin Core pipeline fit together. Block diagram, data flows, decisions.",
     es: "Cómo se integran el cascade de identificadores, outbox offline, almacén de medios R2 y pipeline Darwin Core de COM Argentina. Diagrama de bloques, flujos, decisiones.",
-  },
-  funding: {
-    en: "How COM Argentina is funded today (zero-cost, BYO-key model) and how to support development. Grant outreach, GitHub Sponsors, operator-paid project keys.",
-    es: "Cómo se financia COM Argentina hoy (modelo zero-cost con tus propias keys) y cómo apoyar su desarrollo. Subvenciones, GitHub Sponsors, claves de proyecto pagadas por el operador.",
   },
   contribute: {
     en: "How to contribute to COM Argentina: code (PRs welcome), translations, observation data, and bug reports via the in-app reporter.",

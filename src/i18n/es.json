@@ -109,11 +109,7 @@
       },
       {
         "title": "ID Multi-Modal",
-        "description": "Foto, audio, video y evidencia ecológica — huellas, excrementos, madrigueras — todo en una plataforma."
-      },
-      {
-        "title": "Lenguas Indígenas",
-        "description": "Zapoteco, Mixteco, Náhuatl, Maya, Tsotsil/Tseltal. Construido con principios CARE y consentimiento comunitario."
+        "description": "Foto, audio, video y evidencia ecológica — todo en una plataforma."
       },
       {
         "title": "Enfoque LATAM",
@@ -125,7 +121,7 @@
       },
       {
         "title": "Pipeline de Conservación",
-        "description": "Exportaciones directas a GBIF, CONABIO, CONANP y herbarios regionales en América Latina."
+        "description": "Exportaciones directas a GBIF y herbarios regionales en América Latina."
       }
     ],
     "docs_cta": "Leer la Documentación",
