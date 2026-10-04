@@ -38,7 +38,9 @@ const lang: 'en' | 'es' = 'en';
       document.documentElement.lang = lang;
 
       // Swap [data-i18n] text nodes to the detected language immediately.
-      function applyLang() {
+      function applyLang(targetLang) {
+        if (targetLang) lang = targetLang;
+        document.documentElement.lang = lang;
         document.querySelectorAll('[data-i18n]').forEach(function (el) {
           var text = el.getAttribute('data-' + lang);
           if (text) el.textContent = text;
@@ -48,6 +50,18 @@ const lang: 'en' | 'es' = 'en';
           var ph = el.getAttribute('data-' + lang + '-placeholder');
           if (ph) el.setAttribute('placeholder', ph);
         });
+        // Swap hrefs
+        document.querySelectorAll('[data-href-en][data-href-es]').forEach(function (el) {
+          var href = el.getAttribute('data-href-' + lang);
+          if (href) el.setAttribute('href', href);
+        });
+        // Sync header lang-toggle
+        var langToggle = document.getElementById('lang-toggle');
+        if (langToggle) {
+          var next = lang === 'es' ? 'en' : 'es';
+          langToggle.textContent = next.toUpperCase();
+          langToggle.setAttribute('data-target-lang', next);
+        }
         // Fix sign-in link lang prefix
         var signInLink = document.getElementById('ci-signin-link');
         if (signInLink) signInLink.setAttribute('href', '/' + lang + '/sign-in/');
@@ -58,11 +72,21 @@ const lang: 'en' | 'es' = 'en';
           askLink.setAttribute('href', href.replace('/en/', '/es/'));
           askLink.setAttribute('aria-label', 'Pregunta a la IA del COM');
           askLink.setAttribute('title', 'Pregunta a la IA del COM');
+        } else if (askLink && lang === 'en') {
+          var hrefEn = askLink.getAttribute('href') || '';
+          askLink.setAttribute('href', hrefEn.replace('/es/', '/en/'));
+          askLink.setAttribute('aria-label', 'Ask COM AI');
+          askLink.setAttribute('title', 'Ask COM AI');
         }
       }
 
+      window.addEventListener('rastrum:lang-change', function (e) {
+        var next = e.detail && e.detail.lang;
+        if (next) applyLang(next);
+      });
+
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyLang);
+        document.addEventListener('DOMContentLoaded', function () { applyLang(); });
       } else {
         applyLang();
       }

@@ -1,5 +1,5 @@
 ---
-import { t, getLocalizedPath, getAlternateLocale, getAlternateUrl, routes, type Locale } from '../i18n/utils';
+import { t, getLocalizedPath, getDocPath, getAlternateLocale, getAlternateUrl, routes, type Locale } from '../i18n/utils';
 import { isActiveSection } from '../lib/chrome-helpers';
 import BellIcon from './BellIcon.astro';
 import MegaMenu from './MegaMenu.astro';
@@ -14,6 +14,8 @@ interface Props {
 
 const { lang, currentPath = '/' } = Astro.props;
 const tr = t(lang);
+const trEn = t('en');
+const trEs = t('es');
 const alt = getAlternateLocale(lang);
 const locale = (lang === 'es' ? 'es' : 'en') as Locale;
 
@@ -63,6 +65,10 @@ const communityDonatePath = getLocalizedPath(lang, routes.communityDonate[locale
 
 const validateLabel =
   ((tr as unknown as { validation?: { nav_validate_label?: string } }).validation?.nav_validate_label) ?? 'Validate';
+const validateLabelEn =
+  ((trEn as unknown as { validation?: { nav_validate_label?: string } }).validation?.nav_validate_label) ?? 'Validate';
+const validateLabelEs =
+  ((trEs as unknown as { validation?: { nav_validate_label?: string } }).validation?.nav_validate_label) ?? 'Validar';
 
 interface ExploreMegaMenu {
   biodiversity: string;
@@ -77,29 +83,35 @@ interface ExploreMegaMenu {
   projects?: string;
 }
 const em = (tr as unknown as { nav: { explore_megamenu: ExploreMegaMenu } }).nav.explore_megamenu;
+const emEn = (trEn as unknown as { nav: { explore_megamenu: ExploreMegaMenu } }).nav.explore_megamenu;
+const emEs = (trEs as unknown as { nav: { explore_megamenu: ExploreMegaMenu } }).nav.explore_megamenu;
 
 const exploreColumns = [
   {
     heading: em.biodiversity,
+    headingEn: emEn.biodiversity,
+    headingEs: emEs.biodiversity,
     items: [
-      { key: 'exploreMap',       label: tr.nav.explore_dropdown.map,       href: exploreMapPath },
-      { key: 'exploreRecent',    label: tr.nav.explore_dropdown.recent,    href: exploreRecentPath },
-      { key: 'exploreWatchlist', label: tr.nav.explore_dropdown.watchlist, href: exploreWatchlistPath },
-      { key: 'exploreSpecies',   label: tr.nav.explore_dropdown.species,   href: exploreSpeciesPath },
-      { key: 'exploreValidate',  label: validateLabel,                     href: exploreValidatePath },
-      { key: 'projects',         label: em.projects ?? (lang === 'es' ? 'Proyectos' : 'Projects'), href: projectsPath },
+      { key: 'exploreMap',       label: tr.nav.explore_dropdown.map,       labelEn: trEn.nav.explore_dropdown.map,       labelEs: trEs.nav.explore_dropdown.map,       href: exploreMapPath, hrefEn: getLocalizedPath('en', routes.exploreMap.en + '/'), hrefEs: getLocalizedPath('es', routes.exploreMap.es + '/') },
+      { key: 'exploreRecent',    label: tr.nav.explore_dropdown.recent,    labelEn: trEn.nav.explore_dropdown.recent,    labelEs: trEs.nav.explore_dropdown.recent,    href: exploreRecentPath, hrefEn: getLocalizedPath('en', routes.exploreRecent.en + '/'), hrefEs: getLocalizedPath('es', routes.exploreRecent.es + '/') },
+      { key: 'exploreWatchlist', label: tr.nav.explore_dropdown.watchlist, labelEn: trEn.nav.explore_dropdown.watchlist, labelEs: trEs.nav.explore_dropdown.watchlist, href: exploreWatchlistPath, hrefEn: getLocalizedPath('en', routes.exploreWatchlist.en + '/'), hrefEs: getLocalizedPath('es', routes.exploreWatchlist.es + '/') },
+      { key: 'exploreSpecies',   label: tr.nav.explore_dropdown.species,   labelEn: trEn.nav.explore_dropdown.species,   labelEs: trEs.nav.explore_dropdown.species,   href: exploreSpeciesPath, hrefEn: getLocalizedPath('en', routes.exploreSpecies.en + '/'), hrefEs: getLocalizedPath('es', routes.exploreSpecies.es + '/') },
+      { key: 'exploreValidate',  label: validateLabel,                     labelEn: validateLabelEn,                     labelEs: validateLabelEs,                     href: exploreValidatePath, hrefEn: getLocalizedPath('en', routes.exploreValidate.en + '/'), hrefEs: getLocalizedPath('es', routes.exploreValidate.es + '/') },
+      { key: 'projects',         label: em.projects ?? (lang === 'es' ? 'Proyectos' : 'Projects'), labelEn: emEn.projects ?? 'Projects', labelEs: emEs.projects ?? 'Proyectos', href: projectsPath, hrefEn: getLocalizedPath('en', routes.projects.en + '/'), hrefEs: getLocalizedPath('es', routes.projects.es + '/') },
     ],
   },
   {
     heading: em.community,
+    headingEn: emEn.community,
+    headingEs: emEs.community,
     items: [
-      { key: 'communityAll',     label: em.community_all,     href: communityObserversBase },
-      { key: 'communityTop',     label: em.community_top,     href: communityObserversTopHref },
-      { key: 'communityNearby',  label: em.community_nearby,  href: communityObserversNearbyHref },
-      { key: 'communityExperts', label: em.community_experts, href: communityObserversExpertsHref },
-      { key: 'communityCountry', label: em.community_country, href: communityObserversCountryHref },
-      { key: 'communityMap',     label: em.community_map,     href: communityMapHref },
-      { key: 'leaderboard',     label: em.community_leaderboard ?? (lang === 'es' ? 'Tabla de líderes' : 'Leaderboard'), href: communityLeaderboardHref },
+      { key: 'communityAll',     label: em.community_all,     labelEn: emEn.community_all,     labelEs: emEs.community_all,     href: communityObserversBase, hrefEn: getLocalizedPath('en', routes.communityObservers.en + '/'), hrefEs: getLocalizedPath('es', routes.communityObservers.es + '/') },
+      { key: 'communityTop',     label: em.community_top,     labelEn: emEn.community_top,     labelEs: emEs.community_top,     href: communityObserversTopHref, hrefEn: `${getLocalizedPath('en', routes.communityObservers.en + '/')}?sort=obs_count_30d`, hrefEs: `${getLocalizedPath('es', routes.communityObservers.es + '/')}?sort=obs_count_30d` },
+      { key: 'communityNearby',  label: em.community_nearby,  labelEn: emEn.community_nearby,  labelEs: emEs.community_nearby,  href: communityObserversNearbyHref, hrefEn: `${getLocalizedPath('en', routes.communityObservers.en + '/')}?nearby=true`, hrefEs: `${getLocalizedPath('es', routes.communityObservers.es + '/')}?nearby=true` },
+      { key: 'communityExperts', label: em.community_experts, labelEn: emEn.community_experts, labelEs: emEs.community_experts, href: communityObserversExpertsHref, hrefEn: `${getLocalizedPath('en', routes.communityObservers.en + '/')}?expert=true`, hrefEs: `${getLocalizedPath('es', routes.communityObservers.es + '/')}?expert=true` },
+      { key: 'communityCountry', label: em.community_country, labelEn: emEn.community_country, labelEs: emEs.community_country, href: communityObserversCountryHref, hrefEn: `${getLocalizedPath('en', routes.communityObservers.en + '/')}?country=`, hrefEs: `${getLocalizedPath('es', routes.communityObservers.es + '/')}?country=` },
+      { key: 'communityMap',     label: em.community_map,     labelEn: emEn.community_map,     labelEs: emEs.community_map,     href: communityMapHref, hrefEn: getLocalizedPath('en', routes.communityMap.en + '/'), hrefEs: getLocalizedPath('es', routes.communityMap.es + '/') },
+      { key: 'leaderboard',     label: em.community_leaderboard ?? (lang === 'es' ? 'Tabla de líderes' : 'Leaderboard'), labelEn: emEn.community_leaderboard ?? 'Leaderboard', labelEs: emEs.community_leaderboard ?? 'Tabla de líderes', href: communityLeaderboardHref, hrefEn: getLocalizedPath('en', routes.leaderboard.en + '/'), hrefEs: getLocalizedPath('es', routes.leaderboard.es + '/') },
     ],
   },
 ];
@@ -107,26 +119,32 @@ const exploreColumns = [
 const docColumns = [
   {
     heading: tr.nav.docs_groups.product,
+    headingEn: trEn.nav.docs_groups.product,
+    headingEs: trEs.nav.docs_groups.product,
     items: [
-      { key: 'vision',       label: tr.nav.docs_groups.product_items.vision },
-      { key: 'features',     label: tr.nav.docs_groups.product_items.features },
-      { key: 'architecture', label: tr.nav.docs_groups.product_items.architecture },
-      { key: 'mcp',          label: tr.nav.docs_groups.product_items.mcp },
+      { key: 'vision',       label: tr.nav.docs_groups.product_items.vision,       labelEn: trEn.nav.docs_groups.product_items.vision,       labelEs: trEs.nav.docs_groups.product_items.vision,       hrefEn: getDocPath('en', 'vision'),       hrefEs: getDocPath('es', 'vision') },
+      { key: 'features',     label: tr.nav.docs_groups.product_items.features,     labelEn: trEn.nav.docs_groups.product_items.features,     labelEs: trEs.nav.docs_groups.product_items.features,     hrefEn: getDocPath('en', 'features'),     hrefEs: getDocPath('es', 'features') },
+      { key: 'architecture', label: tr.nav.docs_groups.product_items.architecture, labelEn: trEn.nav.docs_groups.product_items.architecture, labelEs: trEs.nav.docs_groups.product_items.architecture, hrefEn: getDocPath('en', 'architecture'), hrefEs: getDocPath('es', 'architecture') },
+      { key: 'mcp',          label: tr.nav.docs_groups.product_items.mcp,          labelEn: trEn.nav.docs_groups.product_items.mcp,          labelEs: trEs.nav.docs_groups.product_items.mcp,          hrefEn: getDocPath('en', 'mcp'),          hrefEs: getDocPath('es', 'mcp') },
     ],
   },
   {
     heading: tr.nav.docs_groups.progress,
+    headingEn: trEn.nav.docs_groups.progress,
+    headingEs: trEs.nav.docs_groups.progress,
     items: [
-      { key: 'roadmap', label: tr.nav.docs_groups.progress_items.roadmap },
-      { key: 'tasks',   label: tr.nav.docs_groups.progress_items.tasks },
-      { key: 'market',  label: tr.nav.docs_groups.progress_items.market },
+      { key: 'roadmap', label: tr.nav.docs_groups.progress_items.roadmap, labelEn: trEn.nav.docs_groups.progress_items.roadmap, labelEs: trEs.nav.docs_groups.progress_items.roadmap, hrefEn: getDocPath('en', 'roadmap'), hrefEs: getDocPath('es', 'roadmap') },
+      { key: 'tasks',   label: tr.nav.docs_groups.progress_items.tasks,   labelEn: trEn.nav.docs_groups.progress_items.tasks,   labelEs: trEs.nav.docs_groups.progress_items.tasks,   hrefEn: getDocPath('en', 'tasks'),   hrefEs: getDocPath('es', 'tasks') },
+      { key: 'market',  label: tr.nav.docs_groups.progress_items.market,  labelEn: trEn.nav.docs_groups.progress_items.market,  labelEs: trEs.nav.docs_groups.progress_items.market,  hrefEn: getDocPath('en', 'market'),  hrefEs: getDocPath('es', 'market') },
     ],
   },
   {
     heading: tr.nav.docs_groups.community,
+    headingEn: trEn.nav.docs_groups.community,
+    headingEs: trEs.nav.docs_groups.community,
     items: [
-      { key: 'contribute',    label: tr.nav.docs_groups.community_items.contribute },
-      { key: 'sponsorships',  label: tr.nav.docs_groups.community_items.sponsorships },
+      { key: 'contribute',    label: tr.nav.docs_groups.community_items.contribute,   labelEn: trEn.nav.docs_groups.community_items.contribute,   labelEs: trEs.nav.docs_groups.community_items.contribute,   hrefEn: getDocPath('en', 'contribute'),   hrefEs: getDocPath('es', 'contribute') },
+      { key: 'sponsorships',  label: tr.nav.docs_groups.community_items.sponsorships, labelEn: trEn.nav.docs_groups.community_items.sponsorships, labelEs: trEs.nav.docs_groups.community_items.sponsorships, hrefEn: getDocPath('en', 'sponsorships'), hrefEs: getDocPath('es', 'sponsorships') },
     ],
   },
 ];
@@ -135,12 +153,18 @@ const docColumns = [
 <header class="border-b border-zinc-200 dark:border-zinc-800">
   <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-4">
     <!-- Lockup -->
-    <a href={getLocalizedPath(lang, '/')} class="flex flex-col leading-tight">
+    <a href={getLocalizedPath(lang, '/')}
+       data-href-en={getLocalizedPath('en', '/')}
+       data-href-es={getLocalizedPath('es', '/')}
+       class="flex flex-col leading-tight">
       <span class="flex items-center gap-2 text-lg font-bold text-emerald-600 dark:text-emerald-400">
         <img src="/com-logo.jpg" alt="COM Logo" class="w-8 h-8 rounded-full object-cover" width="32" height="32" />
         COM Argentina
       </span>
-      <span class="hidden md:block text-[11px] text-zinc-600 dark:text-zinc-400 -mt-0.5 ml-10">
+      <span class="hidden md:block text-[11px] text-zinc-600 dark:text-zinc-400 -mt-0.5 ml-10"
+            data-i18n
+            data-en={trEn.nav.tagline}
+            data-es={trEs.nav.tagline}>
         {tr.nav.tagline}
       </span>
     </a>
@@ -151,17 +175,21 @@ const docColumns = [
     <nav class="hidden sm:flex items-center gap-5 text-sm min-w-0">
       <a href={getLocalizedPath(lang, routes.observe[locale] + '/')}
          data-tour="observe-nav"
+         data-href-en={getLocalizedPath('en', routes.observe.en + '/')}
+         data-href-es={getLocalizedPath('es', routes.observe.es + '/')}
          class:list={[
            'relative pb-1 transition-colors after:content-[""] after:absolute after:left-0 after:right-0 after:-bottom-3 after:h-[2px] after:rounded after:transition-transform after:origin-left',
            railClass(obsActive, 'emerald'),
          ]}>
-        {tr.nav.observe}
+        <span data-i18n data-en={trEn.nav.observe} data-es={trEs.nav.observe}>{tr.nav.observe}</span>
       </a>
 
       <!-- Explore mega-menu — Biodiversity + Community columns (M28) -->
       <MegaMenu
         lang={locale}
         trigger={tr.nav.explore}
+        triggerEn={trEn.nav.explore}
+        triggerEs={trEs.nav.explore}
         columns={exploreColumns}
         align="left"
         active={expActive}
@@ -171,24 +199,36 @@ const docColumns = [
       />
 
       <a href={getLocalizedPath(lang, routes.chat[locale] + '/')}
+         data-href-en={getLocalizedPath('en', routes.chat.en + '/')}
+         data-href-es={getLocalizedPath('es', routes.chat.es + '/')}
          class:list={[
            'relative pb-1 transition-colors after:content-[""] after:absolute after:left-0 after:right-0 after:-bottom-3 after:h-[2px] after:rounded after:transition-transform after:origin-left',
            railClass(chatActive, 'sky'),
          ]}>
-        {tr.nav.chat}
+        <span data-i18n data-en={trEn.nav.chat} data-es={trEs.nav.chat}>{tr.nav.chat}</span>
       </a>
     </nav>
 
     <!-- Reference (right of verbs, before auth) -->
     <nav class="hidden lg:flex items-center gap-5 text-sm ml-auto">
       <a href={getLocalizedPath(lang, routes.about[locale] + '/')}
+         data-href-en={getLocalizedPath('en', routes.about.en + '/')}
+         data-href-es={getLocalizedPath('es', routes.about.es + '/')}
          class:list={[
            'relative pb-1 transition-colors after:content-[""] after:absolute after:left-0 after:right-0 after:-bottom-3 after:h-[2px] after:rounded after:transition-transform after:origin-left',
            railClass(aboutActive, 'stone'),
          ]}>
-        {tr.nav.about}
+        <span data-i18n data-en={trEn.nav.about} data-es={trEs.nav.about}>{tr.nav.about}</span>
       </a>
-      <MegaMenu lang={locale} trigger={tr.nav.docs} columns={docColumns} align="right" active={docsActive} />
+      <MegaMenu
+        lang={locale}
+        trigger={tr.nav.docs}
+        triggerEn={trEn.nav.docs}
+        triggerEs={trEs.nav.docs}
+        columns={docColumns}
+        align="right"
+        active={docsActive}
+      />
       <!-- Search trigger (⌕) — desktop only; dispatches rastrum:open-palette -->
       <button
         id="hdr-search-btn"
@@ -218,9 +258,11 @@ const docColumns = [
       <a
         href={getLocalizedPath(lang, routes.signIn[locale] + '/')}
         id="sign-in-link"
+        data-href-en={getLocalizedPath('en', routes.signIn.en + '/')}
+        data-href-es={getLocalizedPath('es', routes.signIn.es + '/')}
         class="hidden text-xs font-medium px-2.5 py-1 rounded border border-emerald-600/60 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
       >
-        {tr.auth.sign_in}
+        <span data-i18n data-en={trEn.auth.sign_in} data-es={trEs.auth.sign_in}>{tr.auth.sign_in}</span>
       </a>
       <SyncPill lang={locale} />
       <BellIcon lang={locale} />
@@ -237,24 +279,27 @@ const docColumns = [
           </span>
         </button>
         <div id="avatar-menu" class="hidden absolute right-0 top-full mt-2 w-52 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg py-1 z-50">
-          <a id="menu-profile" href={getLocalizedPath(lang, routes.profile[locale] + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.profile.view_profile}</a>
-          <a id="menu-observations" href={getLocalizedPath(lang, routes.profileObservations[locale] + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.profile.my_observations_title}</a>
-          <a id="menu-watchlist" href={getLocalizedPath(lang, routes.exploreWatchlist[locale] + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.nav.explore_dropdown.watchlist}</a>
-          <a id="menu-inbox" href={inboxPath} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{(tr as unknown as { socialgraph: { inbox: { title: string } } }).socialgraph.inbox.title}</a>
-          <a id="menu-dex" href={profileDexPath} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{(tr as unknown as { pokedex: { title: string } }).pokedex.title}</a>
-          <a id="menu-export" href={profileExportPath} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.profile.export}</a>
-          <a id="menu-import" href={profileImportPath} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{(tr as unknown as { import: { title: string } }).import.title}</a>
-          <a id="menu-settings" href={getLocalizedPath(lang, routes.profileSettings[locale] + '/profile/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.profile.settings_link} ▸</a>
-          <a id="menu-sponsoring" href={getLocalizedPath(lang, routes.sponsoring[locale] + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.sponsoring.page_title}</a>
-          <a id="menu-sponsored-by" href={getLocalizedPath(lang, routes.sponsoredBy[locale] + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.sponsoring.quota_nav_label}</a>
+          <a id="menu-profile" href={getLocalizedPath(lang, routes.profile[locale] + '/')} data-href-en={getLocalizedPath('en', routes.profile.en + '/')} data-href-es={getLocalizedPath('es', routes.profile.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.profile.view_profile} data-es={trEs.profile.view_profile}>{tr.profile.view_profile}</a>
+          <a id="menu-observations" href={getLocalizedPath(lang, routes.profileObservations[locale] + '/')} data-href-en={getLocalizedPath('en', routes.profileObservations.en + '/')} data-href-es={getLocalizedPath('es', routes.profileObservations.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.profile.my_observations_title} data-es={trEs.profile.my_observations_title}>{tr.profile.my_observations_title}</a>
+          <a id="menu-watchlist" href={getLocalizedPath(lang, routes.exploreWatchlist[locale] + '/')} data-href-en={getLocalizedPath('en', routes.exploreWatchlist.en + '/')} data-href-es={getLocalizedPath('es', routes.exploreWatchlist.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.nav.explore_dropdown.watchlist} data-es={trEs.nav.explore_dropdown.watchlist}>{tr.nav.explore_dropdown.watchlist}</a>
+          <a id="menu-inbox" href={inboxPath} data-href-en={getLocalizedPath('en', routes.inbox.en + '/')} data-href-es={getLocalizedPath('es', routes.inbox.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={(trEn as unknown as { socialgraph: { inbox: { title: string } } }).socialgraph.inbox.title} data-es={(trEs as unknown as { socialgraph: { inbox: { title: string } } }).socialgraph.inbox.title}>{(tr as unknown as { socialgraph: { inbox: { title: string } } }).socialgraph.inbox.title}</a>
+          <a id="menu-dex" href={profileDexPath} data-href-en={getLocalizedPath('en', routes.dex.en + '/')} data-href-es={getLocalizedPath('es', routes.dex.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={(trEn as unknown as { pokedex: { title: string } }).pokedex.title} data-es={(trEs as unknown as { pokedex: { title: string } }).pokedex.title}>{(tr as unknown as { pokedex: { title: string } }).pokedex.title}</a>
+          <a id="menu-export" href={profileExportPath} data-href-en={getLocalizedPath('en', routes.profileExport.en + '/')} data-href-es={getLocalizedPath('es', routes.profileExport.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.profile.export} data-es={trEs.profile.export}>{tr.profile.export}</a>
+          <a id="menu-import" href={profileImportPath} data-href-en={getLocalizedPath('en', routes.profileImport.en + '/')} data-href-es={getLocalizedPath('es', routes.profileImport.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={(trEn as unknown as { import: { title: string } }).import.title} data-es={(trEs as unknown as { import: { title: string } }).import.title}>{(tr as unknown as { import: { title: string } }).import.title}</a>
+          <a id="menu-settings" href={getLocalizedPath(lang, routes.profileSettings[locale] + '/profile/')} data-href-en={getLocalizedPath('en', routes.profileSettings.en + '/profile/')} data-href-es={getLocalizedPath('es', routes.profileSettings.es + '/profile/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={`${trEn.profile.settings_link} ▸`} data-es={`${trEs.profile.settings_link} ▸`}>{tr.profile.settings_link} ▸</a>
+          <a id="menu-sponsoring" href={getLocalizedPath(lang, routes.sponsoring[locale] + '/')} data-href-en={getLocalizedPath('en', routes.sponsoring.en + '/')} data-href-es={getLocalizedPath('es', routes.sponsoring.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.sponsoring.page_title} data-es={trEs.sponsoring.page_title}>{tr.sponsoring.page_title}</a>
+          <a id="menu-sponsored-by" href={getLocalizedPath(lang, routes.sponsoredBy[locale] + '/')} data-href-en={getLocalizedPath('en', routes.sponsoredBy.en + '/')} data-href-es={getLocalizedPath('es', routes.sponsoredBy.es + '/')} class="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.sponsoring.quota_nav_label} data-es={trEs.sponsoring.quota_nav_label}>{tr.sponsoring.quota_nav_label}</a>
           <div class="border-t border-zinc-200 dark:border-zinc-800 my-1"></div>
-          <button id="sign-out-btn" class="block w-full text-left px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">{tr.auth.sign_out}</button>
+          <button id="sign-out-btn" class="block w-full text-left px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800" data-i18n data-en={trEn.auth.sign_out} data-es={trEs.auth.sign_out}>{tr.auth.sign_out}</button>
         </div>
       </div>
 
       <a id="header-console-pill"
          href={getLocalizedPath(lang, routes.console[locale] + '/')}
-         class="hidden text-xs px-2.5 py-1 rounded-full text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 ml-2">
+         data-href-en={getLocalizedPath('en', routes.console.en + '/')}
+         data-href-es={getLocalizedPath('es', routes.console.es + '/')}
+         class="hidden text-xs px-2.5 py-1 rounded-full text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 ml-2"
+         data-i18n data-en={trEn.console.nav} data-es={trEs.console.nav}>
         {tr.console.nav}
       </a>
 
@@ -298,8 +343,73 @@ const docColumns = [
     const dark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   });
+  function applyNeutralLanguage(target) {
+    document.documentElement.lang = target;
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      const text = el.getAttribute('data-' + target);
+      if (text) el.textContent = text;
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+      const ph = el.getAttribute('data-' + target + '-placeholder');
+      if (ph) el.setAttribute('placeholder', ph);
+    });
+    document.querySelectorAll('[data-href-en][data-href-es]').forEach(function(el) {
+      const href = el.getAttribute('data-href-' + target);
+      if (href) el.setAttribute('href', href);
+    });
+    const langToggle = document.getElementById('lang-toggle');
+    if (langToggle) {
+      const next = target === 'es' ? 'en' : 'es';
+      langToggle.textContent = next.toUpperCase();
+      langToggle.setAttribute('data-target-lang', next);
+    }
+    // Also sync footer lang buttons if present
+    document.querySelectorAll('[data-lang-switch]').forEach(function(btn) {
+      const btnTarget = btn.getAttribute('data-lang-switch');
+      const isActive = btnTarget === target;
+      btn.classList.toggle('bg-zinc-100', isActive);
+      btn.classList.toggle('dark:bg-zinc-800', isActive);
+      btn.classList.toggle('font-medium', isActive);
+    });
+  }
+
+  // If on a locale-neutral path, check stored or browser language on load
+  const isNeutral = !window.location.pathname.startsWith('/en/') && !window.location.pathname.startsWith('/es/');
+  if (isNeutral) {
+    let pref = null;
+    try { pref = localStorage.getItem('rastrum.lang'); } catch (_) {}
+    if (!pref && typeof navigator !== 'undefined' && navigator.language && navigator.language.toLowerCase().startsWith('es')) {
+      pref = 'es';
+    }
+    if (pref === 'es') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { applyNeutralLanguage('es'); });
+      } else {
+        applyNeutralLanguage('es');
+      }
+    }
+  }
+
+  // Listen for language changes dispatched from other components
+  window.addEventListener('rastrum:lang-change', function(e) {
+    const nextLang = e.detail && e.detail.lang;
+    if (nextLang) {
+      applyNeutralLanguage(nextLang);
+    }
+  });
+
   document.getElementById('lang-toggle')?.addEventListener('click', function(e) {
     const target = this.dataset.targetLang;
+    const isNeutralPath = !window.location.pathname.startsWith('/en/') && !window.location.pathname.startsWith('/es/');
+    if (isNeutralPath) {
+      e.preventDefault();
+      if (target) {
+        localStorage.setItem('rastrum.lang', target);
+        applyNeutralLanguage(target);
+        window.dispatchEvent(new CustomEvent('rastrum:lang-change', { detail: { lang: target } }));
+      }
+      return;
+    }
     if (target) localStorage.setItem('rastrum.lang', target);
     // For locale-neutral pages (e.g. /share/obs/?id=…) the build-time href
     // loses the query string. Re-append it before navigating.

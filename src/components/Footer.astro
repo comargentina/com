@@ -215,6 +215,18 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   });
 
+  window.addEventListener('rastrum:lang-change', (e: any) => {
+    const target = e.detail?.lang;
+    if (!target) return;
+    document.querySelectorAll('[data-lang-switch]').forEach(btn => {
+      const btnTarget = (btn as HTMLElement).dataset.langSwitch;
+      const isActive = btnTarget === target;
+      btn.classList.toggle('bg-zinc-100', isActive);
+      btn.classList.toggle('dark:bg-zinc-800', isActive);
+      btn.classList.toggle('font-medium', isActive);
+    });
+  });
+
   document.querySelectorAll('[data-lang-switch]').forEach(el => {
     el.addEventListener('click', (e) => {
       const target = (el as HTMLElement).dataset.langSwitch;
@@ -244,6 +256,7 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
             btn.classList.toggle('dark:bg-zinc-800', isActive);
             btn.classList.toggle('font-medium', isActive);
           });
+          window.dispatchEvent(new CustomEvent('rastrum:lang-change', { detail: { lang: target } }));
         }
       }
     });
