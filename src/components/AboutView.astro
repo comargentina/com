@@ -151,6 +151,22 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
         ? 'COM Argentina busca llevar ese espíritu de observación y participación a una plataforma abierta de biodiversidad, donde cualquier persona pueda registrar lo que encuentra en la naturaleza, aprender a identificar especies y compartir sus observaciones con otros.'
         : 'COM Argentina seeks to bring that spirit of observation and participation to an open biodiversity platform, where anyone can record what they find in nature, learn to identify species, and share their observations with others.'}
     </p>
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs
+        ? <Fragment>En este camino, encontramos en <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">Rastrum</a> un proyecto que nos sirvió como una referencia fundamental. Su repositorio público y las plantillas desarrolladas por su creador, Artemio Padilla, nos permitieron tomar una base sobre la cual comenzar a construir y adaptar nuestra propia plataforma para COM Argentina.</Fragment>
+        : <Fragment>Along this journey, we found in <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">Rastrum</a> a project that served as a fundamental reference. Its public repository and the templates developed by its creator, Artemio Padilla, provided us with a foundation upon which to build and adapt our own platform for COM Argentina.</Fragment>}
+    </p>
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs
+        ? 'Queremos expresar especialmente nuestro agradecimiento a Artemio Padilla por haber hecho público el repositorio de Rastrum y por permitirnos utilizarlo como referencia y plantilla para nuestro proyecto. Valoramos enormemente la posibilidad de aprender de un trabajo que fue compartido abiertamente y que nos permitió avanzar en el desarrollo de nuestra propia propuesta.'
+        : 'We want to especially express our gratitude to Artemio Padilla for making the Rastrum repository public and for allowing us to use it as a reference and template for our project. We deeply value the opportunity to learn from work that was shared openly, which allowed us to move forward in the development of our own proposal.'}
+    </p>
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs
+        ? <Fragment>Por este motivo, COM Argentina reconoce y agradece públicamente el trabajo de Rastrum, incorporando un vínculo directo a <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">rastrum.org</a> para que quienes visiten nuestra plataforma puedan conocer también el proyecto que nos sirvió de inspiración y base tecnológica.</Fragment>
+        : <Fragment>For this reason, COM Argentina publicly recognizes and thanks the work of Rastrum, incorporating a direct link to <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">rastrum.org</a> so that those who visit our platform can also discover the project that served as our inspiration and technological base.</Fragment>}
+    </p>
+
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed italic">
       {isEs
         ? 'La tecnología es una herramienta, no el objetivo.'
@@ -164,12 +180,16 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
     <div class="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
       <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
         {isEs
-          ? 'Utilizamos Gemini Flash de Google como asistente de inteligencia artificial para ayudar a identificar especies y responder preguntas sobre biodiversidad.'
-          : 'We use Google Gemini Flash as our AI assistant to help identify species and answer biodiversity questions.'}
-        {' '}
-        <strong>Gemini Flash</strong>
+          ? 'Utilizamos Gemini Flash de Google como asistente de inteligencia artificial para ayudar a identificar especies y responder preguntas sobre biodiversidad. Gemini Flash forma parte de las herramientas tecnológicas que utilizamos para acercar el conocimiento y facilitar la interacción con la información sobre las especies.'
+          : 'We use Google Gemini Flash as our AI assistant to help identify species and answer biodiversity questions. Gemini Flash is part of the technological tools we use to bring knowledge closer and facilitate interaction with information about species.'}
       </p>
     </div>
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+      {isEs
+        ? 'Nuestro objetivo no es solamente crear una página web, sino construir una comunidad abierta alrededor de la observación de la naturaleza, donde cada observación pueda convertirse en conocimiento y donde el conocimiento compartido pueda contribuir a valorar y conservar nuestra biodiversidad.'
+        : 'Our goal is not just to create a website, but to build an open community around nature observation, where every observation can become knowledge, and where shared knowledge can contribute to valuing and conserving our biodiversity.'}
+    </p>
+
   </div>
 </section>
 
