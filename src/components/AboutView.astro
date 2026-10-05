@@ -247,32 +247,76 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
   <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-3xl mb-8">
     {isEs ? 'Observaciones registradas por nuestra comunidad.' : 'Observations recorded by our community.'}
   </p>
-  {stats.available ? (
-    <>
-      <div class="grid sm:grid-cols-3 gap-4 mb-4">
-        <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-          <p class="text-3xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(stats.total_observations)}</p>
-          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 uppercase tracking-wider">{isEs ? 'Observaciones' : 'Observations'}</p>
-        </div>
-        <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-          <p class="text-3xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(stats.total_observers)}</p>
-          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 uppercase tracking-wider">{isEs ? 'Observadores' : 'Observers'}</p>
-        </div>
-        <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-          <p class="text-3xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(stats.total_species)}</p>
-          <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 uppercase tracking-wider">{isEs ? 'Especies' : 'Species'}</p>
-        </div>
-      </div>
-      {generatedLabel && (
-        <p class="text-xs text-zinc-600 dark:text-zinc-300 text-right">{isEs ? 'Actualizado' : 'Updated'}: {generatedLabel}</p>
-      )}
-    </>
-  ) : (
-    <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center text-sm text-zinc-600 dark:text-zinc-400">
-      {isEs ? 'Las estadísticas estarán disponibles próximamente.' : 'Stats will be available soon.'}
+  <div class="grid sm:grid-cols-3 gap-4 mb-4">
+    <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
+      <p data-stat-observations class="text-3xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(stats.total_observations)}</p>
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 uppercase tracking-wider">{isEs ? 'Observaciones' : 'Observations'}</p>
     </div>
-  )}
+    <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
+      <p data-stat-observers class="text-3xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(stats.total_observers)}</p>
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 uppercase tracking-wider">{isEs ? 'Observadores' : 'Observers'}</p>
+    </div>
+    <div class="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
+      <p data-stat-species class="text-3xl md:text-4xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(stats.total_species)}</p>
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-2 uppercase tracking-wider">{isEs ? 'Especies' : 'Species'}</p>
+    </div>
+  </div>
 </section>
+
+<script>
+  import { getSupabase } from '../lib/supabase';
+
+  async function loadLiveStats() {
+    try {
+      const supabase = getSupabase();
+      const obsEl = document.querySelector<HTMLElement>('[data-stat-observations]');
+      const observersEl = document.querySelector<HTMLElement>('[data-stat-observers]');
+      const speciesEl = document.querySelector<HTMLElement>('[data-stat-species]');
+      const isEs = document.documentElement.lang === 'es' || location.pathname.startsWith('/es');
+      const numFmt = new Intl.NumberFormat(isEs ? 'es-AR' : 'en-US');
+
+      const [obsRes, observersRes, speciesRpcRes] = await Promise.allSettled([
+        supabase.from('observations').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+        supabase.from('community_observers').select('user_id', { count: 'exact', head: true }),
+        supabase.rpc('count_distinct_observed_species'),
+      ]);
+
+      if (obsRes.status === 'fulfilled' && typeof obsRes.value.count === 'number') {
+        if (obsEl) obsEl.textContent = numFmt.format(obsRes.value.count);
+      }
+
+      if (observersRes.status === 'fulfilled' && typeof observersRes.value.count === 'number') {
+        if (observersEl) observersEl.textContent = numFmt.format(observersRes.value.count);
+      }
+
+      let speciesCount: number | null = null;
+      if (speciesRpcRes.status === 'fulfilled' && typeof speciesRpcRes.value.data === 'number' && speciesRpcRes.value.data > 0) {
+        speciesCount = speciesRpcRes.value.data;
+      } else {
+        const { data: idData } = await supabase
+          .from('identifications')
+          .select('scientific_name')
+          .not('scientific_name', 'is', null);
+        if (idData && idData.length > 0) {
+          const unique = new Set(idData.map((r) => r.scientific_name).filter(Boolean));
+          speciesCount = unique.size;
+        }
+      }
+
+      if (speciesCount !== null && speciesEl) {
+        speciesEl.textContent = numFmt.format(speciesCount);
+      }
+    } catch {
+      // Keep fallback values
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadLiveStats);
+  } else {
+    loadLiveStats();
+  }
+</script>
 
 <!-- CTA final -->
 <section class="py-16">

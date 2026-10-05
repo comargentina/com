@@ -45,6 +45,7 @@ export type TaxonHint =
   | 'Animalia.Aves'
   | 'Animalia.Mammalia'
   | 'Animalia.Insecta'
+  | 'Animalia.Insecta.Lepidoptera'
   | 'Fungi';
 
 export interface RunParallelIdentifyOptions {

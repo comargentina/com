@@ -1,5 +1,6 @@
 ---
 import { ALGORITHMS } from '../lib/algorithms';
+import { getLocalizedPath } from '../i18n/utils';
 
 interface Props { lang: 'en' | 'es' }
 const { lang } = Astro.props;
@@ -9,11 +10,11 @@ const ids = Object.keys(ALGORITHMS) as Array<keyof typeof ALGORITHMS>;
 ---
 
 <article class="prose prose-zinc dark:prose-invert max-w-none">
-  <h1>{isEs ? 'Algoritmos de Rastrum' : 'Rastrum Algorithms'}</h1>
+  <h1>{isEs ? 'Algoritmos de COM' : 'COM Algorithms'}</h1>
   <p class="lead text-lg text-zinc-600 dark:text-zinc-400">
     {isEs
-      ? 'Toda superficie ordenada en Rastrum tiene una entrada en este catálogo. La intención es que veas el "por qué" de cada ranking, no solo el resultado.'
-      : 'Every ranked surface in Rastrum has an entry in this catalog. The intent is for you to see the "why" of each ranking, not just the result.'}
+      ? 'Toda superficie ordenada en COM tiene una entrada en este catálogo. La intención es que veas el "por qué" de cada ranking, no solo el resultado.'
+      : 'Every ranked surface in COM has an entry in this catalog. The intent is for you to see the "why" of each ranking, not just the result.'}
   </p>
 
   <p>
@@ -34,13 +35,14 @@ const ids = Object.keys(ALGORITHMS) as Array<keyof typeof ALGORITHMS>;
       ? 'Una palanca para cada entrada: si la quieres apagar, hay un ajuste claro.'
       : 'A lever for every input: if you want to turn it off, there is a clear setting.'}</li>
     <li>{isEs
-      ? 'Sin engagement bait: las superficies de Rastrum no se ordenan por likes ni reacciones.'
-      : 'No engagement bait: Rastrum surfaces are not sorted by likes or reactions.'}</li>
+      ? 'Sin engagement bait: las superficies de COM no se ordenan por likes ni reacciones.'
+      : 'No engagement bait: COM surfaces are not sorted by likes or reactions.'}</li>
   </ul>
 
   {ids.map((id) => {
     const entry = ALGORITHMS[id];
     const copy = isEs ? entry.copy.es : entry.copy.en;
+    const settingsHref = getLocalizedPath(lang, (isEs ? entry.settings_path.es : entry.settings_path.en) + '/');
     return (
       <section class="not-prose mt-10 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-3">
         <header>
@@ -73,7 +75,7 @@ const ids = Object.keys(ALGORITHMS) as Array<keyof typeof ALGORITHMS>;
             {isEs ? '¿Cómo cambio esto?' : 'How do I change this?'}
           </h4>
           <a
-            href={isEs ? entry.settings_path.es + '/' : entry.settings_path.en + '/'}
+            href={settingsHref}
             class="text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
           >
             {copy.settings_label} →

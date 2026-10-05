@@ -9,6 +9,7 @@
  * new ranking is one entry, never a new modal.
  */
 import { ALGORITHMS, type AlgorithmId } from '../lib/algorithms';
+import { getLocalizedPath } from '../i18n/utils';
 
 interface Props {
   lang: 'en' | 'es';
@@ -22,7 +23,7 @@ const inputsHeading = isEs ? 'Entradas usadas' : 'Inputs used';
 const windowHeading = isEs ? 'Ventana de tiempo' : 'Time window';
 const howChangeHeading = isEs ? '¿Cómo cambio esto?' : 'How do I change this?';
 const moreHref = isEs ? '/es/docs/algorithms/' : '/en/docs/algorithms/';
-const moreLabel = isEs ? 'Sobre los algoritmos de Rastrum' : 'About Rastrum algorithms';
+const moreLabel = isEs ? 'Sobre los algoritmos de COM' : 'About COM algorithms';
 const closeLabel = isEs ? 'Cerrar' : 'Close';
 
 // Pre-render the per-algorithm content blocks. The client script reads
@@ -61,7 +62,7 @@ const ids = Object.keys(ALGORITHMS) as AlgorithmId[];
             data-window-es={entry.copy.es.window}
             data-settings-label-en={entry.copy.en.settings_label}
             data-settings-label-es={entry.copy.es.settings_label}
-            data-settings-path={lang === 'es' ? entry.settings_path.es : entry.settings_path.en}
+            data-settings-path={getLocalizedPath(lang, (lang === 'es' ? entry.settings_path.es : entry.settings_path.en) + '/')}
           >
             <div>
               <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1.5">
