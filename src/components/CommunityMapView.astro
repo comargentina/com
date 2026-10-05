@@ -538,7 +538,7 @@ const stringsJson = JSON.stringify({
             const expertBadge = u.is_expert
               ? `<span style="background:#10b981;color:#fff;font-size:9px;padding:1px 4px;border-radius:8px;margin-left:4px">Expert</span>`
               : '';
-            const profileHref = u.username ? `/en/u/${u.username}/` : '#';
+            const profileHref = u.username ? `/${STRINGS.lang}/u/?username=${encodeURIComponent(u.username)}` : '#';
             const avatarContent = u.avatar_url
               ? `<img src="${u.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy">`
               : `<span style="width:36px;height:36px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;flex-shrink:0">${name[0]?.toUpperCase() ?? '?'}</span>`;

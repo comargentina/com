@@ -96,12 +96,13 @@ DECLARE
     'valiente','curioso','brillante','veloz','silencioso','audaz','sereno',
     'agil','fiero','noble','alerta','sagaz','vibrante','tenaz','libre'
   ];
-  -- Mexican/LATAM fauna & flora (ASCII only, no accents or hyphens)
+  -- Argentine fauna & flora (ASCII only, no accents or hyphens)
   especies text[] := ARRAY[
-    'quetzal','ajolote','teporingo','coati','cenzontle','ocelote','tapir',
-    'jaguar','manati','vaquita','guacamaya','tlacuache','armadillo','tejon',
-    'coyote','puma','venado','iguana','boa','tortuga','pelicano','fragata',
-    'colibri','tucan','flamenco','axolotl','cacomixtle','tlalcoyote'
+    'hornero','carpincho','yaguarete','condor','guanaco','vicuna','huemul',
+    'mara','tatu','chaja','flamenco','tucan','chinchilla','puma','coipo',
+    'zorro','aguara','surubi','dorado','jacana','martineta','benteveo',
+    'carpintero','cardenal','lobito','pinguino','choique','nandu','taruca',
+    'monito','tapir','colibri','ceibo','jacaranda','lapacho'
   ];
   gen_username text;
   attempts int := 0;
@@ -3783,10 +3784,11 @@ DECLARE
     'agil','fiero','noble','alerta','sagaz','vibrante','tenaz','libre'
   ];
   especies text[] := ARRAY[
-    'quetzal','ajolote','teporingo','coati','cenzontle','ocelote','tapir',
-    'jaguar','manati','vaquita','guacamaya','tlacuache','armadillo','tejon',
-    'coyote','puma','venado','iguana','boa','tortuga','pelicano','fragata',
-    'colibri','tucan','flamenco','axolotl','cacomixtle','tlalcoyote'
+    'hornero','carpincho','yaguarete','condor','guanaco','vicuna','huemul',
+    'mara','tatu','chaja','flamenco','tucan','chinchilla','puma','coipo',
+    'zorro','aguara','surubi','dorado','jacana','martineta','benteveo',
+    'carpintero','cardenal','lobito','pinguino','choique','nandu','taruca',
+    'monito','tapir','colibri','ceibo','jacaranda','lapacho'
   ];
   rec RECORD;
   gen_username text;
