@@ -526,41 +526,51 @@ const stringsJson = JSON.stringify({
         map.on('click', 'observers-circles', (e) => {
           if (!e.features || e.features.length === 0 || !map) return;
           const feat = e.features[0];
-          const props = feat.properties as {
-            count: number;
-            users: string;
-          };
+          const props = feat.properties as { count: number; users: string };
           const count: number = props.count;
           const users: UserSummary[] = JSON.parse(props.users ?? '[]');
 
+          const obsLabel = STRINGS.lang === 'es' ? 'observaciones' : 'observations';
+
           const lines = users.map(u => {
             const name = u.display_name || u.username || '—';
-            const expert = u.is_expert ? ' ⭐' : '';
-            const obs = STRINGS.lang === 'es'
-              ? `${u.observation_count} obs.`
-              : `${u.observation_count} obs.`;
-            return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0">
-              ${u.avatar_url
-                ? `<img src="${u.avatar_url}" style="width:24px;height:24px;border-radius:50%;object-fit:cover" loading="lazy">`
-                : `<span style="width:24px;height:24px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px">${name[0]?.toUpperCase() ?? '?'}</span>`
-              }
-              <div>
-                <div style="font-weight:600;font-size:13px">${name}${expert}</div>
-                <div style="font-size:11px;opacity:.7">${obs}</div>
+            const handle = u.username ? `@${u.username}` : '';
+            const expertBadge = u.is_expert
+              ? `<span style="background:#10b981;color:#fff;font-size:9px;padding:1px 4px;border-radius:8px;margin-left:4px">Expert</span>`
+              : '';
+            const profileHref = u.username ? `/en/u/${u.username}/` : '#';
+            const avatarContent = u.avatar_url
+              ? `<img src="${u.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" loading="lazy">`
+              : `<span style="width:36px;height:36px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;flex-shrink:0">${name[0]?.toUpperCase() ?? '?'}</span>`;
+
+            return `<a href="${profileHref}" target="_blank" rel="noopener"
+                style="display:flex;align-items:center;gap:10px;padding:7px 2px;text-decoration:none;color:inherit;border-bottom:1px solid #f0f0f0">
+              ${avatarContent}
+              <div style="min-width:0">
+                <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                  ${name}${expertBadge}
+                </div>
+                <div style="font-size:12px;color:#555;margin-top:1px">${handle}</div>
+                <div style="font-size:13px;color:#10b981;font-weight:600;margin-top:2px">
+                  ${u.observation_count} ${obsLabel}
+                </div>
               </div>
-            </div>`;
+            </a>`;
           }).join('');
 
           const more = count > 5
-            ? `<div style="font-size:11px;opacity:.7;margin-top:4px">${STRINGS.lang === 'es' ? `y ${count - 5} más…` : `and ${count - 5} more…`}</div>`
+            ? `<div style="font-size:12px;color:#888;text-align:center;padding:6px 0">
+                ${STRINGS.lang === 'es' ? `y ${count - 5} observador${count - 5 === 1 ? '' : 'es'} más…` : `and ${count - 5} more observer${count - 5 === 1 ? '' : 's'}…`}
+               </div>`
             : '';
 
           const coords = (feat.geometry as GeoJSON.Point).coordinates as [number, number];
-          new maplibre2.Popup({ closeButton: true, maxWidth: '260px' })
+          new maplibre2.Popup({ closeButton: true, maxWidth: '300px' })
             .setLngLat(coords)
-            .setHTML(`<div style="font-family:sans-serif;padding:4px 2px">${lines}${more}</div>`)
+            .setHTML(`<div style="font-family:sans-serif;padding:4px 0;min-width:240px">${lines}${more}</div>`)
             .addTo(map);
         });
+
 
         map.on('mouseenter', 'observers-circles', () => {
           if (map) map.getCanvas().style.cursor = 'pointer';
