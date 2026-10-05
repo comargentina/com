@@ -159,6 +159,9 @@ const stringsJson = JSON.stringify({
 
   interface ObserverRow {
     id: string;
+    username: string | null;
+    display_name: string | null;
+    avatar_url: string | null;
     country_code: string | null;
     is_expert: boolean;
     observation_count: number;
@@ -266,7 +269,7 @@ const stringsJson = JSON.stringify({
     if (isAuthenticated) {
       const { data, error } = await supabase
         .from('community_observers_with_centroid')
-        .select('id, country_code, is_expert, observation_count, species_count, obs_count_7d, obs_count_30d, centroid_lat, centroid_lng');
+        .select('id, username, display_name, avatar_url, country_code, is_expert, observation_count, species_count, obs_count_7d, obs_count_30d, centroid_lat, centroid_lng');
       if (error) throw error;
       return (data ?? []) as ObserverRow[];
     }
@@ -274,7 +277,7 @@ const stringsJson = JSON.stringify({
     // Anon: no centroid, just country-level data
     const { data, error } = await supabase
       .from('community_observers')
-      .select('id, country_code, is_expert, observation_count, species_count, obs_count_7d, obs_count_30d');
+      .select('id, username, display_name, avatar_url, country_code, is_expert, observation_count, species_count, obs_count_7d, obs_count_30d');
     if (error) throw error;
     return (data ?? []) as ObserverRow[];
   }
@@ -287,15 +290,25 @@ const stringsJson = JSON.stringify({
     return filtered;
   }
 
+
+  interface UserSummary {
+    username: string | null;
+    display_name: string | null;
+    avatar_url: string | null;
+    observation_count: number;
+    is_expert: boolean;
+  }
+
   interface HexCell {
     key: string;
     center: [number, number]; // [lng, lat]
     count: number;
     weight: number;
+    users: UserSummary[];
   }
 
   function aggregateToHex(rows: ObserverRow[], sortField: string): HexCell[] {
-    const cells = new Map<string, { count: number; weight: number }>();
+    const cells = new Map<string, { count: number; weight: number; users: UserSummary[] }>();
 
     for (const row of rows) {
       let lat = row.centroid_lat;
@@ -304,13 +317,12 @@ const stringsJson = JSON.stringify({
       // Fallback to country center when personal centroid is not yet computed.
       if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
         const cc = row.country_code?.toUpperCase();
-        const fallback = cc ? COUNTRY_CENTERS[cc] : null;
-        if (!fallback) continue;
+        const fallback = cc ? COUNTRY_CENTERS[cc] : COUNTRY_CENTERS['AR'];
         [lat, lng] = fallback;
       }
 
       const key = hexKey(lat, lng);
-      const existing = cells.get(key) ?? { count: 0, weight: 0 };
+      const existing = cells.get(key) ?? { count: 0, weight: 0, users: [] };
       existing.count += 1;
 
       // Weight by the selected sort metric
@@ -319,6 +331,17 @@ const stringsJson = JSON.stringify({
       else if (sortField === 'obs_count_7d') w = row.obs_count_7d;
       else if (sortField === 'obs_count_30d') w = row.obs_count_30d;
       existing.weight += w;
+
+      // Keep up to 5 user summaries per cell for popup display
+      if (existing.users.length < 5) {
+        existing.users.push({
+          username: row.username,
+          display_name: row.display_name,
+          avatar_url: row.avatar_url,
+          observation_count: row.observation_count,
+          is_expert: row.is_expert,
+        });
+      }
 
       cells.set(key, existing);
     }
@@ -332,6 +355,7 @@ const stringsJson = JSON.stringify({
           center: hexCenter(key),
           count: cell.count,
           weight: cell.weight,
+          users: cell.users,
         });
       }
     }
@@ -350,16 +374,17 @@ const stringsJson = JSON.stringify({
         properties: {
           count: cell.count,
           weight: cell.weight,
+          users: JSON.stringify(cell.users),
         },
       })),
     };
   }
 
-  function updateCountBadge(rows: ObserverRow[]) {
-    const total = rows.length;
-    countBadge.textContent = STRINGS.observersInView.replace('{count}', String(total));
-    countBadge.classList.toggle('hidden', total === 0);
+  function updateCountBadge(count: number) {
+    countBadge.textContent = STRINGS.observersInView.replace('{count}', String(count));
+    countBadge.classList.toggle('hidden', count === 0);
   }
+
 
   async function renderMap() {
     loadingEl.classList.remove('hidden');
@@ -373,7 +398,8 @@ const stringsJson = JSON.stringify({
       }
 
       const filtered = filterRows(allRows);
-      updateCountBadge(filtered);
+      const cells = aggregateToHex(filtered, sortEl.value);
+      updateCountBadge(filtered.length);
 
       if (filtered.length === 0) {
         loadingEl.classList.add('hidden');
@@ -407,7 +433,6 @@ const stringsJson = JSON.stringify({
 
       // aggregateToHex falls back to country center when personal centroid is absent,
       // so always attempt to render the heatmap.
-      const cells = aggregateToHex(filtered, sortEl.value);
       const geojson = buildGeoJSON(cells);
 
       const src = map.getSource('observers') as import('maplibre-gl').GeoJSONSource | undefined;
@@ -463,9 +488,9 @@ const stringsJson = JSON.stringify({
           paint: {
             'circle-radius': [
               'interpolate', ['linear'], ['get', 'count'],
-              1, 8,
-              10, 16,
-              50, 28,
+              1, 10,
+              10, 18,
+              50, 30,
             ],
             'circle-color': [
               'interpolate', ['linear'], ['get', 'count'],
@@ -473,8 +498,8 @@ const stringsJson = JSON.stringify({
               10, '#f59e0b',
               50, '#ef4444',
             ],
-            'circle-opacity': 0.7,
-            'circle-stroke-width': 1,
+            'circle-opacity': 0.85,
+            'circle-stroke-width': 2,
             'circle-stroke-color': '#ffffff',
           },
         });
@@ -487,13 +512,61 @@ const stringsJson = JSON.stringify({
           minzoom: 4,
           layout: {
             'text-field': ['get', 'count'],
-            'text-size': 11,
+            'text-size': 12,
             'text-font': ['Open Sans Bold'],
             'text-allow-overlap': true,
           },
           paint: {
             'text-color': '#ffffff',
           },
+        });
+
+        // Click popup — show observer info when clicking a circle
+        const maplibre2 = (await import('maplibre-gl')).default;
+        map.on('click', 'observers-circles', (e) => {
+          if (!e.features || e.features.length === 0 || !map) return;
+          const feat = e.features[0];
+          const props = feat.properties as {
+            count: number;
+            users: string;
+          };
+          const count: number = props.count;
+          const users: UserSummary[] = JSON.parse(props.users ?? '[]');
+
+          const lines = users.map(u => {
+            const name = u.display_name || u.username || '—';
+            const expert = u.is_expert ? ' ⭐' : '';
+            const obs = STRINGS.lang === 'es'
+              ? `${u.observation_count} obs.`
+              : `${u.observation_count} obs.`;
+            return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0">
+              ${u.avatar_url
+                ? `<img src="${u.avatar_url}" style="width:24px;height:24px;border-radius:50%;object-fit:cover" loading="lazy">`
+                : `<span style="width:24px;height:24px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px">${name[0]?.toUpperCase() ?? '?'}</span>`
+              }
+              <div>
+                <div style="font-weight:600;font-size:13px">${name}${expert}</div>
+                <div style="font-size:11px;opacity:.7">${obs}</div>
+              </div>
+            </div>`;
+          }).join('');
+
+          const more = count > 5
+            ? `<div style="font-size:11px;opacity:.7;margin-top:4px">${STRINGS.lang === 'es' ? `y ${count - 5} más…` : `and ${count - 5} more…`}</div>`
+            : '';
+
+          const coords = (feat.geometry as GeoJSON.Point).coordinates as [number, number];
+          new maplibre2.Popup({ closeButton: true, maxWidth: '260px' })
+            .setLngLat(coords)
+            .setHTML(`<div style="font-family:sans-serif;padding:4px 2px">${lines}${more}</div>`)
+            .addTo(map);
+        });
+
+        map.on('mouseenter', 'observers-circles', () => {
+          if (map) map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'observers-circles', () => {
+          if (map) map.getCanvas().style.cursor = '';
         });
       }
 
@@ -515,9 +588,10 @@ const stringsJson = JSON.stringify({
     }
   }
 
+
   function onFilterChange() {
     const filtered = filterRows(allRows);
-    updateCountBadge(filtered);
+    updateCountBadge(filtered.length);
 
     if (!map) return;
 

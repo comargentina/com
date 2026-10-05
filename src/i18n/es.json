@@ -605,7 +605,7 @@
       "cta": "Ver Mapa de observaciones →"
     },
     "map_observers_in_view": "{count} observadores en vista",
-    "map_min_cluster": "Las áreas con menos de 3 observadores se ocultan por privacidad.",
+    "map_min_cluster": "Los observadores sin ubicación exacta se muestran en el centro aproximado de su país.",
     "map_sign_in_hint": "Inicia sesión para ver el mapa de calor completo.",
     "map_loading": "Cargando datos de observadores…",
     "map_no_data": "Aún no hay datos de observadores disponibles.",

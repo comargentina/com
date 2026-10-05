@@ -605,7 +605,7 @@
       "cta": "See Observations map →"
     },
     "map_observers_in_view": "{count} observers in view",
-    "map_min_cluster": "Areas with fewer than 3 observers are hidden for privacy.",
+    "map_min_cluster": "Observers without exact location are shown at their country's approximate center.",
     "map_sign_in_hint": "Sign in to see the full heatmap.",
     "map_loading": "Loading observer data…",
     "map_no_data": "No observer data available yet.",
