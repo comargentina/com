@@ -185,6 +185,32 @@ const stringsJson = JSON.stringify({
 
   const MIN_OBSERVERS_PER_CELL = 1;
 
+  // Fallback country centers used when a user has no personal centroid yet.
+  // Coordinates are approximate geographic centers of each country.
+  const COUNTRY_CENTERS: Record<string, [number, number]> = {
+    AR: [-34.6, -63.6],
+    BR: [-14.2, -51.9],
+    CL: [-35.7, -71.5],
+    UY: [-32.5, -55.8],
+    PY: [-23.4, -58.4],
+    BO: [-16.3, -63.6],
+    PE: [-9.2, -75.0],
+    EC: [-1.8, -78.2],
+    CO: [4.6, -74.3],
+    VE: [8.0, -66.6],
+    MX: [23.6, -102.5],
+    GT: [15.8, -90.2],
+    HN: [15.2, -86.2],
+    SV: [13.8, -88.9],
+    NI: [12.9, -85.2],
+    CR: [9.7, -83.8],
+    PA: [8.5, -80.8],
+    CU: [22.0, -80.0],
+    DO: [18.7, -70.2],
+    US: [37.1, -95.7],
+    ES: [40.5, -3.7],
+  };
+
   const root = document.getElementById('community-map-root');
   if (!root) throw new Error('CommunityMapView: missing #community-map-root');
   const STRINGS: Strings = JSON.parse(root.dataset.strings ?? '{}');
@@ -272,9 +298,16 @@ const stringsJson = JSON.stringify({
     const cells = new Map<string, { count: number; weight: number }>();
 
     for (const row of rows) {
-      const lat = row.centroid_lat;
-      const lng = row.centroid_lng;
-      if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      let lat = row.centroid_lat;
+      let lng = row.centroid_lng;
+
+      // Fallback to country center when personal centroid is not yet computed.
+      if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+        const cc = row.country_code?.toUpperCase();
+        const fallback = cc ? COUNTRY_CENTERS[cc] : null;
+        if (!fallback) continue;
+        [lat, lng] = fallback;
+      }
 
       const key = hexKey(lat, lng);
       const existing = cells.get(key) ?? { count: 0, weight: 0 };
@@ -290,7 +323,7 @@ const stringsJson = JSON.stringify({
       cells.set(key, existing);
     }
 
-    // Privacy: only include cells with >= MIN_OBSERVERS_PER_CELL
+    // Only include cells with >= MIN_OBSERVERS_PER_CELL
     const result: HexCell[] = [];
     for (const [key, cell] of cells) {
       if (cell.count >= MIN_OBSERVERS_PER_CELL) {
@@ -352,8 +385,6 @@ const stringsJson = JSON.stringify({
         signInHintEl.classList.remove('hidden');
       }
 
-      const hasCentroids = filtered.some(r => r.centroid_lat != null && r.centroid_lng != null);
-
       if (!map) {
         const maplibre = (await import('maplibre-gl')).default;
         const { COLON_DEFAULT_CENTER } = await import('../lib/media-helpers');
@@ -374,104 +405,108 @@ const stringsJson = JSON.stringify({
 
       loadingEl.classList.add('hidden');
 
-      // If we have centroid data, render the heatmap
-      if (hasCentroids) {
-        const cells = aggregateToHex(filtered, sortEl.value);
-        const geojson = buildGeoJSON(cells);
+      // aggregateToHex falls back to country center when personal centroid is absent,
+      // so always attempt to render the heatmap.
+      const cells = aggregateToHex(filtered, sortEl.value);
+      const geojson = buildGeoJSON(cells);
 
-        // Update or add source
-        const src = map.getSource('observers') as import('maplibre-gl').GeoJSONSource | undefined;
-        if (src) {
-          src.setData(geojson);
-        } else {
-          map.addSource('observers', {
-            type: 'geojson',
-            data: geojson,
-          });
+      const src = map.getSource('observers') as import('maplibre-gl').GeoJSONSource | undefined;
+      if (src) {
+        src.setData(geojson);
+      } else {
+        map.addSource('observers', {
+          type: 'geojson',
+          data: geojson,
+        });
 
-          // Heatmap layer
-          map.addLayer({
-            id: 'observers-heat',
-            type: 'heatmap',
-            source: 'observers',
-            paint: {
-              'heatmap-weight': [
-                'interpolate', ['linear'], ['get', 'weight'],
-                0, 0,
-                100, 1,
-              ],
-              'heatmap-intensity': [
-                'interpolate', ['linear'], ['zoom'],
-                0, 0.5,
-                9, 2,
-              ],
-              'heatmap-color': [
-                'interpolate', ['linear'], ['heatmap-density'],
-                0, 'rgba(16,185,129,0)',
-                0.2, 'rgba(16,185,129,0.4)',
-                0.4, 'rgba(52,211,153,0.6)',
-                0.6, 'rgba(251,191,36,0.7)',
-                0.8, 'rgba(245,158,11,0.8)',
-                1, 'rgba(239,68,68,0.9)',
-              ],
-              'heatmap-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                0, 15,
-                6, 30,
-                9, 50,
-              ],
-              'heatmap-opacity': 0.8,
-            },
-          });
+        // Heatmap layer
+        map.addLayer({
+          id: 'observers-heat',
+          type: 'heatmap',
+          source: 'observers',
+          paint: {
+            'heatmap-weight': [
+              'interpolate', ['linear'], ['get', 'weight'],
+              0, 0,
+              100, 1,
+            ],
+            'heatmap-intensity': [
+              'interpolate', ['linear'], ['zoom'],
+              0, 0.5,
+              9, 2,
+            ],
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0, 'rgba(16,185,129,0)',
+              0.2, 'rgba(16,185,129,0.4)',
+              0.4, 'rgba(52,211,153,0.6)',
+              0.6, 'rgba(251,191,36,0.7)',
+              0.8, 'rgba(245,158,11,0.8)',
+              1, 'rgba(239,68,68,0.9)',
+            ],
+            'heatmap-radius': [
+              'interpolate', ['linear'], ['zoom'],
+              0, 15,
+              6, 30,
+              9, 50,
+            ],
+            'heatmap-opacity': 0.8,
+          },
+        });
 
-          // Circle layer for zoomed-in view
-          map.addLayer({
-            id: 'observers-circles',
-            type: 'circle',
-            source: 'observers',
-            minzoom: 7,
-            paint: {
-              'circle-radius': [
-                'interpolate', ['linear'], ['get', 'count'],
-                3, 8,
-                10, 16,
-                50, 28,
-              ],
-              'circle-color': [
-                'interpolate', ['linear'], ['get', 'count'],
-                3, '#10b981',
-                10, '#f59e0b',
-                50, '#ef4444',
-              ],
-              'circle-opacity': 0.7,
-              'circle-stroke-width': 1,
-              'circle-stroke-color': '#ffffff',
-            },
-          });
+        // Circle layer for zoomed-in view
+        map.addLayer({
+          id: 'observers-circles',
+          type: 'circle',
+          source: 'observers',
+          minzoom: 4,
+          paint: {
+            'circle-radius': [
+              'interpolate', ['linear'], ['get', 'count'],
+              1, 8,
+              10, 16,
+              50, 28,
+            ],
+            'circle-color': [
+              'interpolate', ['linear'], ['get', 'count'],
+              1, '#10b981',
+              10, '#f59e0b',
+              50, '#ef4444',
+            ],
+            'circle-opacity': 0.7,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#ffffff',
+          },
+        });
 
-          // Count labels on circles
-          map.addLayer({
-            id: 'observers-labels',
-            type: 'symbol',
-            source: 'observers',
-            minzoom: 7,
-            layout: {
-              'text-field': ['get', 'count'],
-              'text-size': 11,
-              'text-font': ['Open Sans Bold'],
-              'text-allow-overlap': true,
-            },
-            paint: {
-              'text-color': '#ffffff',
-            },
-          });
-        }
+        // Count labels on circles
+        map.addLayer({
+          id: 'observers-labels',
+          type: 'symbol',
+          source: 'observers',
+          minzoom: 4,
+          layout: {
+            'text-field': ['get', 'count'],
+            'text-size': 11,
+            'text-font': ['Open Sans Bold'],
+            'text-allow-overlap': true,
+          },
+          paint: {
+            'text-color': '#ffffff',
+          },
+        });
+      }
 
+      if (cells.length > 0) {
         privacyNoteEl.classList.remove('hidden');
-      } else if (!isAuthenticated) {
-        // No centroids for anon — show sign-in hint, map still renders
+      } else {
+        noDataEl.classList.remove('hidden');
+      }
+
+      if (!isAuthenticated) {
         signInHintEl.classList.remove('hidden');
       }
+
     } catch (err) {
       loadingEl.classList.add('hidden');
       const msg = err instanceof Error ? err.message : String(err);
@@ -486,25 +521,20 @@ const stringsJson = JSON.stringify({
 
     if (!map) return;
 
-    const hasCentroids = filtered.some(r => r.centroid_lat != null && r.centroid_lng != null);
-    if (hasCentroids) {
-      const cells = aggregateToHex(filtered, sortEl.value);
-      const geojson = buildGeoJSON(cells);
-      const src = map.getSource('observers') as import('maplibre-gl').GeoJSONSource | undefined;
-      if (src) {
-        src.setData(geojson);
-      }
+    const cells = aggregateToHex(filtered, sortEl.value);
+    const geojson = buildGeoJSON(cells);
+    const src = map.getSource('observers') as import('maplibre-gl').GeoJSONSource | undefined;
+    if (src) {
+      src.setData(geojson);
+    }
+    if (cells.length > 0) {
       noDataEl.classList.add('hidden');
       privacyNoteEl.classList.remove('hidden');
     } else {
-      const src = map.getSource('observers') as import('maplibre-gl').GeoJSONSource | undefined;
-      if (src) {
-        src.setData({ type: 'FeatureCollection', features: [] });
-      }
+      privacyNoteEl.classList.add('hidden');
       if (filtered.length === 0) {
         noDataEl.classList.remove('hidden');
       }
-      privacyNoteEl.classList.add('hidden');
     }
   }
 
