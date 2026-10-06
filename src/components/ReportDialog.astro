@@ -18,6 +18,11 @@ interface Props {
 const { lang } = Astro.props;
 const tr = t(lang);
 const reportTr = tr.socialgraph.report;
+
+const en = t('en');
+const es = t('es');
+const reportEn = en.socialgraph.report;
+const reportEs = es.socialgraph.report;
 ---
 
 <div
@@ -31,7 +36,7 @@ const reportTr = tr.socialgraph.report;
   <div class="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
     <header class="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
       <h2 id="rastrum-report-title" class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-        <span data-rd-title-text>{reportTr.title.replace('{{target}}', '')}</span>
+        <span data-rd-title-text data-i18n data-en={reportEn.title.replace('{{target}}', '')} data-es={reportEs.title.replace('{{target}}', '')}>{reportTr.title.replace('{{target}}', '')}</span>
         <span data-rd-target-label class="ml-1 text-zinc-600 dark:text-zinc-400 font-normal"></span>
       </h2>
     </header>
@@ -39,16 +44,16 @@ const reportTr = tr.socialgraph.report;
     <form id="rastrum-report-form" class="px-5 py-4 space-y-4">
       <fieldset class="space-y-1.5">
         <legend class="text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
-          {lang === 'es' ? 'Motivo' : 'Reason'}
+          <span data-i18n data-en="Reason" data-es="Motivo">{lang === 'es' ? 'Motivo' : 'Reason'}</span>
         </legend>
         {[
-          ['spam',              reportTr.reasons.spam],
-          ['harassment',        reportTr.reasons.harassment],
-          ['wrong_id',          reportTr.reasons.wrong_id],
-          ['privacy_violation', reportTr.reasons.privacy_violation],
-          ['copyright',         reportTr.reasons.copyright],
-          ['other',             reportTr.reasons.other],
-        ].map(([value, label]) => (
+          ['spam',              reportEn.reasons.spam, reportEs.reasons.spam, reportTr.reasons.spam],
+          ['harassment',        reportEn.reasons.harassment, reportEs.reasons.harassment, reportTr.reasons.harassment],
+          ['wrong_id',          reportEn.reasons.wrong_id, reportEs.reasons.wrong_id, reportTr.reasons.wrong_id],
+          ['privacy_violation', reportEn.reasons.privacy_violation, reportEs.reasons.privacy_violation, reportTr.reasons.privacy_violation],
+          ['copyright',         reportEn.reasons.copyright, reportEs.reasons.copyright, reportTr.reasons.copyright],
+          ['other',             reportEn.reasons.other, reportEs.reasons.other, reportTr.reasons.other],
+        ].map(([value, labelEn, labelEs, labelCur]) => (
           <label class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800/60 cursor-pointer transition-colors">
             <input
               type="radio"
@@ -57,14 +62,14 @@ const reportTr = tr.socialgraph.report;
               required
               class="h-4 w-4 text-emerald-700 focus:ring-emerald-500 border-zinc-300 dark:border-zinc-700"
             />
-            <span class="text-sm text-zinc-800 dark:text-zinc-200">{label}</span>
+            <span class="text-sm text-zinc-800 dark:text-zinc-200" data-i18n data-en={labelEn} data-es={labelEs}>{labelCur}</span>
           </label>
         ))}
       </fieldset>
 
       <div class="space-y-1.5">
         <label for="rastrum-report-note" class="text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
-          {lang === 'es' ? 'Nota (opcional)' : 'Note (optional)'}
+          <span data-i18n data-en="Note (optional)" data-es="Nota (opcional)">{lang === 'es' ? 'Nota (opcional)' : 'Note (optional)'}</span>
         </label>
         <textarea
           id="rastrum-report-note"
@@ -72,13 +77,16 @@ const reportTr = tr.socialgraph.report;
           rows="3"
           maxlength="1000"
           placeholder={reportTr.note_placeholder}
+          data-i18n-placeholder
+          data-en-placeholder={reportEn.note_placeholder}
+          data-es-placeholder={reportEs.note_placeholder}
           class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
         ></textarea>
       </div>
 
       <p data-rd-error class="hidden text-sm text-rose-600 dark:text-rose-400"></p>
       <p data-rd-thanks class="hidden rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-900/60">
-        {reportTr.thanks}
+        <span data-i18n data-en={reportEn.thanks} data-es={reportEs.thanks}>{reportTr.thanks}</span>
       </p>
 
       <footer class="flex items-center justify-end gap-2 pt-2">
@@ -87,14 +95,14 @@ const reportTr = tr.socialgraph.report;
           data-rd-cancel
           class="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
         >
-          {lang === 'es' ? 'Cancelar' : 'Cancel'}
+          <span data-i18n data-en="Cancel" data-es="Cancelar">{lang === 'es' ? 'Cancelar' : 'Cancel'}</span>
         </button>
         <button
           type="submit"
           data-rd-submit
           class="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-emerald-700 hover:bg-emerald-800 px-5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {reportTr.submit}
+          <span data-i18n data-en={reportEn.submit} data-es={reportEs.submit}>{reportTr.submit}</span>
         </button>
       </footer>
     </form>
@@ -140,6 +148,16 @@ const reportTr = tr.socialgraph.report;
       if (targetLabelEl) {
         targetLabelEl.textContent = dialog!.dataset.targetLabel ?? '';
       }
+      // Ensure strings match current document language
+      const curLang = document.documentElement.lang === 'es' ? 'es' : 'en';
+      dialog!.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
+        const text = el.getAttribute(`data-${curLang}`);
+        if (text) el.textContent = text;
+      });
+      dialog!.querySelectorAll<HTMLTextAreaElement>('[data-i18n-placeholder]').forEach((el) => {
+        const ph = el.getAttribute(`data-${curLang}-placeholder`);
+        if (ph) el.placeholder = ph;
+      });
       // Focus the first reason radio so keyboard users land in-form.
       const first = dialog!.querySelector<HTMLElement>('input[type="radio"]')
         ?? focusableEls()[0];
@@ -201,8 +219,8 @@ const reportTr = tr.socialgraph.report;
         setTimeout(close, 1400);
       } catch (err) {
         if (errorEl) {
-          const lang = dialog.dataset.lang ?? 'en';
-          errorEl.textContent = lang === 'es'
+          const curLang = document.documentElement.lang === 'es' ? 'es' : 'en';
+          errorEl.textContent = curLang === 'es'
             ? 'No se pudo enviar el reporte. Intenta de nuevo.'
             : "Couldn't submit the report. Try again.";
           errorEl.classList.remove('hidden');

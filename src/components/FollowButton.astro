@@ -29,25 +29,41 @@ interface Props {
 
 const { lang, targetUserId = '' } = Astro.props;
 const tr = t(lang);
+const en = t('en');
+const es = t('es');
 const signInPath = getLocalizedPath(lang, routes.signIn[lang] + '/');
+const signInPathEn = getLocalizedPath('en', routes.signIn.en + '/');
+const signInPathEs = getLocalizedPath('es', routes.signIn.es + '/');
 ---
 
 <div
   class="rastrum-follow-btn inline-flex"
   data-target-id={targetUserId}
   data-sign-in-path={signInPath}
+  data-sign-in-path-en={signInPathEn}
+  data-sign-in-path-es={signInPathEs}
   data-label-follow={tr.social.follow}
   data-label-following={tr.social.following}
   data-label-requested={tr.socialgraph.follow.requested}
   data-label-signin={tr.social.signin_to_follow}
   data-label-loading={tr.social.loading}
+  data-en-label-follow={en.social.follow}
+  data-en-label-following={en.social.following}
+  data-en-label-requested={en.socialgraph.follow.requested}
+  data-en-label-signin={en.social.signin_to_follow}
+  data-en-label-loading={en.social.loading}
+  data-es-label-follow={es.social.follow}
+  data-es-label-following={es.social.following}
+  data-es-label-requested={es.socialgraph.follow.requested}
+  data-es-label-signin={es.social.signin_to_follow}
+  data-es-label-loading={es.social.loading}
 >
   <button
     type="button"
     data-state="hidden"
     class="follow-btn hidden min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold border transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
   >
-    <span class="follow-label">{tr.social.follow}</span>
+    <span class="follow-label" data-i18n data-en={en.social.follow} data-es={es.social.follow}>{tr.social.follow}</span>
   </button>
 </div>
 
@@ -85,10 +101,15 @@ const signInPath = getLocalizedPath(lang, routes.signIn[lang] + '/');
     btn.classList.add(...STATE_CLASSES[state]);
     const labelEl = btn.querySelector('.follow-label') as HTMLSpanElement | null;
     if (!labelEl) return;
-    if (state === 'following') labelEl.textContent = root.dataset.labelFollowing ?? '';
-    else if (state === 'requested') labelEl.textContent = root.dataset.labelRequested ?? '';
-    else if (state === 'follow') labelEl.textContent = root.dataset.labelFollow ?? '';
-    else labelEl.textContent = root.dataset.labelSignin ?? '';
+    const curLang = document.documentElement.lang === 'es' ? 'es' : 'en';
+    const getVal = (key: string) => {
+      const camel = key.charAt(0).toUpperCase() + key.slice(1);
+      return (curLang === 'es' ? root.dataset[`esLabel${camel}`] : root.dataset[`enLabel${camel}`]) || root.dataset[`label${camel}`] || '';
+    };
+    if (state === 'following') labelEl.textContent = getVal('following');
+    else if (state === 'requested') labelEl.textContent = getVal('requested');
+    else if (state === 'follow') labelEl.textContent = getVal('follow');
+    else labelEl.textContent = getVal('signin');
   }
 
   async function readExisting(supabase: ReturnType<typeof getSupabase>, follower: string, followee: string): Promise<'none' | 'pending' | 'accepted'> {
@@ -119,7 +140,8 @@ const signInPath = getLocalizedPath(lang, routes.signIn[lang] + '/');
     if (!user) {
       paint(btn, 'signin', root);
       btn.addEventListener('click', () => {
-        const path = root.dataset.signInPath ?? '/';
+        const curLang = document.documentElement.lang === 'es' ? 'es' : 'en';
+        const path = (curLang === 'es' ? root.dataset.signInPathEs : root.dataset.signInPathEn) || root.dataset.signInPath || '/';
         window.location.href = path;
       });
       return;

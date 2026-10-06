@@ -24,7 +24,7 @@ import ShareObsView from '../../../components/ShareObsView.astro';
 const lang: 'en' | 'es' = 'en';
 ---
 
-<BaseLayout title="Observation — Rastrum" description="View a shared biodiversity observation from the Rastrum community — species identification, photo, audio, GPS location, and observer notes." lang={lang}>
+<BaseLayout title="Observation — COM" description="View a shared biodiversity observation from the COM Argentina community — species identification, photo, audio, GPS location, and observer notes." lang={lang}>
 
   <!-- Detect user language preference BEFORE first paint so strings render correctly.
        This page is locale-neutral (no /en/ or /es/ prefix) so lang is always 'en'
@@ -50,10 +50,30 @@ const lang: 'en' | 'es' = 'en';
           var ph = el.getAttribute('data-' + lang + '-placeholder');
           if (ph) el.setAttribute('placeholder', ph);
         });
+        // Swap title attributes
+        document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+          var title = el.getAttribute('data-' + lang + '-title');
+          if (title) el.setAttribute('title', title);
+        });
+        // Swap aria-label attributes
+        document.querySelectorAll('[data-i18n-aria-label]').forEach(function (el) {
+          var aria = el.getAttribute('data-' + lang + '-aria-label');
+          if (aria) el.setAttribute('aria-label', aria);
+        });
         // Swap hrefs
         document.querySelectorAll('[data-href-en][data-href-es]').forEach(function (el) {
           var href = el.getAttribute('data-href-' + lang);
           if (href) el.setAttribute('href', href);
+        });
+        // Sync follow buttons
+        document.querySelectorAll('.rastrum-follow-btn').forEach(function (root) {
+          var btn = root.querySelector('.follow-btn');
+          if (!btn) return;
+          var state = btn.getAttribute('data-state');
+          var labelEl = btn.querySelector('.follow-label');
+          if (!labelEl) return;
+          var text = root.getAttribute('data-' + lang + '-label-' + state) || root.getAttribute('data-label-' + state);
+          if (text) labelEl.textContent = text;
         });
         // Sync header lang-toggle
         var langToggle = document.getElementById('lang-toggle');
@@ -64,8 +84,8 @@ const lang: 'en' | 'es' = 'en';
         }
         // Fix sign-in link lang prefix
         var signInLink = document.getElementById('ci-signin-link');
-        if (signInLink) signInLink.setAttribute('href', '/' + lang + '/sign-in/');
-        // Fix Ask Rastrum link lang prefix (built with static /en/chat/)
+        if (signInLink) signInLink.setAttribute('href', '/' + lang + '/' + (lang === 'es' ? 'ingresar' : 'sign-in') + '/');
+        // Fix Ask COM link lang prefix (built with static /en/chat/)
         var askLink = document.getElementById('ask-rastrum-link');
         if (askLink && lang === 'es') {
           var href = askLink.getAttribute('href') || '';
@@ -258,34 +278,26 @@ const lang: 'en' | 'es' = 'en';
       const shareBtn = document.getElementById('obs-share-btn');
       if (shareBtn) {
         const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
-        shareBtn.dataset.shareTitle = speciesName + ' — Rastrum';
+        const pageTitle = speciesName + ' — COM';
+        document.title = pageTitle;
+        shareBtn.dataset.shareTitle = pageTitle;
         shareBtn.dataset.shareText  = lang === 'es'
-          ? `Observación de ${speciesName} en Rastrum`
-          : `Observation of ${speciesName} on Rastrum`;
-        // #714: point the share URL at the share-card Edge Function so that
-        // social crawlers receive server-rendered OG meta + SVG card image
-        // instead of the generic static fallback served by GitHub Pages.
-        const supabaseUrl = getSupabaseUrl();
-        const shareCardUrl = supabaseUrl
-          ? `${supabaseUrl}/functions/v1/share-card?obs_id=${encodeURIComponent(id)}`
-          : window.location.href;
-        shareBtn.dataset.shareUrl = shareCardUrl;
+          ? `Observación de ${speciesName} en COM Argentina`
+          : `Observation of ${speciesName} on COM Argentina`;
+        shareBtn.dataset.shareUrl = window.location.href;
 
         // Also rewrite the og: tags in <head> at runtime so JS-capable
         // previewers (Notion, Discord desktop) see the dynamic card.
+        const supabaseUrl = getSupabaseUrl();
         const imgUrl = supabaseUrl
           ? `${supabaseUrl}/functions/v1/share-card?obs_id=${encodeURIComponent(id)}&format=svg`
           : null;
         if (imgUrl) {
           document.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.setAttribute('content', imgUrl);
           document.querySelector<HTMLMetaElement>('meta[name="twitter:image"]')?.setAttribute('content', imgUrl);
-          document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', speciesName + ' — Rastrum');
-          document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', speciesName + ' — Rastrum');
-          // og:url → share-card URL (social previewers use this to unfurl the right page)
-          document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute('content', shareCardUrl);
-          // canonical stays pointing to rastrum.org — canonical is for Google,
-          // not social previewers. Changing it to the edge-function URL would
-          // confuse Search crawlers. (Nyx review note on PR #715)
+          document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', pageTitle);
+          document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', pageTitle);
+          document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute('content', window.location.href);
         }
       }
       const date = new Date(obs.observed_at as string);

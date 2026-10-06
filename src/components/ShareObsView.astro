@@ -72,6 +72,7 @@ const labelsEn = {
   establishment:     ve.establishment,
   observer:          ve.observer,
   sensitive:         ve.sensitive,
+  reportBtn:         ve.report_btn,
   reactionsHelp:     ve.reactions_help,
   communityIds:      ve.community_ids,
   noSuggestions:     ve.no_suggestions,
@@ -97,6 +98,7 @@ const labelsEs = {
   establishment:     vs.establishment,
   observer:          vs.observer,
   sensitive:         vs.sensitive,
+  reportBtn:         vs.report_btn,
   reactionsHelp:     vs.reactions_help,
   communityIds:      vs.community_ids,
   noSuggestions:     vs.no_suggestions,
@@ -174,6 +176,12 @@ const labelsEs = {
                 class="hidden inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
                 aria-label={labels.reportBtn}
                 title={labels.reportBtn}
+                data-i18n-aria-label
+                data-i18n-title
+                data-en-aria-label={labelsEn.reportBtn}
+                data-es-aria-label={labelsEs.reportBtn}
+                data-en-title={labelsEn.reportBtn}
+                data-es-title={labelsEs.reportBtn}
               >
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4a2 2 0 0 1 2-2h11l4 6-4 6H6"/><line x1="4" y1="22" x2="4" y2="14"/></svg>
               </button>
