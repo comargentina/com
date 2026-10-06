@@ -353,9 +353,35 @@ export async function reportTarget(args: {
   reason: ReportReason;
   note?: string;
 }) {
-  const { data, error } = await getSupabase().functions.invoke('report', { body: args });
-  if (error) throw error;
-  return data as { ok: boolean; id: string };
+  const sb = getSupabase();
+  try {
+    const { data, error } = await sb.functions.invoke('report', { body: args });
+    if (!error && data && (data as { ok?: boolean }).ok) {
+      return data as { ok: boolean; id: string };
+    }
+  } catch {
+    // Edge function unavailable, fallback to direct DB insert
+  }
+
+  const user = await getCachedUser();
+  if (!user) {
+    throw new Error('must_be_authenticated');
+  }
+
+  const { data: inserted, error: dbErr } = await sb
+    .from('reports')
+    .insert({
+      reporter_id: user.id,
+      target_type: args.target,
+      target_id: args.target_id,
+      reason: args.reason,
+      note: args.note || null,
+    })
+    .select('id')
+    .single();
+
+  if (dbErr) throw dbErr;
+  return { ok: true, id: inserted.id };
 }
 
 export async function blockUser(targetUserId: string) {

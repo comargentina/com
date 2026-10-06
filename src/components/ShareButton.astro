@@ -108,22 +108,23 @@ const sizeClass = size === 'md'
         }
       }
 
-      // Web Share API — Android/iOS native sheet
-      if (navigator.share) {
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+      // Web Share API on mobile devices (opens native app sheet)
+      if (isMobile && typeof navigator.share === 'function') {
         try {
           const shareData: ShareData = { title: shareTitle, text: shareText, url: shareUrl };
-          if (files.length > 0 && navigator.canShare({ files })) {
+          if (files.length > 0 && navigator.canShare && navigator.canShare({ files })) {
             shareData.files = files;
           }
           await navigator.share(shareData);
           return;
         } catch (e) {
-          // User cancelled or error — fall through to clipboard
           if ((e as Error).name === 'AbortError') return;
         }
       }
 
-      // Fallback: copy to clipboard
+      // Desktop or fallback: copy to clipboard and display confirmation toast
       try {
         await navigator.clipboard.writeText(shareUrl);
         showToast(toastMsg);
@@ -131,6 +132,9 @@ const sizeClass = size === 'md'
         // Last resort: select a temp input
         const inp = document.createElement('input');
         inp.value = shareUrl;
+        inp.style.position = 'fixed';
+        inp.style.opacity = '0';
+        inp.style.pointerEvents = 'none';
         document.body.appendChild(inp);
         inp.select();
         document.execCommand('copy');

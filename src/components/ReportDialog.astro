@@ -217,12 +217,20 @@ const reportEs = es.socialgraph.report;
         window.posthog?.capture('content_reported', { target, reason });
         thanksEl?.classList.remove('hidden');
         setTimeout(close, 1400);
-      } catch (err) {
+      } catch (err: unknown) {
         if (errorEl) {
           const curLang = document.documentElement.lang === 'es' ? 'es' : 'en';
-          errorEl.textContent = curLang === 'es'
-            ? 'No se pudo enviar el reporte. Intenta de nuevo.'
-            : "Couldn't submit the report. Try again.";
+          const isAuthErr = (err as Error)?.message === 'must_be_authenticated';
+          if (isAuthErr) {
+            const signInHref = curLang === 'es' ? '/es/ingresar/' : '/en/sign-in/';
+            errorEl.innerHTML = curLang === 'es'
+              ? `Debes <a href="${signInHref}" class="underline font-semibold hover:text-emerald-700 dark:hover:text-emerald-300">iniciar sesión</a> para enviar un reporte.`
+              : `You must <a href="${signInHref}" class="underline font-semibold hover:text-emerald-700 dark:hover:text-emerald-300">sign in</a> to submit a report.`;
+          } else {
+            errorEl.textContent = curLang === 'es'
+              ? 'No se pudo enviar el reporte. Intenta de nuevo.'
+              : "Couldn't submit the report. Try again.";
+          }
           errorEl.classList.remove('hidden');
         }
         // eslint-disable-next-line no-console
