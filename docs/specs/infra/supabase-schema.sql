@@ -12507,13 +12507,15 @@ CREATE POLICY "id_validator_insert" ON public.identifications
     )
   );
 
--- RLS: gate observation_flag on reports INSERT (#558).
+-- RLS: allow authenticated users to submit reports on reports INSERT (#558).
 DROP POLICY IF EXISTS reports_owner_write ON public.reports;
 CREATE POLICY reports_owner_write ON public.reports FOR INSERT
+  TO authenticated
   WITH CHECK (
     reporter_id = auth.uid()
-    AND public.has_karma_privilege(auth.uid(), 'observation_flag')
   );
+
+GRANT SELECT, INSERT ON public.reports TO authenticated;
 
 -- RLS: gate expert_application on expert_applications INSERT (#558).
 DROP POLICY IF EXISTS "expert_apps_insert_own" ON public.expert_applications;
