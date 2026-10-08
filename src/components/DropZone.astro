@@ -127,6 +127,8 @@ const editPhotoLabel = isEs ? 'Editar foto' : 'Edit photo';
 </div>
 
 <script>
+import { getCachedSession } from '../lib/supabase';
+
 const root      = document.getElementById('drop-zone-root');
 const defaultEl = document.getElementById('dz-default');
 const dragover  = document.getElementById('dz-dragover');
@@ -140,13 +142,34 @@ const galInput  = document.getElementById('dz-gallery-input') as HTMLInputElemen
 const audInput  = document.getElementById('dz-audio-input')   as HTMLInputElement | null;
 const addMoreBtn = document.getElementById('dz-add-more-btn') as HTMLButtonElement | null;
 
+// ── Auth check ───────────────────────────────────────────────────────────────
+async function checkAuth(): Promise<boolean> {
+  try {
+    const session = await getCachedSession();
+    return !!session?.user;
+  } catch {
+    return false;
+  }
+}
+
+async function requireAuth(callback: () => void) {
+  const isAuth = await checkAuth();
+  if (!isAuth) {
+    const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
+    const signInPath = lang === 'es' ? '/es/ingresar/' : '/en/sign-in/';
+    window.location.href = signInPath;
+    return;
+  }
+  callback();
+}
+
 // ── Button → input wiring ──────────────────────────────────────────────────
-capBtn?.addEventListener('click', () => capInput?.click());
-galBtn?.addEventListener('click', () => galInput?.click());
-audBtn?.addEventListener('click', () => audInput?.click());
-uploadIconBtn?.addEventListener('click', () => galInput?.click());
+capBtn?.addEventListener('click', () => requireAuth(() => capInput?.click()));
+galBtn?.addEventListener('click', () => requireAuth(() => galInput?.click()));
+audBtn?.addEventListener('click', () => requireAuth(() => audInput?.click()));
+uploadIconBtn?.addEventListener('click', () => requireAuth(() => galInput?.click()));
 // "+ add more" tile — opens gallery so the user can append more files after an initial drop
-addMoreBtn?.addEventListener('click', () => galInput?.click());
+addMoreBtn?.addEventListener('click', () => requireAuth(() => galInput?.click()));
 
 function onInputChange(input: HTMLInputElement | null) {
   return () => {
@@ -166,20 +189,24 @@ root?.addEventListener('dragover', (e) => e.preventDefault());
 root?.addEventListener('drop', (e) => {
   e.preventDefault();
   dragover?.classList.add('hidden');
-  const files = Array.from(e.dataTransfer?.files ?? []);
-  if (files.length) dispatch(files);
+  requireAuth(() => {
+    const files = Array.from(e.dataTransfer?.files ?? []);
+    if (files.length) dispatch(files);
+  });
 });
 
 // ── Paste (Ctrl+V) — desktop Chrome ────────────────────────────────────────
 document.addEventListener('paste', (e) => {
   // Only if drop-zone is visible/relevant
   if (!root) return;
-  const items = Array.from(e.clipboardData?.items ?? []);
-  const files = items
-    .filter(i => i.kind === 'file')
-    .map(i => i.getAsFile())
-    .filter(Boolean) as File[];
-  if (files.length) dispatch(files);
+  requireAuth(() => {
+    const items = Array.from(e.clipboardData?.items ?? []);
+    const files = items
+      .filter(i => i.kind === 'file')
+      .map(i => i.getAsFile())
+      .filter(Boolean) as File[];
+    if (files.length) dispatch(files);
+  });
 });
 
 // ── Dispatch event ─────────────────────────────────────────────────────────
