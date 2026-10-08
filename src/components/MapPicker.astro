@@ -270,7 +270,7 @@ const initialLng  = initialCoords?.lng ?? '';
           style: MAP_STYLE_STREET,
           center: [initialLng, initialLat],
           zoom: initialZoom,
-          attributionControl: { compact: true },
+          attributionControl: false,
         });
         state.map.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');
         state.marker = new maplibre.Marker({ draggable: true, color: '#047857' })
@@ -437,7 +437,7 @@ const initialLng  = initialCoords?.lng ?? '';
         center: [lng, lat],
         zoom: 12,
         interactive: false,
-        attributionControl: { compact: true },
+        attributionControl: false,
       });
       const marker = new maplibre.Marker({ color: '#047857' }).setLngLat([lng, lat]).addTo(map);
       installSpriteFallback(map);
