@@ -53,11 +53,11 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
     </div>
 
     <p id="suggest-id-target" class="text-xs text-zinc-600 dark:text-zinc-400 mb-3"></p>
-    <p id="suggest-id-microcopy" class="text-xs text-zinc-600 dark:text-zinc-400 mb-3" data-i18n data-en={ve.karma_microcopy_loading} data-es={ves.karma_microcopy_loading}>
+    <p id="suggest-id-microcopy" class="hidden text-xs text-zinc-600 dark:text-zinc-400 mb-3" data-i18n data-en={ve.karma_microcopy_loading} data-es={ves.karma_microcopy_loading}>
       {v.karma_microcopy_loading}
     </p>
     <!-- Karma gate warning (#558): shown as soft warning when user is below threshold -->
-    <p id="suggest-id-karma-gate" class="hidden text-xs text-amber-600 dark:text-amber-400 mb-3" role="status"></p>
+    <p id="suggest-id-karma-gate" class="hidden text-xs text-amber-600 dark:text-amber-400 mb-3" role="status" aria-hidden="true"></p>
 
     <form id="suggest-id-form" class="space-y-3" novalidate>
       <div>
@@ -221,30 +221,8 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
 
     /** Check karma gate and show soft warning (#558). Non-blocking for v1. */
     async function checkKarmaGate(): Promise<void> {
-      if (!karmaGateEl) return;
-      const isEs = getIsEs();
-      const karmaGateValidateMsg = (isEs ? modal!.dataset.labelKarmaGateValidateEs : modal!.dataset.labelKarmaGateValidateEn)
-        ?? (isEs ? 'Alcanza {min_karma} de karma para sugerir identificaciones' : 'Reach {min_karma} karma to suggest IDs');
-      try {
-        const supabase = getSupabase();
-        const user = await getCachedUser();
-        if (!user) return;
-        const { data: u } = await supabase
-          .from('users')
-          .select('karma_total')
-          .eq('id', user.id)
-          .maybeSingle();
-        const karma = (u as { karma_total?: number } | null)?.karma_total ?? 0;
-        const MIN_KARMA = 100; // mirrors karma_thresholds seed value
-        if (karma < MIN_KARMA) {
-          karmaGateEl.textContent = karmaGateValidateMsg.replace('{min_karma}', String(MIN_KARMA));
-          karmaGateEl.classList.remove('hidden');
-        } else {
-          karmaGateEl.classList.add('hidden');
-        }
-      } catch {
-        // Gate check failure is non-blocking: silently skip.
-      }
+      // Disabled - karma gate messages hidden
+      return;
     }
 
     function open(obsId: string, observer: string | null) {
