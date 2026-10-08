@@ -51,12 +51,15 @@ const editPhotoLabel = isEs ? 'Editar foto' : 'Edit photo';
 
   <!-- Default state -->
   <div id="dz-default" class="flex flex-col items-center justify-center gap-3 px-6 py-10 text-center">
-    <!-- Upload icon -->
-    <div class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+    <!-- Upload icon (clickable - opens gallery) -->
+    <button id="dz-upload-icon-btn" type="button"
+      class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
+      aria-label={galleryLabel}
+    >
       <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
       </svg>
-    </div>
+    </button>
 
     <div>
       <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{dropLabel}</p>
@@ -131,6 +134,7 @@ const previews  = document.getElementById('dz-previews');
 const capBtn    = document.getElementById('dz-capture-btn');
 const galBtn    = document.getElementById('dz-gallery-btn');
 const audBtn    = document.getElementById('dz-audio-btn');
+const uploadIconBtn = document.getElementById('dz-upload-icon-btn');
 const capInput  = document.getElementById('dz-capture-input') as HTMLInputElement | null;
 const galInput  = document.getElementById('dz-gallery-input') as HTMLInputElement | null;
 const audInput  = document.getElementById('dz-audio-input')   as HTMLInputElement | null;
@@ -140,6 +144,7 @@ const addMoreBtn = document.getElementById('dz-add-more-btn') as HTMLButtonEleme
 capBtn?.addEventListener('click', () => capInput?.click());
 galBtn?.addEventListener('click', () => galInput?.click());
 audBtn?.addEventListener('click', () => audInput?.click());
+uploadIconBtn?.addEventListener('click', () => galInput?.click());
 // "+ add more" tile — opens gallery so the user can append more files after an initial drop
 addMoreBtn?.addEventListener('click', () => galInput?.click());
 
