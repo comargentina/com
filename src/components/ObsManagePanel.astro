@@ -510,6 +510,16 @@ const observe = tr.observe;
       }
       if (target === 'location') {
         window.dispatchEvent(new CustomEvent('rastrum:mappicker-resize', { detail: { id: 'obs-detail-loc-view' } }));
+        // Translate the Edit location button when location tab is activated
+        const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
+        const openBtn = document.querySelector<HTMLButtonElement>('[data-mappicker-open="obs-detail-edit"]');
+        if (openBtn) {
+          const tr = lang === 'es' ? (window as any).t('es') : (window as any).t('en');
+          const tree = tr as { obs_detail: { location: { edit_button: string } } };
+          if (tree.obs_detail && tree.obs_detail.location && tree.obs_detail.location.edit_button) {
+            openBtn.textContent = tree.obs_detail.location.edit_button;
+          }
+        }
       }
     }
 
