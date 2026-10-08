@@ -393,6 +393,8 @@ const observe = tr.observe;
         pickerId="obs-detail-edit"
         initialCoords={null}
         openLabel={od.location.edit_button}
+        openLabelEn={trEn.obs_detail.location.edit_button}
+        openLabelEs={trEs.obs_detail.location.edit_button}
       />
       <span
         id="m-loc-saving"
@@ -514,11 +516,9 @@ const observe = tr.observe;
         const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
         const openBtn = document.querySelector<HTMLButtonElement>('[data-mappicker-open="obs-detail-edit"]');
         if (openBtn) {
-          const tr = lang === 'es' ? (window as any).t('es') : (window as any).t('en');
-          const tree = tr as { obs_detail: { location: { edit_button: string } } };
-          if (tree.obs_detail && tree.obs_detail.location && tree.obs_detail.location.edit_button) {
-            openBtn.textContent = tree.obs_detail.location.edit_button;
-          }
+          const enLabel = openBtn.getAttribute('data-en') || 'Edit location';
+          const esLabel = openBtn.getAttribute('data-es') || 'Editar ubicación';
+          openBtn.textContent = lang === 'es' ? esLabel : enLabel;
         }
       }
     }

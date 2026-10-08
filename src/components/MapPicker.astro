@@ -8,6 +8,9 @@ interface Props {
   pickerId?: string;
   /** Optional override for the "Pick on map" / "Edit location" open-modal button label. */
   openLabel?: string;
+  /** Optional bilingual labels for the open button (for dynamic translation). */
+  openLabelEn?: string;
+  openLabelEs?: string;
 }
 const {
   mode,
@@ -16,11 +19,13 @@ const {
   lang,
   pickerId = 'default',
   openLabel,
+  openLabelEn,
+  openLabelEs,
 } = Astro.props;
 const isEs = lang === 'es';
 
 const labelsEn = {
-  open:      openLabel ?? 'Pick on map',
+  open:      openLabelEn ?? openLabel ?? 'Pick on map',
   title:     'Pick a location',
   hint:      'Tap or drag the pin to set the location.',
   use:       'Use this location',
@@ -36,7 +41,7 @@ const labelsEn = {
 };
 
 const labelsEs = {
-  open:      openLabel ?? 'Elegir en el mapa',
+  open:      openLabelEs ?? openLabel ?? 'Elegir en el mapa',
   title:     'Elige una ubicación',
   hint:      'Toca o arrastra el alfiler para fijar la ubicación.',
   use:       'Usar esta ubicación',
