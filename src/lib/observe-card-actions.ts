@@ -6,7 +6,7 @@
  */
 import type { CardState } from './observe-card-state';
 
-export type CardAction = 'affirm' | 'other' | 'review' | 'adopt' | 'dismiss';
+export type CardAction = 'affirm' | 'other' | 'review' | 'adopt' | 'dismiss' | 'cancel-review';
 
 export function cardActions(state: CardState): CardAction[] {
   switch (state) {
@@ -14,7 +14,7 @@ export function cardActions(state: CardState): CardAction[] {
     case 'S2':
       return ['affirm', 'other', 'review'];
     case 'S2prime':
-      return ['adopt', 'dismiss'];
+      return ['adopt', 'dismiss', 'cancel-review'];
     case 'S3':
       return ['other', 'review'];
     case 'S0':

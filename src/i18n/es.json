@@ -812,6 +812,7 @@
       "action_review": "🙋 No sé — pedir revisión",
       "action_adopt": "Adoptar",
       "action_dismiss": "Descartar",
+      "action_cancel_review": "✕ Cancelar revisión",
       "review_requested_ack": "Revisión solicitada ✓"
     },
     "downloads": {

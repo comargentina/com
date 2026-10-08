@@ -371,6 +371,7 @@ const cardStrings: CardStrings = {
   actionReview: tr.observe.card.action_review,
   actionAdopt: tr.observe.card.action_adopt,
   actionDismiss: tr.observe.card.action_dismiss,
+  actionCancelReview: tr.observe.card.action_cancel_review,
   reviewRequestedAck: tr.observe.card.review_requested_ack,
   traceColSource: tr.observe.trace.col_source,
   traceColWhere: tr.observe.trace.col_where,
@@ -428,6 +429,9 @@ document.addEventListener('rastrum:card-vm', (e) => {
         input?.select();
       } else if (action === 'review') {
         reviewRequested = true;
+        redispatchCardVm();
+      } else if (action === 'cancel-review') {
+        reviewRequested = false;
         redispatchCardVm();
       } else if (action === 'adopt') {
         observerAffirmed = false;

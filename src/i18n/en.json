@@ -812,6 +812,7 @@
       "action_review": "🙋 I don't know — ask for review",
       "action_adopt": "Adopt",
       "action_dismiss": "Dismiss",
+      "action_cancel_review": "✕ Cancel review",
       "review_requested_ack": "Review requested ✓"
     },
     "downloads": {

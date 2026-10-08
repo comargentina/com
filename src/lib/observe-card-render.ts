@@ -21,6 +21,7 @@ export interface CardStrings {
   actionReview: string;
   actionAdopt: string;
   actionDismiss: string;
+  actionCancelReview: string;
   reviewRequestedAck: string;
   traceColSource: string;
   traceColWhere: string;
@@ -72,6 +73,7 @@ function actionsRow(vm: CardViewModel, s: CardStrings): string {
       a === 'other'  ? s.actionOther  :
       a === 'review' ? s.actionReview :
       a === 'adopt'  ? s.actionAdopt  :
+      a === 'cancel-review' ? s.actionCancelReview :
       s.actionDismiss;
     parts.push(actionBtn(a, label, a === 'affirm' || a === 'adopt'));
   }
