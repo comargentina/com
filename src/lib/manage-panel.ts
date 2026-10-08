@@ -730,6 +730,14 @@ export async function wireManagePanelLocation(
     ? { saveFailed: 'No se pudo guardar la ubicación.', invalidCoords: 'Coordenadas no válidas.' }
     : { saveFailed: 'Failed to save location.',         invalidCoords: 'Invalid coordinates.' };
 
+  // Translate the MapPicker "Edit location" button for obs-detail-edit
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-mappicker-open="obs-detail-edit"]');
+  if (openBtn) {
+    const tree = t(lang) as { obs_detail: { location: { edit_button: string } } };
+    const editLabel = tree.obs_detail.location.edit_button;
+    openBtn.textContent = editLabel;
+  }
+
   // Pre-populate both pickers (view + edit modal) with the current coords
   // pulled off the loaded observation. The location is a PostgREST EWKB hex or GeoJSON Point.
   const parsed = parseLocationToGeoJSON(obs.location);

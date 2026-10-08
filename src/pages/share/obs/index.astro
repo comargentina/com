@@ -114,6 +114,15 @@ const lang: 'en' | 'es' = 'en';
           var title = editLocBtn.getAttribute('data-' + next + '-title');
           if (title) editLocBtn.setAttribute('title', title);
         }
+        // Also translate the Edit location button in the manage panel
+        var manageOpenBtn = document.querySelector('[data-mappicker-open="obs-detail-edit"]');
+        if (manageOpenBtn) {
+          var tr = next === 'es' ? t('es') : t('en');
+          var tree = tr as { obs_detail: { location: { edit_button: string } } };
+          if (tree.obs_detail && tree.obs_detail.location && tree.obs_detail.location.edit_button) {
+            manageOpenBtn.textContent = tree.obs_detail.location.edit_button;
+          }
+        }
       });
 
       if (document.readyState === 'loading') {
