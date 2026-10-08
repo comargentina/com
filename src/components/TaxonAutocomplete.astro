@@ -4,7 +4,7 @@
  *
  * Drop-in replacement for a plain <input> in the observation form.
  * Shows live genus/species suggestions as the user types, using:
- *   1. Rastrum `taxa` table (Supabase, LAC-relevant, with obs counts)
+ *   1. COM `taxa` table (Supabase, LAC-relevant, with obs counts)
  *   2. GBIF Species Suggest API (online fallback, global coverage)
  *
  * Props:
@@ -166,7 +166,7 @@ import { createSuggestTaxa } from '../lib/taxon-autocomplete';
           const cnt = document.createElement('span');
           cnt.className = 'taxon-count';
           cnt.textContent = lang === 'es' ? `${r.observationCount} obs` : `${r.observationCount} obs`;
-          cnt.title = lang === 'es' ? `${r.observationCount} registros en Rastrum` : `${r.observationCount} records in Rastrum`;
+          cnt.title = lang === 'es' ? `${r.observationCount} registros en COM` : `${r.observationCount} records in COM`;
           li.appendChild(cnt);
         }
 

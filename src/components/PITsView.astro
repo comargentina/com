@@ -2,7 +2,7 @@
 /**
  * PITsView.astro — Puntos de Información Territorial browse UI (issue #193).
  *
- * A PIT is a named real-world location with a QR code that deep-links to Rastrum.
+ * A PIT is a named real-world location with a QR code that deep-links to COM.
  * This view lists existing PITs and allows creating new ones.
  *
  * QR codes are generated via https://api.qrserver.com (no npm dep).
@@ -17,8 +17,8 @@ const isEs = lang === 'es';
 
 const copy = {
   title:        isEs ? 'Puntos de Información Territorial' : 'Territorial Information Points',
-  subtitle:     isEs ? 'Lugares reales con códigos QR que enlazan a Rastrum.'
-                     : 'Real-world locations with QR codes that link to Rastrum.',
+  subtitle:     isEs ? 'Lugares reales con códigos QR que enlazan a COM.'
+                     : 'Real-world locations with QR codes that link to COM.',
   createBtn:    isEs ? 'Crear PIT'          : 'Create PIT',
   emptyPits:    isEs ? 'No hay PITs todavía. ¡Crea el primero!'
                      : 'No PITs yet. Create the first one!',

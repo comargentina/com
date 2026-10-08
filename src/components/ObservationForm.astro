@@ -125,8 +125,8 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
       <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">🧠 {isEs ? 'IA local — primera descarga' : 'Local AI — first download'}</p>
       <p class="text-sm text-amber-700 dark:text-amber-400">
         {isEs
-          ? 'Rastrum usa IA en tu dispositivo para identificar especies. La primera vez descarga ~2.4 GB. Tu foto nunca sale de tu celular.'
-          : 'Rastrum uses on-device AI to identify species. First use downloads ~2.4 GB. Your photo never leaves your device.'}
+          ? 'COM usa IA en tu dispositivo para identificar especies. La primera vez descarga ~2.4 GB. Tu foto nunca sale de tu celular.'
+          : 'COM uses on-device AI to identify species. First use downloads ~2.4 GB. Your photo never leaves your device.'}
       </p>
       <div class="flex gap-2 mt-2">
         <button id="webllm-ok" class="rounded bg-amber-700 px-3 py-1.5 text-xs text-white hover:bg-amber-800">
@@ -1070,7 +1070,7 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
       return;
     }
     const url = `https://rastrum.org/share/obs/?id=${encodeURIComponent(lastSavedObservationId)}`;
-    const title = idName?.textContent ?? 'Rastrum';
+    const title = idName?.textContent ?? 'COM';
     const text = isEs ? '¡Mira esta observación!' : 'Look at this observation!';
     type NavShare = Navigator & { share?: (data: ShareData) => Promise<void> };
     const nav = navigator as NavShare;
@@ -2818,8 +2818,8 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
             ? `~${distLabel} km del rango conocido`
             : `~${distLabel} km from the known range`;
           const oaMessage = isEsSubmit
-            ? `Este registro está a ~${distLabel} km del rango conocido en GBIF/Rastrum.\n\n¿Es correcto? Puede ser un descubrimiento (extensión de rango), un especímen escapado o cultivado, o una posible mis-identificación.`
-            : `This record is ~${distLabel} km from the known range in GBIF/Rastrum.\n\nIs this correct? It could be a discovery (range extension), an escaped or cultivated specimen, or a possible mis-identification.`;
+            ? `Este registro está a ~${distLabel} km del rango conocido en GBIF/COM.\n\n¿Es correcto? Puede ser un descubrimiento (extensión de rango), un especímen escapado o cultivado, o una posible mis-identificación.`
+            : `This record is ~${distLabel} km from the known range in GBIF/COM.\n\nIs this correct? It could be a discovery (range extension), an escaped or cultivated specimen, or a possible mis-identification.`;
           const confirmed = await openConfirmDialog({
             title: oaTitle,
             message: oaMessage,

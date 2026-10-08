@@ -282,8 +282,8 @@ const weathers = WEATHERS;
       </p>
       <p class="text-xs text-zinc-600 dark:text-zinc-400">
         {isEs
-          ? "Guardar esta observación en Rastrum ayuda a los científicos a monitorear la biodiversidad de América Latina."
-          : "Saving this observation to Rastrum helps scientists monitor biodiversity across Latin America."}
+          ? "Guardar esta observación en COM ayuda a los científicos a monitorear la biodiversidad de América Latina."
+          : "Saving this observation to COM helps scientists monitor biodiversity across Latin America."}
       </p>
     </div>
 
@@ -1227,7 +1227,7 @@ pipelineSkipBtn?.addEventListener('click', () => {
 contributeBtn?.addEventListener('click', () => {
   identifyResult?.classList.add('hidden');
   postForm?.classList.remove('hidden');
-  if (saveBtn) saveBtn.textContent = isEs ? 'Guardar en Rastrum' : 'Save to Rastrum';
+  if (saveBtn) saveBtn.textContent = isEs ? 'Guardar en COM' : 'Save to COM';
 });
 
 identifyDoneBtn?.addEventListener('click', () => {

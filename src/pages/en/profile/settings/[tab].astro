@@ -35,11 +35,11 @@ const tokensPath        = getLocalizedPath(lang, routes.profileTokens[lang === '
 const expertApplyPath   = getLocalizedPath(lang, routes.profileExpertApply[lang === 'es' ? 'es' : 'en'] + '/');
 
 const tabTitle = settings.tabs[activeTab] ?? activeTab;
-const pageTitle = `${tabTitle} — ${settings.title} — Rastrum`;
+const pageTitle = `${tabTitle} — ${settings.title} — COM`;
 const mcpUrl = 'https://reppvlqejgoqvitturxp.supabase.co/functions/v1/mcp';
 ---
 
-<BaseLayout title={pageTitle} description="Rastrum account settings." lang={lang}>
+<BaseLayout title={pageTitle} description="COM account settings." lang={lang}>
   <SettingsShell lang={lang} activeTab={activeTab}>
     {activeTab === 'profile' && (
       <ProfileEditForm lang={lang} section="basic" />

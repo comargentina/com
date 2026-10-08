@@ -3,10 +3,10 @@
  * /share-target — Web Share Target API receiver.
  *
  * This page is the `action` endpoint registered in manifest.webmanifest.
- * The browser POSTs multipart/form-data here when the user picks Rastrum
+ * The browser POSTs multipart/form-data here when the user picks COM
  * from the OS share sheet.
  *
- * Because Rastrum is a fully static site (Astro SSG), we can't handle the
+ * Because COM is a fully static site (Astro SSG), we can't handle the
  * POST server-side. Instead the Service Worker intercepts the POST, stashes
  * the file in Cache Storage, and redirects to this page. The client-side
  * script below retrieves the stashed entry, writes it to sessionStorage
@@ -20,7 +20,7 @@
  *   title, text, url — optional text metadata
  *
  * Flow:
- *   Other app → Share → OS sheet → Rastrum (installed PWA)
+ *   Other app → Share → OS sheet → COM (installed PWA)
  *   → POST /share-target (SW intercepts)
  *   → SW stashes file in Cache Storage under SHARE_TARGET_CACHE_KEY
  *   → SW redirects to /share-target (GET)
@@ -33,7 +33,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Opening in Rastrum…</title>
+  <title>Opening in COM…</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -112,7 +112,7 @@
     async function run() {
       // Retrieve the stashed blob from the SW cache
       if (!('caches' in self)) {
-        fail('Cache API not available — try opening Rastrum directly.');
+        fail('Cache API not available — try opening COM directly.');
         return;
       }
 
@@ -127,7 +127,7 @@
         return;
       }
 
-      const metaHeader = stash.headers.get('X-Rastrum-Share-Meta');
+      const metaHeader = stash.headers.get('X-COM-Share-Meta');
       let meta: { filename?: string; title?: string; text?: string; url?: string } = {};
       try { if (metaHeader) meta = JSON.parse(metaHeader); } catch { /* ignore */ }
 
@@ -145,7 +145,7 @@
       const kind = detectKind(mime);
 
       if (!kind) {
-        fail(`Unsupported file type: ${mime}. Rastrum accepts audio, images, and video.`);
+        fail(`Unsupported file type: ${mime}. COM accepts audio, images, and video.`);
         return;
       }
 

@@ -211,7 +211,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     const name = profile.display_name || profile.username || 'Observer';
     const nameEl = document.getElementById('pp-name');
     if (nameEl) nameEl.textContent = name;
-    document.title = `${name} — Rastrum`;
+    document.title = `${name} — COM`;
 
     const handleEl = document.getElementById('pp-handle');
     if (handleEl) handleEl.textContent = profile.username ? '@' + profile.username : '';

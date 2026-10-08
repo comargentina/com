@@ -59,7 +59,7 @@ const isChat = currentPath.includes('/chat');
 // contract; without it the page renders as orphaned content. Use
 // ConsoleLayout for any /{en,es}/{console,consola}/ route.
 if (resolveChromeMode(currentPath, import.meta.env.BASE_URL) === 'console') {
-  console.warn(`[Rastrum] ${currentPath} uses BaseLayout but is in console chrome — switch to ConsoleLayout (src/components/ConsoleLayout.astro)`);
+  console.warn(`[COM] ${currentPath} uses BaseLayout but is in console chrome — switch to ConsoleLayout (src/components/ConsoleLayout.astro)`);
 }
 
 const SITE_URL = 'https://rastrum.org';

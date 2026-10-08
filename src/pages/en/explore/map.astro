@@ -14,6 +14,6 @@ const dateTo   = url.searchParams.get('dateTo')   ?? '';
 const observer = url.searchParams.get('observer') ?? '';
 ---
 
-<BaseLayout title={`${tr.map.title} — Rastrum`} description="Interactive map of biodiversity observations from the Rastrum community. Filter by taxon, date range, and observer across Latin America." lang={lang}>
+<BaseLayout title={`${tr.map.title} — COM`} description="Interactive map of biodiversity observations from the COM community. Filter by taxon, date range, and observer across Latin America." lang={lang}>
   <ExploreMapView lang={lang} taxon={taxon} dateFrom={dateFrom} dateTo={dateTo} observer={observer} />
 </BaseLayout>

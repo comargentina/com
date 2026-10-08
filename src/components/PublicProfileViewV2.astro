@@ -342,7 +342,7 @@ const sponsoringI18n = {
 
     const isOwner = viewer?.id === profile.id;
 
-    // Update Ask-Rastrum link to pre-attach this observer in chat.
+    // Update Ask-COM link to pre-attach this observer in chat.
     const askLink = document.getElementById('ask-rastrum-link-profile') as HTMLAnchorElement | null;
     if (askLink && profile.id) {
       const langLocal = document.documentElement.lang === 'es' ? 'es' : 'en';
@@ -389,7 +389,7 @@ const sponsoringI18n = {
     const ownerLabel = root.dataset.labelOwnerOnly ?? '';
 
     const name = showName ? (profile.display_name || profile.username || 'Observer') : (profile.username || 'Observer');
-    const titleTpl = root.dataset.labelPageTitle ?? '{name} — Rastrum';
+    const titleTpl = root.dataset.labelPageTitle ?? '{name} — COM';
     document.title = titleTpl.replaceAll('{name}', name);
 
     const nameEl = root.querySelector<HTMLElement>('[data-pp-name]');
@@ -398,8 +398,8 @@ const sponsoringI18n = {
     // Wire ShareButton for this profile
     const shareProfBtn = document.getElementById('profile-share-btn');
     if (shareProfBtn) {
-      shareProfBtn.dataset.shareTitle = `${name} — Rastrum`;
-      shareProfBtn.dataset.shareText  = `Perfil de ${name} en Rastrum`;
+      shareProfBtn.dataset.shareTitle = `${name} — COM`;
+      shareProfBtn.dataset.shareText  = `Perfil de ${name} en COM`;
       shareProfBtn.dataset.shareUrl   = window.location.href;
     }
 

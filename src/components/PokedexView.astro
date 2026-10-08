@@ -237,7 +237,7 @@ const exploreHref       = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'exp
     if (backLink) {
       backLink.href = `/${lang}/u/?username=${encodeURIComponent(handle)}`;
     }
-    const titleTpl = root?.dataset.labelVisitorPageTitle ?? '@{handle}\'s Pokédex — Rastrum';
+    const titleTpl = root?.dataset.labelVisitorPageTitle ?? '@{handle}\'s Pokédex — COM';
     document.title = titleTpl.replaceAll('{handle}', handle);
   }
 

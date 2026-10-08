@@ -1399,7 +1399,7 @@ const indexBase = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'explore/spe
       else commonEl.classList.add('hidden');
     }
 
-    const titleTpl = root.dataset.labelPageTitle ?? '{name} — Rastrum';
+    const titleTpl = root.dataset.labelPageTitle ?? '{name} — COM';
     document.title = titleTpl.replaceAll('{name}', taxon.scientific_name);
 
     if (badgesEl) {

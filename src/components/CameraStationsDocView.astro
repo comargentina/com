@@ -14,8 +14,8 @@ const isEs = lang === 'es';
 
   <p>
     {isEs
-      ? 'Una estación de cámara representa un punto fijo de despliegue con uno o más periodos activos (fecha de inicio y fin). Rastrum calcula automáticamente las noches-trampa y permite derivar índices estándar de vida silvestre como el Índice de Abundancia Relativa (RAI) y la tasa de detección por cada 100 noches-trampa.'
-      : 'A camera station represents a fixed deployment point with one or more active periods (start and end dates). Rastrum automatically computes trap-nights and lets you derive standard wildlife indices like Relative Abundance Index (RAI) and detection rate per 100 trap-nights.'}
+      ? 'Una estación de cámara representa un punto fijo de despliegue con uno o más periodos activos (fecha de inicio y fin). COM calcula automáticamente las noches-trampa y permite derivar índices estándar de vida silvestre como el Índice de Abundancia Relativa (RAI) y la tasa de detección por cada 100 noches-trampa.'
+      : 'A camera station represents a fixed deployment point with one or more active periods (start and end dates). COM automatically computes trap-nights and lets you derive standard wildlife indices like Relative Abundance Index (RAI) and detection rate per 100 trap-nights.'}
   </p>
 
   <h2>{isEs ? 'Funcionalidades' : 'Features'}</h2>
@@ -27,8 +27,8 @@ const isEs = lang === 'es';
       ? 'Define múltiples periodos de despliegue por estación. Un periodo sin fecha de fin significa "aún activo".'
       : 'Define multiple deployment periods per station. A period with no end date means "still active".'}</li>
     <li><strong>{isEs ? 'Noches-trampa automáticas' : 'Automatic trap-nights'}:</strong> {isEs
-      ? 'Rastrum calcula las noches-trampa sumando los días de todos los periodos activos de la estación.'
-      : 'Rastrum computes trap-nights by summing the days across all active periods for the station.'}</li>
+      ? 'COM calcula las noches-trampa sumando los días de todos los periodos activos de la estación.'
+      : 'COM computes trap-nights by summing the days across all active periods for the station.'}</li>
     <li><strong>{isEs ? 'Vinculación de observaciones' : 'Observation linking'}:</strong> {isEs
       ? 'Las observaciones se vinculan a estaciones explícitamente — dos estaciones en el mismo polígono necesitan conteos separados.'
       : 'Observations are linked to stations explicitly — two stations within the same polygon need separate counts.'}</li>
