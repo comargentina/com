@@ -66,6 +66,8 @@ function actionsRow(vm: CardViewModel, s: CardStrings): string {
   for (const a of acts) {
     if (a === 'review' && vm.reviewRequested) {
       parts.push(`<span data-card-review-ack class="text-xs text-amber-700 dark:text-amber-400">${esc(s.reviewRequestedAck)}</span>`);
+      // Always add cancel button when review is requested
+      parts.push(actionBtn('cancel-review', s.actionCancelReview, false));
       continue;
     }
     const label =
