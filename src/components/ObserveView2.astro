@@ -6,7 +6,6 @@ import MapPicker from "./MapPicker.astro";
 import TaxonAutocomplete from "./TaxonAutocomplete.astro";
 import ActiveObserversBanner from "./ActiveObserversBanner.astro";
 import ContextualSpeciesChips from "./ContextualSpeciesChips.astro";
-import WhyThisSpecies from "./WhyThisSpecies.astro";
 import IdentifyOnlyResult from "./observe/IdentifyOnlyResult.astro";
 import NoRunnersBlock from "./observe/NoRunnersBlock.astro";
 import AudioSkippedWarning from "./observe/AudioSkippedWarning.astro";
@@ -144,11 +143,8 @@ const weathers = WEATHERS;
     <div id="obs2-id-card" class="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4">
       <!-- #1125 C-4: the progressive card is the only identification surface. -->
       <div id="obs2-card-v2" class="hidden"></div>
-      <!-- "Why this species?" (issue #736) — relocated inside the card's
-           audit disclosure (#1125 C-4). Hidden until "ver traza" opens. -->
-      <WhyThisSpecies lang={lang} />
       <!-- Manual entry — on-demand only; revealed by the card's
-           "✎ No, es otra…" action or the WhyThisSpecies report button. -->
+           "✎ No, es otra…" action. -->
       <div id="obs2-id-manual" class="mt-2 hidden">
         <label for="obs2-taxon-input" id="obs2-taxon-label" class="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">
           {isEs ? "Nombre científico (opcional)" : "Scientific name (optional)"}
@@ -404,7 +400,6 @@ const cardStrings: CardStrings = {
   traceOutcomeNonprimary: tr.observe.trace.outcome_nonprimary,
   traceCapped: tr.observe.trace.capped,
   traceConsensusPending: tr.observe.trace.consensus_pending,
-  traceExportJson: tr.observe.trace.export_json,
   traceNoAttempts: tr.observe.trace.no_attempts,
 };
 
@@ -466,14 +461,6 @@ document.addEventListener('rastrum:card-vm', (e) => {
     const wasHidden = tracePanel.hasAttribute('hidden');
     if (wasHidden) tracePanel.removeAttribute('hidden');
     else tracePanel.setAttribute('hidden', '');
-    const wts = document.getElementById('why-this-species');
-    if (wts && wasHidden) {
-      if (vm.headline) wts.dataset.scientificName = vm.headline;
-      wts.classList.remove('hidden');
-    }
-  });
-  el.querySelector('[data-card-trace-json]')?.addEventListener('click', () => {
-    try { void navigator.clipboard?.writeText(JSON.stringify(vm.trace, null, 2)); } catch { /* clipboard denied */ }
   });
 });
 
@@ -1190,26 +1177,8 @@ function showPostForm() {
   if (bestResult) {
     const taxonInputEl = document.getElementById('obs2-taxon-input') as HTMLInputElement | null;
     if (taxonInputEl && !taxonInputEl.value) taxonInputEl.value = bestResult.scientific_name;
-    const wts = document.getElementById('why-this-species');
-    if (wts) {
-      wts.dataset.source = bestResult.source;
-      wts.dataset.scientificName = bestResult.scientific_name;
-    }
   }
 }
-
-// "Report incorrect" from the WhyThisSpecies panel (issue #736).
-// Pre-save we have no identification id, so M22's wrong_id flow isn't
-// live yet — the most useful action is to reveal the manual-entry
-// field so the observer can correct the taxon themselves and focus
-// the input. After save, the standard ReportDialog on /share/obs/
-// handles the M22 path with target='identification'.
-window.addEventListener('rastrum:why-this-species-report', () => {
-  document.getElementById('obs2-id-manual')?.classList.remove('hidden');
-  const taxonInputEl = document.getElementById('obs2-taxon-input') as HTMLInputElement | null;
-  taxonInputEl?.focus();
-  taxonInputEl?.select();
-});
 
 // ── Identify mode: skip save ──────────────────────────────────────────────
 // Pipeline escape hatch: "Skip identification and continue"

@@ -34,7 +34,6 @@ const S: CardStrings = {
   traceOutcomeNonprimary: 'non-primary',
   traceCapped: 'capped floor',
   traceConsensusPending: 'awaiting community validation',
-  traceExportJson: 'Export JSON',
   traceNoAttempts: 'no identification attempts yet',
 };
 const vm = (o: Partial<CardViewModel>): CardViewModel => ({
