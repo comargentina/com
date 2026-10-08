@@ -17,7 +17,7 @@
       "purpose": "any"
     },
     {
-      "src": "/com-logo-192.png",
+      "src": "/com-logo-maskable-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
@@ -29,7 +29,7 @@
       "purpose": "any"
     },
     {
-      "src": "/com-logo-512.png",
+      "src": "/com-logo-maskable-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"

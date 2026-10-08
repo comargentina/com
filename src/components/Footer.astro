@@ -14,6 +14,8 @@ if (chromeMode === 'app') return;
 const appVersion = import.meta.env.PUBLIC_VERSION ?? 'dev';
 
 const tr = t(lang);
+const trEn = t('en');
+const trEs = t('es');
 const locale = (lang === 'es' ? 'es' : 'en') as Locale;
 const alt: Locale = locale === 'es' ? 'en' : 'es';
 const altHref = currentPath ? getAlternateUrl(currentPath, alt) : getLocalizedPath(alt, '/');
@@ -21,25 +23,52 @@ const enHref  = currentPath ? getAlternateUrl(currentPath, 'en') : getLocalizedP
 
 const year = new Date().getFullYear();
 
-const observeHref      = getLocalizedPath(lang, routes.observe[locale] + '/');
-const identifyHref     = getLocalizedPath(lang, routes.identify[locale] + '/');
-const exploreHref      = getLocalizedPath(lang, routes.exploreMap[locale] + '/');
-const chatHref         = getLocalizedPath(lang, routes.chat[locale] + '/');
+const observeHrefEn      = getLocalizedPath('en', routes.observe.en + '/');
+const observeHrefEs      = getLocalizedPath('es', routes.observe.es + '/');
+const identifyHrefEn     = getLocalizedPath('en', routes.identify.en + '/');
+const identifyHrefEs     = getLocalizedPath('es', routes.identify.es + '/');
+const exploreHrefEn      = getLocalizedPath('en', routes.exploreMap.en + '/');
+const exploreHrefEs      = getLocalizedPath('es', routes.exploreMap.es + '/');
+const chatHrefEn         = getLocalizedPath('en', routes.chat.en + '/');
+const chatHrefEs         = getLocalizedPath('es', routes.chat.es + '/');
 
-const aboutHref        = getLocalizedPath(lang, routes.about[locale] + '/');
-const visionHref       = getDocPath(lang, 'vision');
-const roadmapHref      = getDocPath(lang, 'roadmap');
-const architectureHref = getDocPath(lang, 'architecture');
-const contributeHref    = getDocPath(lang, 'contribute');
-const fundingHref       = getDocPath(lang, 'funding');
+const aboutHrefEn        = getLocalizedPath('en', routes.about.en + '/');
+const aboutHrefEs        = getLocalizedPath('es', routes.about.es + '/');
+const visionHrefEn       = getDocPath('en', 'vision');
+const visionHrefEs       = getDocPath('es', 'vision');
+const roadmapHrefEn      = getDocPath('en', 'roadmap');
+const roadmapHrefEs      = getDocPath('es', 'roadmap');
+const architectureHrefEn = getDocPath('en', 'architecture');
+const architectureHrefEs = getDocPath('es', 'architecture');
+const contributeHrefEn   = getDocPath('en', 'contribute');
+const contributeHrefEs   = getDocPath('es', 'contribute');
 
-const licenseHref = 'https://github.com/ArtemioPadilla/rastrum/blob/main/LICENSE';
-const privacyHref = getLocalizedPath(lang, routes.privacy[locale] + '/');
-const termsHref   = getLocalizedPath(lang, routes.terms[locale] + '/');
-const faqHref     = getLocalizedPath(lang, routes.faq[locale] + '/');
+const privacyHrefEn = getLocalizedPath('en', routes.privacy.en + '/');
+const privacyHrefEs = getLocalizedPath('es', routes.privacy.es + '/');
+const termsHrefEn   = getLocalizedPath('en', routes.terms.en + '/');
+const termsHrefEs   = getLocalizedPath('es', routes.terms.es + '/');
+const faqHrefEn     = getLocalizedPath('en', routes.faq.en + '/');
+const faqHrefEs     = getLocalizedPath('es', routes.faq.es + '/');
+
+const observeHref      = lang === 'es' ? observeHrefEs : observeHrefEn;
+const identifyHref     = lang === 'es' ? identifyHrefEs : identifyHrefEn;
+const exploreHref      = lang === 'es' ? exploreHrefEs : exploreHrefEn;
+const chatHref         = lang === 'es' ? chatHrefEs : chatHrefEn;
+const aboutHref        = lang === 'es' ? aboutHrefEs : aboutHrefEn;
+const visionHref       = lang === 'es' ? visionHrefEs : visionHrefEn;
+const roadmapHref      = lang === 'es' ? roadmapHrefEs : roadmapHrefEn;
+const architectureHref = lang === 'es' ? architectureHrefEs : architectureHrefEn;
+const contributeHref   = lang === 'es' ? contributeHrefEs : contributeHrefEn;
+const privacyHref      = lang === 'es' ? privacyHrefEs : privacyHrefEn;
+const termsHref        = lang === 'es' ? termsHrefEs : termsHrefEn;
+const faqHref          = lang === 'es' ? faqHrefEs : faqHrefEn;
 
 const ftLinks = tr.footer.links as Record<string, string>;
 const ftCols  = tr.footer.columns as Record<string, string>;
+const ftLinksEn = trEn.footer.links as Record<string, string>;
+const ftColsEn  = trEn.footer.columns as Record<string, string>;
+const ftLinksEs = trEs.footer.links as Record<string, string>;
+const ftColsEs  = trEs.footer.columns as Record<string, string>;
 
 const linkClass = 'text-zinc-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors';
 const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
@@ -54,58 +83,64 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
       <!-- Brand: spans 2 cols on lg -->
       <div class="sm:col-span-2 lg:col-span-2 space-y-3">
         <a href={getLocalizedPath(lang, '/')}
+           data-href-en={getLocalizedPath('en', '/')}
+           data-href-es={getLocalizedPath('es', '/')}
            class="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-lg">
           <img src="/com-logo.jpg" alt="COM Logo" class="w-8 h-8 rounded-full object-cover" width="32" height="32" loading="lazy" />
           COM Argentina
         </a>
         <p class="text-sm text-zinc-600 dark:text-zinc-400"
-           data-i18n data-en={t('en').footer.tagline} data-es={t('es').footer.tagline}>{tr.footer.tagline}</p>
+           data-i18n data-en={trEn.footer.tagline} data-es={trEs.footer.tagline}>{tr.footer.tagline}</p>
         <p class="text-xs text-zinc-400 dark:text-zinc-300 max-w-xs"
-           data-i18n data-en={t('en').footer.description_short} data-es={t('es').footer.description_short}>{tr.footer.description_short}</p>
+           data-i18n data-en={trEn.footer.description_short} data-es={trEs.footer.description_short}>{tr.footer.description_short}</p>
         <div class="flex items-center gap-4 pt-1 text-xs">
-          <a href="#" class={linkClass}>{ftLinks.mastodon}</a>
-          <a href="#" class={linkClass}>{ftLinks.rss}</a>
+          <a href="#" class={linkClass} data-i18n data-en={ftLinksEn.mastodon} data-es={ftLinksEs.mastodon}>{ftLinks.mastodon}</a>
+          <a href="#" class={linkClass} data-i18n data-en={ftLinksEn.rss} data-es={ftLinksEs.rss}>{ftLinks.rss}</a>
         </div>
       </div>
 
       <!-- Product -->
       <div class="space-y-3">
-        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">{ftCols.product}</h3>
+        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider"
+            data-i18n data-en={ftColsEn.product} data-es={ftColsEs.product}>{ftCols.product}</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href={observeHref}  class={linkClass}>{tr.nav.observe}</a></li>
-          <li><a href={identifyHref} class={linkClass}>{tr.nav.identify}</a></li>
-          <li><a href={exploreHref}  class={linkClass}>{tr.nav.map}</a></li>
-          <li><a href={chatHref}     class={linkClass}>{tr.nav.chat}</a></li>
+          <li><a href={observeHref} data-href-en={observeHrefEn} data-href-es={observeHrefEs} class={linkClass} data-i18n data-en={trEn.nav.observe} data-es={trEs.nav.observe}>{tr.nav.observe}</a></li>
+          <li><a href={identifyHref} data-href-en={identifyHrefEn} data-href-es={identifyHrefEs} class={linkClass} data-i18n data-en={trEn.nav.identify} data-es={trEs.nav.identify}>{tr.nav.identify}</a></li>
+          <li><a href={exploreHref} data-href-en={exploreHrefEn} data-href-es={exploreHrefEs} class={linkClass} data-i18n data-en={trEn.nav.map} data-es={trEs.nav.map}>{tr.nav.map}</a></li>
+          <li><a href={chatHref} data-href-en={chatHrefEn} data-href-es={chatHrefEs} class={linkClass} data-i18n data-en={trEn.nav.chat} data-es={trEs.nav.chat}>{tr.nav.chat}</a></li>
         </ul>
       </div>
 
       <!-- Learn -->
       <div class="space-y-3">
-        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">{ftCols.learn}</h3>
+        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider"
+            data-i18n data-en={ftColsEn.learn} data-es={ftColsEs.learn}>{ftCols.learn}</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href={aboutHref}        class={linkClass}>{tr.nav.about}</a></li>
-          <li><a href={visionHref}       class={linkClass}>{tr.docs.sections.vision}</a></li>
-          <li><a href={roadmapHref}      class={linkClass}>{tr.docs.sections.roadmap}</a></li>
-          <li><a href={architectureHref} class={linkClass}>{tr.docs.sections.architecture}</a></li>
+          <li><a href={aboutHref} data-href-en={aboutHrefEn} data-href-es={aboutHrefEs} class={linkClass} data-i18n data-en={trEn.nav.about} data-es={trEs.nav.about}>{tr.nav.about}</a></li>
+          <li><a href={visionHref} data-href-en={visionHrefEn} data-href-es={visionHrefEs} class={linkClass} data-i18n data-en={trEn.docs.sections.vision} data-es={trEs.docs.sections.vision}>{tr.docs.sections.vision}</a></li>
+          <li><a href={roadmapHref} data-href-en={roadmapHrefEn} data-href-es={roadmapHrefEs} class={linkClass} data-i18n data-en={trEn.docs.sections.roadmap} data-es={trEs.docs.sections.roadmap}>{tr.docs.sections.roadmap}</a></li>
+          <li><a href={architectureHref} data-href-en={architectureHrefEn} data-href-es={architectureHrefEs} class={linkClass} data-i18n data-en={trEn.docs.sections.architecture} data-es={trEs.docs.sections.architecture}>{tr.docs.sections.architecture}</a></li>
         </ul>
       </div>
 
       <!-- Community -->
       <div class="space-y-3">
-        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">{ftCols.community}</h3>
+        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider"
+            data-i18n data-en={ftColsEn.community} data-es={ftColsEs.community}>{ftCols.community}</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href={contributeHref} class={linkClass}>{ftLinks.contribute}</a></li>
+          <li><a href={contributeHref} data-href-en={contributeHrefEn} data-href-es={contributeHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.contribute} data-es={ftLinksEs.contribute}>{ftLinks.contribute}</a></li>
         </ul>
       </div>
 
       <!-- Legal (lg: 5th col; hidden on sm/md, shown inline in bottom strip) -->
       <div class="hidden lg:block space-y-3">
-        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">{ftCols.legal}</h3>
+        <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider"
+            data-i18n data-en={ftColsEn.legal} data-es={ftColsEs.legal}>{ftCols.legal}</h3>
         <ul class="space-y-2 text-sm">
-          <li><span class="text-zinc-600 dark:text-zinc-400">{tr.footer.license}</span></li>
-          <li><a href={privacyHref} class={linkClass}>{ftLinks.privacy}</a></li>
-          <li><a href={termsHref}   class={linkClass}>{ftLinks.terms}</a></li>
-          <li><a href={faqHref}     class={linkClass}>{ftLinks.faq}</a></li>
+          <li><span class="text-zinc-600 dark:text-zinc-400" data-i18n data-en={trEn.footer.license} data-es={trEs.footer.license}>{tr.footer.license}</span></li>
+          <li><a href={privacyHref} data-href-en={privacyHrefEn} data-href-es={privacyHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.privacy} data-es={ftLinksEs.privacy}>{ftLinks.privacy}</a></li>
+          <li><a href={termsHref} data-href-en={termsHrefEn} data-href-es={termsHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.terms} data-es={ftLinksEs.terms}>{ftLinks.terms}</a></li>
+          <li><a href={faqHref} data-href-en={faqHrefEn} data-href-es={faqHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.faq} data-es={ftLinksEs.faq}>{ftLinks.faq}</a></li>
         </ul>
       </div>
 
@@ -113,58 +148,60 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
 
     <!-- Legal row: sm/md only (between grid and bottom strip) -->
     <div class="hidden sm:flex lg:hidden items-center gap-x-4 gap-y-2 flex-wrap mt-6 text-sm">
-      <span class="text-zinc-600 dark:text-zinc-400">{tr.footer.license}</span>
-      <a href={privacyHref} class={linkClass}>{ftLinks.privacy}</a>
-      <a href={termsHref}   class={linkClass}>{ftLinks.terms}</a>
-      <a href={faqHref}     class={linkClass}>{ftLinks.faq}</a>
+      <span class="text-zinc-600 dark:text-zinc-400" data-i18n data-en={trEn.footer.license} data-es={trEs.footer.license}>{tr.footer.license}</span>
+      <a href={privacyHref} data-href-en={privacyHrefEn} data-href-es={privacyHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.privacy} data-es={ftLinksEs.privacy}>{ftLinks.privacy}</a>
+      <a href={termsHref} data-href-en={termsHrefEn} data-href-es={termsHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.terms} data-es={ftLinksEs.terms}>{ftLinks.terms}</a>
+      <a href={faqHref} data-href-en={faqHrefEn} data-href-es={faqHrefEs} class={linkClass} data-i18n data-en={ftLinksEn.faq} data-es={ftLinksEs.faq}>{ftLinks.faq}</a>
     </div>
 
     <!-- ── Mobile: brand + 4 <details> accordions ── -->
     <div class="sm:hidden space-y-4">
       <div class="space-y-2">
         <a href={getLocalizedPath(lang, '/')}
+           data-href-en={getLocalizedPath('en', '/')}
+           data-href-es={getLocalizedPath('es', '/')}
            class="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
           <img src="/com-logo.jpg" alt="" class="w-5 h-5 rounded-full object-cover" width="20" height="20" loading="lazy" />
           COM Argentina
         </a>
         <p class="text-xs text-zinc-400 dark:text-zinc-300"
-           data-i18n data-en={t('en').footer.tagline} data-es={t('es').footer.tagline}>{tr.footer.tagline}</p>
+           data-i18n data-en={trEn.footer.tagline} data-es={trEs.footer.tagline}>{tr.footer.tagline}</p>
         <div class="flex items-center gap-3 text-xs">
-          <a href="#" class={mLinkClass}>{ftLinks.mastodon}</a>
-          <a href="#" class={mLinkClass}>{ftLinks.rss}</a>
+          <a href="#" class={mLinkClass} data-i18n data-en={ftLinksEn.mastodon} data-es={ftLinksEs.mastodon}>{ftLinks.mastodon}</a>
+          <a href="#" class={mLinkClass} data-i18n data-en={ftLinksEn.rss} data-es={ftLinksEs.rss}>{ftLinks.rss}</a>
         </div>
       </div>
 
       {[
-        { label: ftCols.product, items: [
-          { href: observeHref,  label: tr.nav.observe },
-          { href: identifyHref, label: tr.nav.identify },
-          { href: exploreHref,  label: tr.nav.map },
-          { href: chatHref,     label: tr.nav.chat },
+        { label: ftCols.product, labelEn: ftColsEn.product, labelEs: ftColsEs.product, items: [
+          { href: observeHref, hrefEn: observeHrefEn, hrefEs: observeHrefEs, label: tr.nav.observe, labelEn: trEn.nav.observe, labelEs: trEs.nav.observe },
+          { href: identifyHref, hrefEn: identifyHrefEn, hrefEs: identifyHrefEs, label: tr.nav.identify, labelEn: trEn.nav.identify, labelEs: trEs.nav.identify },
+          { href: exploreHref, hrefEn: exploreHrefEn, hrefEs: exploreHrefEs, label: tr.nav.map, labelEn: trEn.nav.map, labelEs: trEs.nav.map },
+          { href: chatHref, hrefEn: chatHrefEn, hrefEs: chatHrefEs, label: tr.nav.chat, labelEn: trEn.nav.chat, labelEs: trEs.nav.chat },
         ]},
-        { label: ftCols.learn, items: [
-          { href: aboutHref,        label: tr.nav.about },
-          { href: visionHref,       label: tr.docs.sections.vision },
-          { href: roadmapHref,      label: tr.docs.sections.roadmap },
-          { href: architectureHref, label: tr.docs.sections.architecture },
+        { label: ftCols.learn, labelEn: ftColsEn.learn, labelEs: ftColsEs.learn, items: [
+          { href: aboutHref, hrefEn: aboutHrefEn, hrefEs: aboutHrefEs, label: tr.nav.about, labelEn: trEn.nav.about, labelEs: trEs.nav.about },
+          { href: visionHref, hrefEn: visionHrefEn, hrefEs: visionHrefEs, label: tr.docs.sections.vision, labelEn: trEn.docs.sections.vision, labelEs: trEs.docs.sections.vision },
+          { href: roadmapHref, hrefEn: roadmapHrefEn, hrefEs: roadmapHrefEs, label: tr.docs.sections.roadmap, labelEn: trEn.docs.sections.roadmap, labelEs: trEs.docs.sections.roadmap },
+          { href: architectureHref, hrefEn: architectureHrefEn, hrefEs: architectureHrefEs, label: tr.docs.sections.architecture, labelEn: trEn.docs.sections.architecture, labelEs: trEs.docs.sections.architecture },
         ]},
-        { label: ftCols.community, items: [
-          { href: contributeHref, label: ftLinks.contribute },
+        { label: ftCols.community, labelEn: ftColsEn.community, labelEs: ftColsEs.community, items: [
+          { href: contributeHref, hrefEn: contributeHrefEn, hrefEs: contributeHrefEs, label: ftLinks.contribute, labelEn: ftLinksEn.contribute, labelEs: ftLinksEs.contribute },
         ]},
-        { label: ftCols.legal, items: [
-          { href: privacyHref, label: ftLinks.privacy },
-          { href: termsHref,   label: ftLinks.terms },
-          { href: faqHref,     label: ftLinks.faq },
+        { label: ftCols.legal, labelEn: ftColsEn.legal, labelEs: ftColsEs.legal, items: [
+          { href: privacyHref, hrefEn: privacyHrefEn, hrefEs: privacyHrefEs, label: ftLinks.privacy, labelEn: ftLinksEn.privacy, labelEs: ftLinksEs.privacy },
+          { href: termsHref, hrefEn: termsHrefEn, hrefEs: termsHrefEs, label: ftLinks.terms, labelEn: ftLinksEn.terms, labelEs: ftLinksEs.terms },
+          { href: faqHref, hrefEn: faqHrefEn, hrefEs: faqHrefEs, label: ftLinks.faq, labelEn: ftLinksEn.faq, labelEs: ftLinksEs.faq },
         ]},
       ].map(col => (
         <details class="group border-t border-zinc-100 dark:border-zinc-800 pt-3">
           <summary class="flex items-center justify-between cursor-pointer list-none text-xs font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
-            {col.label}
+            <span data-i18n data-en={col.labelEn} data-es={col.labelEs}>{col.label}</span>
             <svg aria-hidden="true" class="w-3 h-3 transition-transform group-open:rotate-90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </summary>
           <ul class="mt-2 space-y-2 text-sm pb-1">
             {col.items.map(item => (
-              <li><a href={item.href} class={mLinkClass}>{item.label}</a></li>
+              <li><a href={item.href} data-href-en={item.hrefEn} data-href-es={item.hrefEs} class={mLinkClass} data-i18n data-en={item.labelEn} data-es={item.labelEs}>{item.label}</a></li>
             ))}
           </ul>
         </details>
@@ -174,7 +211,7 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
     <!-- ── Bottom strip ── -->
     <div class="mt-8 pt-5 border-t border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 pb-[env(safe-area-inset-bottom,0px)]">
       <p class="text-xs text-zinc-400 dark:text-zinc-300 text-center sm:text-left">
-        &copy; {year} COM &middot; {ftLinks.license_summary}
+        &copy; {year} COM &middot; <span data-i18n data-en={ftLinksEn.license_summary} data-es={ftLinksEs.license_summary}>{ftLinks.license_summary}</span>
       </p>
       <div class="flex items-center gap-2">
         <!-- EN/ES segmented switch -->
@@ -225,6 +262,10 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
       btn.classList.toggle('dark:bg-zinc-800', isActive);
       btn.classList.toggle('font-medium', isActive);
     });
+    document.querySelectorAll('[data-href-en][data-href-es]').forEach(node => {
+      const href = node.getAttribute('data-href-' + target);
+      if (href) (node as HTMLAnchorElement).href = href;
+    });
   });
 
   document.querySelectorAll('[data-lang-switch]').forEach(el => {
@@ -247,6 +288,10 @@ const mLinkClass = 'text-zinc-600 dark:text-zinc-400';
           document.querySelectorAll('[data-i18n-placeholder]').forEach(node => {
             const ph = node.getAttribute('data-' + target + '-placeholder');
             if (ph) (node as HTMLInputElement).placeholder = ph;
+          });
+          document.querySelectorAll('[data-href-en][data-href-es]').forEach(node => {
+            const href = node.getAttribute('data-href-' + target);
+            if (href) (node as HTMLAnchorElement).href = href;
           });
           // Update active state on lang buttons
           document.querySelectorAll('[data-lang-switch]').forEach(btn => {

@@ -23,13 +23,18 @@ const tr = t(lang);
 const trEn = t('en');
 const trEs = t('es');
 const signInPath = getLocalizedPath(lang, routes.signIn[lang] + '/');
-const sgTree = tr as unknown as {
+
+type SocialGraphTree = {
   socialgraph: {
     cards: Record<string, string>;
     block: { button: string };
     report: { button: string };
   };
 };
+
+const sgTreeEn = trEn as unknown as SocialGraphTree;
+const sgTreeEs = trEs as unknown as SocialGraphTree;
+const sgTree = tr as unknown as SocialGraphTree;
 const sgCards = sgTree.socialgraph.cards;
 const sgBlockLabel  = sgTree.socialgraph.block.button;
 const sgReportLabel = sgTree.socialgraph.report.button;
@@ -60,6 +65,46 @@ const sgReportLabel = sgTree.socialgraph.report.button;
   data-label-report-comment-aria={sgCards.report_comment_aria}
   data-label-block-commenter-aria={sgCards.block_commenter_aria}
   data-label-thread-locked={tr.social.thread_locked_banner}
+  data-en-edit={trEn.social.edit}
+  data-es-edit={trEs.social.edit}
+  data-en-delete={trEn.social.delete}
+  data-es-delete={trEs.social.delete}
+  data-en-reply={trEn.social.reply}
+  data-es-reply={trEs.social.reply}
+  data-en-cancel={trEn.social.cancel}
+  data-es-cancel={trEs.social.cancel}
+  data-en-save={trEn.social.save}
+  data-es-save={trEs.social.save}
+  data-en-empty={trEn.social.empty_comments}
+  data-es-empty={trEs.social.empty_comments}
+  data-en-edited={trEn.social.edited}
+  data-es-edited={trEs.social.edited}
+  data-en-deleted={trEn.social.comment_deleted}
+  data-es-deleted={trEs.social.comment_deleted}
+  data-en-confirm-delete={trEn.social.delete_confirm}
+  data-es-confirm-delete={trEs.social.delete_confirm}
+  data-en-confirm-delete-title={trEn.social.delete_confirm_title}
+  data-es-confirm-delete-title={trEs.social.delete_confirm_title}
+  data-en-more-actions={sgTreeEn.socialgraph.cards.more_actions}
+  data-es-more-actions={sgTreeEs.socialgraph.cards.more_actions}
+  data-en-block={sgTreeEn.socialgraph.block.button}
+  data-es-block={sgTreeEs.socialgraph.block.button}
+  data-en-report={sgTreeEn.socialgraph.report.button}
+  data-es-report={sgTreeEs.socialgraph.report.button}
+  data-en-block-confirm={sgTreeEn.socialgraph.cards.block_user_confirm}
+  data-es-block-confirm={sgTreeEs.socialgraph.cards.block_user_confirm}
+  data-en-block-confirm-title={sgTreeEn.socialgraph.cards.block_user_confirm_title}
+  data-es-block-confirm-title={sgTreeEs.socialgraph.cards.block_user_confirm_title}
+  data-en-block-success={sgTreeEn.socialgraph.cards.block_user_success}
+  data-es-block-success={sgTreeEs.socialgraph.cards.block_user_success}
+  data-en-block-error={sgTreeEn.socialgraph.cards.block_user_error}
+  data-es-block-error={sgTreeEs.socialgraph.cards.block_user_error}
+  data-en-report-comment-aria={sgTreeEn.socialgraph.cards.report_comment_aria}
+  data-es-report-comment-aria={sgTreeEs.socialgraph.cards.report_comment_aria}
+  data-en-block-commenter-aria={sgTreeEn.socialgraph.cards.block_commenter_aria}
+  data-es-block-commenter-aria={sgTreeEs.socialgraph.cards.block_commenter_aria}
+  data-en-thread-locked={trEn.social.thread_locked_banner}
+  data-es-thread-locked={trEs.social.thread_locked_banner}
 >
   <h2 class="text-lg md:text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4"
       data-i18n data-en={trEn.social.comments_title} data-es={trEs.social.comments_title}>
@@ -69,7 +114,7 @@ const sgReportLabel = sgTree.socialgraph.report.button;
   <!-- Thread-locked banner (hidden until the script confirms a locked row) -->
   <div class="comments-locked-banner hidden mb-4 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-100 flex items-center gap-2">
     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <span>{tr.social.thread_locked_banner}</span>
+    <span data-i18n data-en={trEn.social.thread_locked_banner} data-es={trEs.social.thread_locked_banner}>{tr.social.thread_locked_banner}</span>
   </div>
 
   <div class="comments-loading text-sm text-zinc-600 dark:text-zinc-400 py-3"
@@ -234,30 +279,45 @@ const sgReportLabel = sgTree.socialgraph.report.button;
 
   async function wireOne(root: HTMLElement) {
     const obsId = root.dataset.observationId;
-    const lang = (root.dataset.lang === 'es' ? 'es' : 'en') as 'en' | 'es';
     if (!obsId) return;
 
-    const labels: Record<string, string> = {
-      edit: root.dataset.labelEdit ?? 'Edit',
-      delete: root.dataset.labelDelete ?? 'Delete',
-      reply: root.dataset.labelReply ?? 'Reply',
-      cancel: root.dataset.labelCancel ?? 'Cancel',
-      save: root.dataset.labelSave ?? 'Save',
-      edited: root.dataset.labelEdited ?? 'edited',
-      deleted: root.dataset.labelDeleted ?? 'deleted',
-      confirmDelete: root.dataset.labelConfirmDelete ?? 'Delete this comment?',
-      confirmDeleteTitle: root.dataset.labelConfirmDeleteTitle ?? 'Delete comment?',
-      empty: root.dataset.labelEmpty ?? 'No comments yet.',
-      moreActions: root.dataset.labelMoreActions ?? 'More actions',
-      block: root.dataset.labelBlock ?? 'Block',
-      report: root.dataset.labelReport ?? 'Report',
-      blockConfirm: root.dataset.labelBlockConfirm ?? 'Block @{{handle}}?',
-      blockConfirmTitle: root.dataset.labelBlockConfirmTitle ?? 'Block this user?',
-      blockSuccess: root.dataset.labelBlockSuccess ?? 'User blocked.',
-      blockError: root.dataset.labelBlockError ?? 'Could not block.',
-      reportCommentAria: root.dataset.labelReportCommentAria ?? 'Report this comment',
-      blockCommenterAria: root.dataset.labelBlockCommenterAria ?? 'Block this commenter',
-    };
+    function getActiveLang(): 'en' | 'es' {
+      const docLang = document.documentElement.lang;
+      if (docLang === 'es' || docLang === 'en') return docLang;
+      return (root.dataset.lang === 'es' ? 'es' : 'en');
+    }
+
+    function getLabels(currentLang: 'en' | 'es'): Record<string, string> {
+      const prefix = currentLang === 'es' ? 'es' : 'en';
+      const attr = (name: string) => {
+        const cap = name.charAt(0).toUpperCase() + name.slice(1);
+        return (root.dataset as Record<string, string | undefined>)[prefix + cap];
+      };
+      return {
+        edit: attr('edit') ?? root.dataset.labelEdit ?? (currentLang === 'es' ? 'Editar' : 'Edit'),
+        delete: attr('delete') ?? root.dataset.labelDelete ?? (currentLang === 'es' ? 'Eliminar' : 'Delete'),
+        reply: attr('reply') ?? root.dataset.labelReply ?? (currentLang === 'es' ? 'Responder' : 'Reply'),
+        cancel: attr('cancel') ?? root.dataset.labelCancel ?? (currentLang === 'es' ? 'Cancelar' : 'Cancel'),
+        save: attr('save') ?? root.dataset.labelSave ?? (currentLang === 'es' ? 'Guardar' : 'Save'),
+        edited: attr('edited') ?? root.dataset.labelEdited ?? (currentLang === 'es' ? 'editado' : 'edited'),
+        deleted: attr('deleted') ?? root.dataset.labelDeleted ?? (currentLang === 'es' ? 'comentario eliminado' : 'deleted'),
+        confirmDelete: attr('confirmDelete') ?? root.dataset.labelConfirmDelete ?? (currentLang === 'es' ? '¿Eliminar este comentario?' : 'Delete this comment?'),
+        confirmDeleteTitle: attr('confirmDeleteTitle') ?? root.dataset.labelConfirmDeleteTitle ?? (currentLang === 'es' ? '¿Eliminar comentario?' : 'Delete comment?'),
+        empty: attr('empty') ?? root.dataset.labelEmpty ?? (currentLang === 'es' ? 'No hay comentarios aún.' : 'No comments yet.'),
+        moreActions: attr('moreActions') ?? root.dataset.labelMoreActions ?? (currentLang === 'es' ? 'Más acciones' : 'More actions'),
+        block: attr('block') ?? root.dataset.labelBlock ?? (currentLang === 'es' ? 'Bloquear' : 'Block'),
+        report: attr('report') ?? root.dataset.labelReport ?? (currentLang === 'es' ? 'Reportar' : 'Report'),
+        blockConfirm: attr('blockConfirm') ?? root.dataset.labelBlockConfirm ?? (currentLang === 'es' ? '¿Bloquear a @{{handle}}?' : 'Block @{{handle}}?'),
+        blockConfirmTitle: attr('blockConfirmTitle') ?? root.dataset.labelBlockConfirmTitle ?? (currentLang === 'es' ? '¿Bloquear a este usuario?' : 'Block this user?'),
+        blockSuccess: attr('blockSuccess') ?? root.dataset.labelBlockSuccess ?? (currentLang === 'es' ? 'Usuario bloqueado.' : 'User blocked.'),
+        blockError: attr('blockError') ?? root.dataset.labelBlockError ?? (currentLang === 'es' ? 'No se pudo bloquear.' : 'Could not block.'),
+        reportCommentAria: attr('reportCommentAria') ?? root.dataset.labelReportCommentAria ?? (currentLang === 'es' ? 'Reportar este comentario' : 'Report this comment'),
+        blockCommenterAria: attr('blockCommenterAria') ?? root.dataset.labelBlockCommenterAria ?? (currentLang === 'es' ? 'Bloquear a este comentarista' : 'Block this commenter'),
+      };
+    }
+
+    let curLang = getActiveLang();
+    let labels = getLabels(curLang);
 
     const listEl = root.querySelector('.comments-list') as HTMLUListElement | null;
     const loadingEl = root.querySelector('.comments-loading') as HTMLElement | null;
@@ -319,6 +379,8 @@ const sgReportLabel = sgTree.socialgraph.report.button;
 
     function render() {
       if (!listEl) return;
+      curLang = getActiveLang();
+      labels = getLabels(curLang);
       const tree = buildCommentTree(allRows);
       if (!tree.length) {
         listEl.classList.add('hidden');
@@ -328,7 +390,7 @@ const sgReportLabel = sgTree.socialgraph.report.button;
       emptyEl?.classList.add('hidden');
       listEl.classList.remove('hidden');
       listEl.innerHTML = tree
-        .map(n => nodeMarkup(n, authors, currentUserId, lang, labels, false))
+        .map(n => nodeMarkup(n, authors, currentUserId, curLang, labels, false))
         .join('');
       paintBodies();
       wireRowActions();
@@ -574,6 +636,15 @@ const sgReportLabel = sgTree.socialgraph.report.button;
         window.posthog?.capture('comment_posted', { observation_id: obsId });
       } finally {
         composerSubmit.disabled = false;
+      }
+    });
+
+    window.addEventListener('rastrum:lang-change', () => {
+      render();
+      const signInLink = root.querySelector('#ci-signin-link') as HTMLAnchorElement | null;
+      if (signInLink) {
+        const lang = getActiveLang();
+        signInLink.setAttribute('href', '/' + lang + '/' + (lang === 'es' ? 'ingresar' : 'sign-in') + '/');
       }
     });
 
