@@ -1255,7 +1255,8 @@ postForm?.addEventListener('submit', async (e) => {
 
     const machineName = bestResult?.scientific_name || '';
     const observerOwned = observerAffirmed || (!!taxonInput && taxonInput !== machineName);
-    const identifiedSpecies = taxonInput || observerAffirmedTaxon || machineName;
+    // Always use AI identification (machineName) when available, regardless of user input
+    const identifiedSpecies = machineName || taxonInput || observerAffirmedTaxon;
 
     const obs = await saveObservationToOutbox({
       observerRef,
