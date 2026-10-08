@@ -554,6 +554,16 @@ const lang: 'en' | 'es' = 'en';
           editLocBtn.classList.remove('hidden');
           editLocBtn.disabled = false;
           editLocBtn.removeAttribute('aria-disabled');
+          // Translate the button text based on current language
+          const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
+          const span = editLocBtn.querySelector('span');
+          if (span) {
+            const text = span.getAttribute('data-' + lang);
+            if (text) span.textContent = text;
+          }
+          // Also translate the title attribute
+          const title = editLocBtn.getAttribute('data-' + lang + '-title');
+          if (title) editLocBtn.setAttribute('title', title);
           editLocBtn.addEventListener('click', () => {
             const tab = document.getElementById('m-tab-location') as HTMLButtonElement | null;
             tab?.click();
