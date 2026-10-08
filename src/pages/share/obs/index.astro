@@ -103,6 +103,17 @@ const lang: 'en' | 'es' = 'en';
       window.addEventListener('rastrum:lang-change', function (e) {
         var next = e.detail && e.detail.lang;
         if (next) applyLang(next);
+        // Also translate the Edit location button if it's visible
+        var editLocBtn = document.getElementById('obs-edit-location-btn');
+        if (editLocBtn && !editLocBtn.classList.contains('hidden')) {
+          var span = editLocBtn.querySelector('span');
+          if (span) {
+            var text = span.getAttribute('data-' + next);
+            if (text) span.textContent = text;
+          }
+          var title = editLocBtn.getAttribute('data-' + next + '-title');
+          if (title) editLocBtn.setAttribute('title', title);
+        }
       });
 
       if (document.readyState === 'loading') {
