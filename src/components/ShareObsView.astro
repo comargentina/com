@@ -264,9 +264,9 @@ const labelsEs = {
             <button id="ci-suggest-btn" type="button" class="hidden rounded-lg bg-emerald-700 hover:bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white">
               <span data-i18n data-en={labelsEn.suggestBtn} data-es={labelsEs.suggestBtn}>{labels.suggestBtn}</span>
             </button>
-            <a id="ask-rastrum-link" href={`/${lang}/chat/`} class="inline-flex items-center gap-1 min-h-9 rounded-lg border border-emerald-600/60 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10" aria-label={lang === 'es' ? 'Pregunta a la IA del COM' : 'Ask COM AI'} title={lang === 'es' ? 'Pregunta a la IA del COM' : 'Ask COM AI'}>
+            <a id="ask-rastrum-link" href={`/${lang}/chat/`} class="inline-flex items-center gap-1 min-h-9 rounded-lg border border-emerald-600/60 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10" aria-label={lang === 'es' ? 'Pregunta a la IA del COM' : 'Ask COM AI'} title={lang === 'es' ? 'Pregunta a la IA del COM' : 'Ask COM AI'} data-i18n-aria-label data-i18n-title data-en-aria-label="Ask COM AI" data-en-title="Ask COM AI" data-es-aria-label="Pregunta a la IA del COM" data-es-title="Pregunta a la IA del COM">
               <span aria-hidden="true">💬</span>
-              <span data-i18n data-en="Ask" data-es="Preguntar">{lang === 'es' ? 'Preguntar a la IA' : 'Ask AI'}</span>
+              <span data-i18n data-en="Ask AI" data-es="Preguntar a la IA">{lang === 'es' ? 'Preguntar a la IA' : 'Ask AI'}</span>
             </a>
             <button
               id="ci-ask-ai-btn"

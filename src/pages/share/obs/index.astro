@@ -153,6 +153,14 @@ const lang: 'en' | 'es' = 'en';
       if (askLink) {
         const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
         askLink.href = `/${lang}/chat/?attach=observation:${encodeURIComponent(id)}`;
+        // Also update aria-label and title attributes
+        if (lang === 'es') {
+          askLink.setAttribute('aria-label', 'Pregunta a la IA del COM');
+          askLink.setAttribute('title', 'Pregunta a la IA del COM');
+        } else {
+          askLink.setAttribute('aria-label', 'Ask COM AI');
+          askLink.setAttribute('title', 'Ask COM AI');
+        }
       }
       load(id).catch(e => {
         document.getElementById('loading')?.classList.add('hidden');
