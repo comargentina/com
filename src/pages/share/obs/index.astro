@@ -31,10 +31,8 @@ const lang: 'en' | 'es' = 'en';
        at build time. We swap the [data-i18n] text nodes at runtime. -->
   <script is:inline>
     (function () {
-      var stored = null;
-      try { stored = localStorage.getItem('rastrum.lang'); } catch (_) { /* ignore */ }
-      var browserEs = typeof navigator !== 'undefined' && navigator.language && navigator.language.toLowerCase().startsWith('es');
-      var lang = stored === 'es' || (!stored && browserEs) ? 'es' : 'en';
+      // Force Spanish for COM Argentina
+      var lang = 'es';
       document.documentElement.lang = lang;
 
       // Swap [data-i18n] text nodes to the detected language immediately.
@@ -118,7 +116,7 @@ const lang: 'en' | 'es' = 'en';
         var manageOpenBtn = document.querySelector('[data-mappicker-open="obs-detail-edit"]');
         if (manageOpenBtn) {
           var tr = next === 'es' ? t('es') : t('en');
-          var tree = tr as { obs_detail: { location: { edit_button: string } } };
+          var tree = tr;
           if (tree.obs_detail && tree.obs_detail.location && tree.obs_detail.location.edit_button) {
             manageOpenBtn.textContent = tree.obs_detail.location.edit_button;
           }
