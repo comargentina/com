@@ -425,7 +425,7 @@ const tabs = [
   }) as EventListener);
 
   async function shareObservation(id: string, name: string): Promise<void> {
-    const url = `https://rastrum.org/share/obs/?id=${encodeURIComponent(id)}`;
+    const url = `${window.location.origin}/share/obs/?id=${encodeURIComponent(id)}`;
     const text = lang === 'es' ? '¡Mira esta observación!' : 'Look at this observation!';
     type NavShare = Navigator & { share?: (data: ShareData) => Promise<void> };
     const nav = navigator as NavShare;
