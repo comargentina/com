@@ -921,7 +921,7 @@ const distancePage = page as unknown as Record<string, string>;
         }
         
         const popup = new maplibregl.Popup({ 
-          offset: 15,
+          offset: [0, -10],
           anchor: 'bottom',
           closeButton: true, 
           closeOnClick: false,
