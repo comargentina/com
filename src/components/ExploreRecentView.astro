@@ -921,10 +921,10 @@ const distancePage = page as unknown as Record<string, string>;
         }
         
         const popup = new maplibregl.Popup({ 
-          offset: [0, -10],
-          anchor: 'bottom',
+          offset: 20,
+          anchor: 'top',
           closeButton: true, 
-          closeOnClick: false,
+          closeOnClick: true,
           maxWidth: '300px',
           className: 'rastrum-map-popup'
         })
@@ -952,15 +952,6 @@ const distancePage = page as unknown as Record<string, string>;
       mapInstance.on('mouseleave', 'observation-pins', () => {
         mapInstance.getCanvas().style.cursor = '';
       });
-
-      // Fit bounds
-      const bounds = new maplibregl.LngLatBounds();
-      features.forEach(f => {
-        if (f.geometry.type === 'Point') {
-          bounds.extend(f.geometry.coordinates as [number, number]);
-        }
-      });
-      mapInstance.fitBounds(bounds, { padding: 50, maxZoom: 12 });
     }
 
     function setViewMode(mode: ViewMode) {
