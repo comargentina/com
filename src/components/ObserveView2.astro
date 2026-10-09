@@ -1241,15 +1241,6 @@ postForm?.addEventListener('submit', async (e) => {
     const observerOwned = observerAffirmed || (!!taxonInput && taxonInput !== machineName);
     // Always use AI identification if taxon input is empty or whitespace only
     const identifiedSpecies = (taxonInput && taxonInput.trim()) || observerAffirmedTaxon || machineName;
-    
-    // Debug: log what's being used
-    console.log('[rastrum] Saving with species:', {
-      taxonInput,
-      observerAffirmedTaxon,
-      machineName,
-      identifiedSpecies,
-      bestResult
-    });
 
     const obs = await saveObservationToOutbox({
       observerRef,
