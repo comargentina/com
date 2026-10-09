@@ -791,7 +791,9 @@ const distancePage = page as unknown as Record<string, string>;
         const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
           ? r.location_obscured
           : r.location;
+        console.log('[rastrum] Row', r.id, 'location:', raw);
         const parsed = parseLocationToGeoJSON(raw);
+        console.log('[rastrum] Parsed coordinates:', parsed?.coordinates);
         if (!parsed?.coordinates) continue;
 
         const ident = pickIdent(r);
