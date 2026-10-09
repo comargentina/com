@@ -628,6 +628,7 @@ const distancePage = page as unknown as Record<string, string>;
     let mapMarkers: any[] = [];
     let mapTargetCenter: [number, number] | null = null;
     let mapTargetZoom = 9;
+    let mapSource: any = null;
 
     function listRowMarkup(r: Row): string {
       const ident = pickIdent(r);
@@ -766,10 +767,10 @@ const distancePage = page as unknown as Record<string, string>;
       mapInstance = map;
       mapInited = true;
 
-      // Plot markers after a short delay to ensure map is visible
-      setTimeout(() => {
+      // Plot markers after map is ready
+      map.on('load', () => {
         plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
-      }, 200);
+      });
 
       map.on('moveend', () => {
         if (mapBlockEl && mapBlockEl.clientHeight > 0 && !mapBlockEl.classList.contains('hidden')) {
@@ -784,49 +785,111 @@ const distancePage = page as unknown as Record<string, string>;
 
     function plotMapMarkers(rows: Row[], maplibregl: any, parseLocationToGeoJSON: any) {
       if (!mapInstance) return;
-      mapMarkers.forEach(m => m.remove());
-      mapMarkers = [];
+      
+      // Remove existing source if any
+      if (mapSource) {
+        mapInstance.removeSource('observations');
+        mapSource = null;
+      }
+      
+      // Build GeoJSON features
+      const features = rows
+        .map(r => {
+          const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
+            ? r.location_obscured
+            : r.location;
+          const parsed = parseLocationToGeoJSON(raw);
+          if (!parsed?.coordinates) return null;
+          
+          const ident = pickIdent(r);
+          const sci = ident?.scientific_name ?? unknownLabel;
+          const common = lang === 'es'
+            ? (ident?.taxa?.common_name_es ?? ident?.taxa?.common_name_en ?? '')
+            : (ident?.taxa?.common_name_en ?? ident?.taxa?.common_name_es ?? '');
+          
+          return {
+            type: 'Feature' as const,
+            geometry: {
+              type: 'Point' as const,
+              coordinates: parsed.coordinates as [number, number],
+            },
+            properties: {
+              id: r.id,
+              scientific_name: sci,
+              common_name: common,
+            },
+          };
+        })
+        .filter(f => f !== null);
 
-      const bounds: any[] = [];
-      for (const r of rows) {
-        const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
-          ? r.location_obscured
-          : r.location;
-        const parsed = parseLocationToGeoJSON(raw);
-        if (!parsed?.coordinates) continue;
+      if (features.length === 0) return;
 
-        bounds.push(parsed.coordinates as [number, number]);
+      const geojson = {
+        type: 'FeatureCollection' as const,
+        features,
+      };
 
-        const ident = pickIdent(r);
-        const sci = ident?.scientific_name ?? unknownLabel;
-        const common = lang === 'es'
-          ? (ident?.taxa?.common_name_es ?? ident?.taxa?.common_name_en ?? '')
-          : (ident?.taxa?.common_name_en ?? ident?.taxa?.common_name_es ?? '');
+      // Add source
+      mapInstance.addSource('observations', {
+        type: 'geojson',
+        data: geojson,
+      });
+      mapSource = mapInstance.getSource('observations');
 
+      // Add circle layer
+      mapInstance.addLayer({
+        id: 'observation-pins',
+        type: 'circle',
+        source: 'observations',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#059669',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+
+      // Add click handler
+      mapInstance.on('click', 'observation-pins', (e: any) => {
+        const feat = e.features?.[0];
+        if (!feat) return;
+        const props = feat.properties;
+        const sci = props.scientific_name;
+        const common = props.common_name;
+        const obsId = props.id;
+        
         const popupHtml = `
           <div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 2px;">
             <p style="font-weight: 600; font-style: italic; margin: 0; color: #18181b;">${escapeText(sci)}</p>
             ${common ? `<p style="margin: 2px 0 0; color: #71717a;">${escapeText(common)}</p>` : ''}
-            <a href="${shareBase}?id=${encodeURIComponent(r.id)}" style="display: inline-block; margin-top: 6px; color: #059669; font-weight: 600; text-decoration: underline;">
+            <a href="${shareBase}?id=${encodeURIComponent(obsId)}" style="display: inline-block; margin-top: 6px; color: #059669; font-weight: 600; text-decoration: underline;">
               ${lang === 'es' ? 'Ver observación →' : 'View observation →'}
             </a>
           </div>
         `;
-
-        const popup = new maplibregl.Popup({ offset: 12, closeButton: false }).setHTML(popupHtml);
-        const marker = new maplibregl.Marker({ color: '#059669' })
-          .setLngLat(parsed.coordinates as [number, number])
-          .setPopup(popup)
+        
+        new maplibregl.Popup({ offset: 12, closeButton: false })
+          .setLngLat(e.lngLat)
+          .setHTML(popupHtml)
           .addTo(mapInstance);
-        mapMarkers.push(marker);
-      }
+      });
 
-      // Fit map to bounds if we have markers
-      if (bounds.length > 0 && mapInstance) {
-        const boundsObj = new maplibregl.LngLatBounds();
-        bounds.forEach(b => boundsObj.extend(b));
-        mapInstance.fitBounds(boundsObj, { padding: 50, maxZoom: 12 });
-      }
+      // Change cursor on hover
+      mapInstance.on('mouseenter', 'observation-pins', () => {
+        mapInstance.getCanvas().style.cursor = 'pointer';
+      });
+      mapInstance.on('mouseleave', 'observation-pins', () => {
+        mapInstance.getCanvas().style.cursor = '';
+      });
+
+      // Fit bounds
+      const bounds = new maplibregl.LngLatBounds();
+      features.forEach(f => {
+        if (f.geometry.type === 'Point') {
+          bounds.extend(f.geometry.coordinates as [number, number]);
+        }
+      });
+      mapInstance.fitBounds(bounds, { padding: 50, maxZoom: 12 });
     }
 
     function setViewMode(mode: ViewMode) {
