@@ -419,7 +419,7 @@ const stringsJson = JSON.stringify({
           style: basemapStyleUrl(),
           center: [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat],
           zoom: COLON_DEFAULT_CENTER.zoom - 2,
-          attributionControl: { compact: true },
+          attributionControl: false,
         });
         map.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');
         installSpriteFallback(map);

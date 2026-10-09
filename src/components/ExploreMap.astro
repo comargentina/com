@@ -203,7 +203,7 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
     style: choice.style,
     center: [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat],
     zoom: COLON_DEFAULT_CENTER.zoom,
-    attributionControl: { compact: true },
+    attributionControl: false,
   });
 
   // #1113 — the hosted OpenFreeMap style references Maki POI icons

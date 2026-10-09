@@ -380,6 +380,11 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
         }
       })();
     </script>
+    <style is:global>
+      .maplibregl-ctrl-attrib {
+        display: none !important;
+      }
+    </style>
   </head>
   <body class="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors pb-20 sm:pb-0">
     <BanBanner lang={installLang} />

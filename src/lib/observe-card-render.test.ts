@@ -21,6 +21,7 @@ const S: CardStrings = {
   actionReview: 'ask for review',
   actionAdopt: 'adopt',
   actionDismiss: 'dismiss',
+  actionCancelReview: 'cancel review',
   reviewRequestedAck: 'review requested',
   traceColSource: 'Source',
   traceColWhere: 'Where',
