@@ -14,7 +14,7 @@ export function cardActions(state: CardState): CardAction[] {
     case 'S2':
       return ['affirm', 'other', 'review'];
     case 'S2prime':
-      return ['adopt', 'dismiss', 'cancel-review'];
+      return ['adopt', 'dismiss'];
     case 'S3':
       return ['other', 'review'];
     case 'S0':
