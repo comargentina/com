@@ -861,13 +861,12 @@ const distancePage = page as unknown as Record<string, string>;
       });
     }
 
-    // Read URL param or localStorage
+    // Read URL param, else use default (ignore localStorage for initial load)
     function readViewMode(): ViewMode {
       try {
         const urlParam = new URL(window.location.href).searchParams.get('view');
         if (isViewMode(urlParam)) return urlParam;
-        const v = localStorage.getItem(RECENTS_VIEW_MODE_KEY);
-        return isViewMode(v) ? v : DEFAULT_VIEW_MODE;
+        return DEFAULT_VIEW_MODE;
       } catch { return DEFAULT_VIEW_MODE; }
     }
     function writeViewMode(mode: ViewMode) {
