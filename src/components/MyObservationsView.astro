@@ -426,16 +426,23 @@ const tabs = [
 
   async function shareObservation(id: string, name: string): Promise<void> {
     const url = `${window.location.origin}/share/obs/?id=${encodeURIComponent(id)}`;
+    console.log('[rastrum] shareObservation called:', { id, name, url });
     const text = lang === 'es' ? '¡Mira esta observación!' : 'Look at this observation!';
     type NavShare = Navigator & { share?: (data: ShareData) => Promise<void> };
     const nav = navigator as NavShare;
     try {
       if (typeof nav.share === 'function') {
+        console.log('[rastrum] Using navigator.share');
         await nav.share({ url, title: name, text });
       } else if (navigator.clipboard?.writeText) {
+        console.log('[rastrum] Using clipboard.writeText');
         await navigator.clipboard.writeText(url);
+      } else {
+        console.log('[rastrum] No share method available');
       }
-    } catch { /* user cancelled */ }
+    } catch (err) {
+      console.error('[rastrum] Share failed:', err);
+    }
   }
 
   async function fetchPage(): Promise<Row[]> {
