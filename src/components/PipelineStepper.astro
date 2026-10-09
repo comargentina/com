@@ -230,6 +230,9 @@ const labels = {
         const estimateSec = Math.round(estimateMs / 1000);
         estimateEl.textContent = `~${estimateSec}s`;
         estimateEl.classList.remove('hidden');
+      } else if (state === 'done') {
+        estimateEl.textContent = isEs ? 'guardado' : 'saved';
+        estimateEl.classList.remove('hidden');
       } else {
         estimateEl.classList.add('hidden');
         estimateEl.textContent = '';
