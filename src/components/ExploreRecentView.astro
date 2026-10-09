@@ -745,6 +745,9 @@ const distancePage = page as unknown as Record<string, string>;
 
     async function initMap(rows: Row[]) {
       if (!mapBlockEl) return;
+      console.log('[rastrum] Map block element:', mapBlockEl);
+      console.log('[rastrum] Map block height:', mapBlockEl.clientHeight);
+      console.log('[rastrum] Map block display:', window.getComputedStyle(mapBlockEl).display);
       const { default: maplibregl } = await import('maplibre-gl' as string) as any;
       const { basemapStyleUrl, installSpriteFallback } = await import('../lib/map-style');
       const { parseLocationToGeoJSON } = await import('../lib/geo');
