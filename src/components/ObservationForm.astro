@@ -32,14 +32,6 @@ const saveObservationCtaLabel = idStrings.save_observation_cta ?? submitFullLabe
 const initialSubmitLabel = identifyOnly ? submitIdentifyLabel : submitFullLabel;
 
 // taxon-hint chip strings (extracted to typed locals for the JSX)
-const taxonHintStrings = (tr.observe as unknown as { taxon_hint?: Record<string, string> }).taxon_hint ?? {};
-const taxonHintLabel = taxonHintStrings.label ?? (isEs ? '¿Qué viste?' : 'What did you see?');
-const taxonHintPlant   = taxonHintStrings.plant   ?? (isEs ? 'Planta'   : 'Plant');
-const taxonHintBird    = taxonHintStrings.bird    ?? (isEs ? 'Ave'      : 'Bird');
-const taxonHintMammal  = taxonHintStrings.mammal  ?? (isEs ? 'Mamífero' : 'Mammal');
-const taxonHintInsect  = taxonHintStrings.insect  ?? (isEs ? 'Insecto'  : 'Insect');
-const taxonHintFungus  = taxonHintStrings.fungus  ?? (isEs ? 'Hongo'    : 'Fungus');
-const taxonHintClear   = taxonHintStrings.clear   ?? (isEs ? 'Quitar pista' : 'Clear hint');
 const observeStringsForLabels = tr.observe as unknown as Record<string, string>;
 const shareLabel = observeStringsForLabels.share ?? (isEs ? 'Compartir' : 'Share');
 const shareUnavailableHint = observeStringsForLabels.share_unavailable_hint ?? (isEs ? 'Guarda primero la observación para compartirla.' : 'Save the observation first to share.');
@@ -225,20 +217,6 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
       </div>
       <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{tr.observe.photo_hint}</p>
       <p id="photo-hint-android" class="hidden mt-1 text-xs text-amber-700 dark:text-amber-400">{observeStrings.photo_hint_android}</p>
-
-      <!-- Quick-taxon chips (ux-quick-taxon-chips). Pure routing hint —
-           selecting one filters the cascade runners; default = no hint. -->
-      <fieldset id="taxon-hint-chips" class="mt-3" aria-label={taxonHintLabel}>
-        <legend class="text-xs uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1">{taxonHintLabel}</legend>
-        <div class="flex flex-wrap gap-1.5">
-          <button type="button" data-hint="Plantae" class="taxon-chip min-h-9 px-2.5 py-1 rounded-full text-xs font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 data-[active=true]:bg-emerald-700 data-[active=true]:text-white data-[active=true]:border-emerald-700"><span aria-hidden="true">🌿</span> {taxonHintPlant}</button>
-          <button type="button" data-hint="Animalia.Aves" class="taxon-chip min-h-9 px-2.5 py-1 rounded-full text-xs font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 data-[active=true]:bg-emerald-700 data-[active=true]:text-white data-[active=true]:border-emerald-700"><span aria-hidden="true">🐦</span> {taxonHintBird}</button>
-          <button type="button" data-hint="Animalia.Insecta.Lepidoptera" class="taxon-chip min-h-9 px-2.5 py-1 rounded-full text-xs font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 data-[active=true]:bg-emerald-700 data-[active=true]:text-white data-[active=true]:border-emerald-700"><span aria-hidden="true">🦋</span> {isEs ? 'Mariposa' : 'Butterfly'}</button>
-          <button type="button" data-hint="Animalia.Insecta" class="taxon-chip min-h-9 px-2.5 py-1 rounded-full text-xs font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 data-[active=true]:bg-emerald-700 data-[active=true]:text-white data-[active=true]:border-emerald-700"><span aria-hidden="true">🐛</span> {taxonHintInsect}</button>
-          <button type="button" data-hint="Fungi" class="taxon-chip min-h-9 px-2.5 py-1 rounded-full text-xs font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 data-[active=true]:bg-emerald-700 data-[active=true]:text-white data-[active=true]:border-emerald-700"><span aria-hidden="true">🍄</span> {taxonHintFungus}</button>
-          <button type="button" id="taxon-hint-clear" class="hidden min-h-9 px-2.5 py-1 rounded-full text-xs font-medium border border-transparent text-zinc-600 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-200 underline">{taxonHintClear}</button>
-        </div>
-      </fieldset>
 
       <!-- Photo dedupe warning (ux-photo-dedupe). Shown when the perceptual
            hash of a freshly-added photo matches one uploaded by this observer
@@ -1243,38 +1221,6 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
     </span>`;
   }
 
-  // ── Taxon hint chips (ux-quick-taxon-chips) ──────────────────────────
-  // Tapping a chip primes the cascade by filtering runners (e.g. 🐦 drops
-  // PlantNet, prefers Phi/Claude). Default state = no hint.
-  type TaxonHint = 'Plantae' | 'Animalia.Aves' | 'Animalia.Mammalia' | 'Animalia.Insecta' | 'Animalia.Insecta.Lepidoptera' | 'Fungi';
-  let activeTaxonHint: TaxonHint | null = null;
-  const taxonChipBtns = document.querySelectorAll<HTMLButtonElement>('.taxon-chip');
-  const taxonClearBtn = document.getElementById('taxon-hint-clear');
-
-  function paintTaxonChips() {
-    taxonChipBtns.forEach((btn) => {
-      btn.dataset.active = String(btn.dataset.hint === activeTaxonHint);
-    });
-    taxonClearBtn?.classList.toggle('hidden', !activeTaxonHint);
-  }
-
-  taxonChipBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const v = btn.dataset.hint as TaxonHint | undefined;
-      if (!v) return;
-      activeTaxonHint = activeTaxonHint === v ? null : v;
-      paintTaxonChips();
-      // Re-run identify on the first photo if we already have one — the chip
-      // is a routing hint, so changing it should re-route.
-      if (lastFile) triggerClientIdentify(lastFile);
-    });
-  });
-  taxonClearBtn?.addEventListener('click', () => {
-    activeTaxonHint = null;
-    paintTaxonChips();
-    if (lastFile) triggerClientIdentify(lastFile);
-  });
-
   // ── "Identify another way" ──────────────────────────────────────────
   // Re-runs the cascade, excluding the runner that produced the current
   // result. Used when Phi or PlantNet returns the wrong taxon and the
@@ -1367,7 +1313,7 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
     // Pre-apply the taxon hint filter here (mirrors what runParallelIdentify
     // does internally) so we can detect the "hint filtered all runners" case
     // and surface a specific actionable message to the user (#784).
-    const hintFilteredRunners = filterRunnersByHint(runners, activeTaxonHint ?? null);
+    const hintFilteredRunners = filterRunnersByHint(runners, null);
     const hintFilteredOutAll =
       Object.keys(hintFilteredRunners).length === 0 && Object.keys(runners).length > 0;
 
@@ -1396,7 +1342,7 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
       // a plant-only cascade always fails. See feedback report 2026-04-27.
       if (idAllFailed) {
         idAllFailed.textContent = describeAllFailed({
-          hint: activeTaxonHint,
+          hint: null,
           // Pass effective availability (after hint filter) so the message
           // is accurate: if PlantNet was filtered out by the hint, the user
           // should not be told "PlantNet ran but failed" (#784).
@@ -1608,7 +1554,7 @@ const photoPraiseJson = JSON.stringify(photoPraiseTree);
       try {
         const { openCropModal } = await import('../lib/photo-crop-controller');
         const result = await openCropModal(toProcess[0]);
-        if (result.kind === 'cancel') {
+        if (result.kind === 'cancel' || result.kind === 'delete') {
           toProcess = toProcess.slice(1);
         } else {
           toProcess[0] = result.file;

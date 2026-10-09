@@ -33,7 +33,7 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
   aria-labelledby="rastrum-crop-title"
   data-lang={lang}
 >
-  <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+  <div class="w-full max-w-3xl sm:max-w-4xl rounded-2xl bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
     <header class="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
       <h2 id="rastrum-crop-title" class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
         {obs.crop_title}
@@ -41,105 +41,109 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
       <p class="mt-0.5 text-xs text-zinc-600 dark:text-zinc-400">{obs.crop_subtitle}</p>
     </header>
 
-    <div class="px-5 py-4 space-y-3">
-      <div
-        id="rastrum-crop-stage"
-        class="relative w-full bg-zinc-100 dark:bg-zinc-950 rounded-lg overflow-hidden touch-none select-none"
-        style="aspect-ratio: 4/3;"
-      >
-        <canvas
-          id="rastrum-crop-canvas"
-          class="block w-full h-full object-contain"
-          aria-hidden="true"
-        ></canvas>
+    <div class="px-5 py-4 flex flex-col sm:flex-row gap-4">
+      <!-- Image canvas -->
+      <div class="flex-shrink-0 mx-auto sm:mx-0">
+        <div
+          id="rastrum-crop-stage"
+          class="relative w-48 h-36 sm:w-64 sm:h-48 bg-zinc-100 dark:bg-zinc-950 rounded-lg overflow-hidden touch-none select-none"
+        >
+          <canvas
+            id="rastrum-crop-canvas"
+            class="block w-full h-full object-contain"
+            aria-hidden="true"
+          ></canvas>
+        </div>
+        <p class="text-xs text-zinc-600 dark:text-zinc-400 text-center mt-2">{obs.crop_drag_hint}</p>
       </div>
 
-      <p class="text-xs text-zinc-600 dark:text-zinc-400 text-center">{obs.crop_drag_hint}</p>
-
-      <div class="flex items-center justify-center gap-2">
-        <button
-          type="button"
-          id="rastrum-crop-rotate-left"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[36px]"
-          aria-label={obs.crop_rotate_left}
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 4L4 9l5 5M4 9h11a5 5 0 010 10h-3" />
-          </svg>
-          <span class="hidden sm:inline">{obs.crop_rotate_left}</span>
-        </button>
-        <button
-          type="button"
-          id="rastrum-crop-reset"
-          class="inline-flex items-center rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[36px]"
-        >{obs.crop_reset}</button>
-        <button
-          type="button"
-          id="rastrum-crop-rotate-right"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[36px]"
-          aria-label={obs.crop_rotate_right}
-        >
-          <span class="hidden sm:inline">{obs.crop_rotate_right}</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 4l5 5-5 5M20 9H9a5 5 0 000 10h3" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="space-y-2 pt-1">
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label for="rastrum-crop-brightness" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              {obs.crop_brightness_label}
-            </label>
-            <span id="rastrum-crop-brightness-val" class="text-xs font-mono text-zinc-600 dark:text-zinc-400" aria-live="polite">0</span>
-          </div>
-          <input
-            id="rastrum-crop-brightness"
-            type="range"
-            min="-100"
-            max="100"
-            step="1"
-            value="0"
-            class="w-full min-h-[44px] accent-emerald-600"
-            aria-label={obs.crop_brightness_label}
-          />
+      <!-- Controls -->
+      <div class="flex-1 space-y-3">
+        <div class="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            id="rastrum-crop-rotate-left"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[36px]"
+            aria-label={obs.crop_rotate_left}
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 4L4 9l5 5M4 9h11a5 5 0 010 10h-3" />
+            </svg>
+            <span class="hidden sm:inline">{obs.crop_rotate_left}</span>
+          </button>
+          <button
+            type="button"
+            id="rastrum-crop-reset"
+            class="inline-flex items-center rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[36px]"
+          >{obs.crop_reset}</button>
+          <button
+            type="button"
+            id="rastrum-crop-rotate-right"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[36px]"
+            aria-label={obs.crop_rotate_right}
+          >
+            <span class="hidden sm:inline">{obs.crop_rotate_right}</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 4l5 5-5 5M20 9H9a5 5 0 000 10h3" />
+            </svg>
+          </button>
         </div>
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label for="rastrum-crop-contrast" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              {obs.crop_contrast_label}
-            </label>
-            <span id="rastrum-crop-contrast-val" class="text-xs font-mono text-zinc-600 dark:text-zinc-400" aria-live="polite">0</span>
+
+        <div class="space-y-2">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="rastrum-crop-brightness" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                {obs.crop_brightness_label}
+              </label>
+              <span id="rastrum-crop-brightness-val" class="text-xs font-mono text-zinc-600 dark:text-zinc-400" aria-live="polite">0</span>
+            </div>
+            <input
+              id="rastrum-crop-brightness"
+              type="range"
+              min="-100"
+              max="100"
+              step="1"
+              value="0"
+              class="w-full min-h-[44px] accent-emerald-600"
+              aria-label={obs.crop_brightness_label}
+            />
           </div>
-          <input
-            id="rastrum-crop-contrast"
-            type="range"
-            min="-100"
-            max="100"
-            step="1"
-            value="0"
-            class="w-full min-h-[44px] accent-emerald-600"
-            aria-label={obs.crop_contrast_label}
-          />
-        </div>
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label for="rastrum-crop-exposure" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              {obs.exposure_label}
-            </label>
-            <span id="rastrum-crop-exposure-val" class="text-xs font-mono text-zinc-600 dark:text-zinc-400" aria-live="polite">0</span>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="rastrum-crop-contrast" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                {obs.crop_contrast_label}
+              </label>
+              <span id="rastrum-crop-contrast-val" class="text-xs font-mono text-zinc-600 dark:text-zinc-400" aria-live="polite">0</span>
+            </div>
+            <input
+              id="rastrum-crop-contrast"
+              type="range"
+              min="-100"
+              max="100"
+              step="1"
+              value="0"
+              class="w-full min-h-[44px] accent-emerald-600"
+              aria-label={obs.crop_contrast_label}
+            />
           </div>
-          <input
-            id="rastrum-crop-exposure"
-            type="range"
-            min="-100"
-            max="100"
-            step="1"
-            value="0"
-            class="w-full min-h-[44px] accent-emerald-600"
-            aria-label={obs.exposure_aria}
-          />
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="rastrum-crop-exposure" class="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                {obs.exposure_label}
+              </label>
+              <span id="rastrum-crop-exposure-val" class="text-xs font-mono text-zinc-600 dark:text-zinc-400" aria-live="polite">0</span>
+            </div>
+            <input
+              id="rastrum-crop-exposure"
+              type="range"
+              min="-100"
+              max="100"
+              step="1"
+              value="0"
+              class="w-full min-h-[44px] accent-emerald-600"
+              aria-label={obs.exposure_aria}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -459,7 +463,7 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
       close();
     });
     deleteBtn?.addEventListener('click', () => {
-      emit('cancel');
+      emit('delete');
       close();
     });
     skipBtn?.addEventListener('click', () => {

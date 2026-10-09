@@ -71,32 +71,6 @@ const weathers = WEATHERS;
        action wins the first fold (#942 PR5 redo, Fogg ability lever). -->
   <DropZone lang={lang} />
 
-  <!-- Quick taxon hint chips — below drop zone, above capability caption.
-       Single-select; tapping the same chip deselects. Primes the cascade
-       runner filter so e.g. Bird skips PlantNet. (#ux-quick-taxon-chips) -->
-  <div id="obs2-taxon-chips" class="flex flex-wrap gap-2">
-    <button type="button" data-hint="Plantae"
-      class="obs2-taxon-chip flex items-center gap-1.5 rounded-full border border-zinc-300 dark:border-zinc-600 px-3 py-1 text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400">
-      🌿 {isEs ? 'Planta' : 'Plant'}
-    </button>
-    <button type="button" data-hint="Animalia.Aves"
-      class="obs2-taxon-chip flex items-center gap-1.5 rounded-full border border-zinc-300 dark:border-zinc-600 px-3 py-1 text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400">
-      🐦 {isEs ? 'Ave' : 'Bird'}
-    </button>
-    <button type="button" data-hint="Animalia.Insecta.Lepidoptera"
-      class="obs2-taxon-chip flex items-center gap-1.5 rounded-full border border-zinc-300 dark:border-zinc-600 px-3 py-1 text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400">
-      🦋 {isEs ? 'Mariposa' : 'Butterfly'}
-    </button>
-    <button type="button" data-hint="Animalia.Insecta"
-      class="obs2-taxon-chip flex items-center gap-1.5 rounded-full border border-zinc-300 dark:border-zinc-600 px-3 py-1 text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400">
-      🐛 {isEs ? 'Insecto' : 'Insect'}
-    </button>
-    <button type="button" data-hint="Fungi"
-      class="obs2-taxon-chip flex items-center gap-1.5 rounded-full border border-zinc-300 dark:border-zinc-600 px-3 py-1 text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400">
-      🍄 {isEs ? 'Hongo' : 'Fungus'}
-    </button>
-  </div>
-
   <CapabilityCaption lang={lang} />
 
   <!-- Contextual hint (shown briefly after file drop) -->
@@ -448,39 +422,6 @@ document.addEventListener('rastrum:card-vm', (e) => {
   });
 });
 
-// ── Taxon hint chips (#ux-quick-taxon-chips) ──────────────────────────────
-import type { TaxonHint } from '../lib/identify-cascade-client';
-let selectedTaxonHint: TaxonHint | null = null;
-
-const taxonChips = document.querySelectorAll<HTMLButtonElement>('.obs2-taxon-chip');
-taxonChips.forEach(chip => {
-  chip.addEventListener('click', () => {
-    const hint = chip.dataset.hint as TaxonHint;
-    if (selectedTaxonHint === hint) {
-      // Deselect
-      selectedTaxonHint = null;
-      applyChipStyles(null);
-    } else {
-      selectedTaxonHint = hint;
-      applyChipStyles(hint);
-    }
-  });
-});
-
-function applyChipStyles(active: TaxonHint | null): void {
-  taxonChips.forEach(chip => {
-    const isActive = chip.dataset.hint === active;
-    chip.classList.toggle('bg-emerald-600', isActive);
-    chip.classList.toggle('text-white', isActive);
-    chip.classList.toggle('border-emerald-600', isActive);
-    chip.classList.toggle('border-zinc-300', !isActive);
-    chip.classList.toggle('dark:border-zinc-600', !isActive);
-    chip.classList.toggle('text-zinc-600', !isActive);
-    chip.classList.toggle('dark:text-zinc-300', !isActive);
-    chip.classList.toggle('dark:text-zinc-400', !isActive);
-  });
-}
-
 // DOM refs
 const pipelineSection  = document.getElementById('obs2-pipeline-section');
 const pipelineStatus   = document.getElementById('obs2-pipeline-status');
@@ -756,6 +697,38 @@ document.addEventListener('rastrum:photo-edited', (e: Event) => {
   }
 });
 
+// ── Photo deleted (from crop modal) ──────────────────────────────────────
+document.addEventListener('rastrum:photo-deleted', (e: Event) => {
+  const ev = e as CustomEvent<{ file: File }>;
+  if (!pipelineState) return;
+  const idx = pipelineState.files.findIndex(f => f.file === ev.detail.file);
+  if (idx === -1) return;
+  // Remove the file and revoke the blobUrl to free memory
+  const old = pipelineState.files[idx];
+  URL.revokeObjectURL(old.blobUrl);
+  pipelineState.files.splice(idx, 1);
+  // If no files left, reset the UI
+  if (pipelineState.files.length === 0) {
+    pipelineState.status = 'idle';
+    postForm?.classList.add('hidden');
+    pipelineSection?.classList.remove('hidden');
+    updatePipelineUI();
+  } else {
+    // If pipeline already ran, re-run with remaining photos
+    if (pipelineState.status === 'done' || pipelineState.status === 'failed') {
+      pipelineState.status = 'processing';
+      postForm?.classList.add('hidden');
+      pipelineSection?.classList.remove('hidden');
+      updatePipelineUI();
+      runPipeline(pipelineState).catch(err => {
+        if (selfHealChunk(err)) return;
+        console.error('[rastrum] re-run after delete failed', err);
+        showPostForm();
+      });
+    }
+  }
+});
+
 document.addEventListener('rastrum:files-dropped', async (e: Event) => {
   const ev = e as CustomEvent<{ files: File[] }>;
   const files: File[] = ev.detail.files;
@@ -905,7 +878,7 @@ async function runPipeline(state: PipelineState) {
         runners.bioclip_2 = makeBioClipRunner(lang as 'en' | 'es');
 
         const abort = new AbortController();
-        const out = await runParallelIdentify(pf.file as File, { runners, taxonHint: selectedTaxonHint }, abort.signal);
+        const out = await runParallelIdentify(pf.file as File, { runners, taxonHint: null }, abort.signal);
         cardAttempts = cardAttempts.concat(out.attempts ?? []);
         if (out.kind === 'winner' || out.kind === 'uncertain') {
           const r = out.result;
@@ -1373,9 +1346,6 @@ document.getElementById('obs2-new-btn')?.addEventListener('click', () => {
   const cardV2El = document.getElementById('obs2-card-v2');
   if (cardV2El) { cardV2El.innerHTML = ''; cardV2El.classList.add('hidden'); }
   pipelineState = null;
-  // Reset taxon hint chip selection
-  selectedTaxonHint = null;
-  applyChipStyles(null);
   pipelineSection?.classList.add('hidden');
   postForm?.classList.add('hidden');
   successEl?.classList.add('hidden');

@@ -7,7 +7,8 @@
 export type CropResult =
   | { kind: 'use'; file: File }
   | { kind: 'skip'; file: File }
-  | { kind: 'cancel' };
+  | { kind: 'cancel' }
+  | { kind: 'delete' };
 
 /**
  * Open the global crop modal for `file`. Resolves once the user
@@ -30,7 +31,7 @@ export function openCropModal(file: File): Promise<CropResult> {
 
     let settled = false;
     const handler = (ev: Event) => {
-      const e = ev as CustomEvent<{ kind: 'use' | 'skip' | 'cancel'; file?: File }>;
+      const e = ev as CustomEvent<{ kind: 'use' | 'skip' | 'cancel' | 'delete'; file?: File }>;
       const detail = e.detail;
       if (!detail) return;
       // Multiple events may fire on skip (one without file, one with);
@@ -42,6 +43,8 @@ export function openCropModal(file: File): Promise<CropResult> {
         resolve({ kind: 'use', file: detail.file });
       } else if (detail.kind === 'skip') {
         resolve({ kind: 'skip', file: detail.file ?? file });
+      } else if (detail.kind === 'delete') {
+        resolve({ kind: 'delete' });
       } else {
         resolve({ kind: 'cancel' });
       }
