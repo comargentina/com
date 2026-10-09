@@ -849,7 +849,7 @@ const distancePage = page as unknown as Record<string, string>;
         },
       });
 
-      // Add click handler
+      // Make layer interactive
       mapInstance.on('click', 'observation-pins', (e: any) => {
         const feat = e.features?.[0];
         if (!feat) return;
@@ -859,16 +859,16 @@ const distancePage = page as unknown as Record<string, string>;
         const obsId = props.id;
         
         const popupHtml = `
-          <div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 2px;">
-            <p style="font-weight: 600; font-style: italic; margin: 0; color: #18181b;">${escapeText(sci)}</p>
-            ${common ? `<p style="margin: 2px 0 0; color: #71717a;">${escapeText(common)}</p>` : ''}
-            <a href="${shareBase}?id=${encodeURIComponent(obsId)}" style="display: inline-block; margin-top: 6px; color: #059669; font-weight: 600; text-decoration: underline;">
+          <div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 8px;">
+            <p style="font-weight: 600; font-style: italic; margin: 0 0 4px 0; color: #18181b;">${escapeText(sci)}</p>
+            ${common ? `<p style="margin: 0 0 6px 0; color: #71717a;">${escapeText(common)}</p>` : ''}
+            <a href="${shareBase}?id=${encodeURIComponent(obsId)}" style="display: inline-block; color: #059669; font-weight: 600; text-decoration: underline;">
               ${lang === 'es' ? 'Ver observación →' : 'View observation →'}
             </a>
           </div>
         `;
         
-        new maplibregl.Popup({ offset: 12, closeButton: false })
+        new maplibregl.Popup({ offset: 12, closeButton: true, maxWidth: '300px' })
           .setLngLat(e.lngLat)
           .setHTML(popupHtml)
           .addTo(mapInstance);
