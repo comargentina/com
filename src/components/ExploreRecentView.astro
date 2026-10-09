@@ -223,14 +223,29 @@ const distancePage = page as unknown as Record<string, string>;
     z-index: 1000 !important;
   }
   .maplibregl-popup-content {
-    background: white !important;
+    background: #ffffff !important;
     color: #18181b !important;
     border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+  .maplibregl-popup-content a {
+    color: #059669 !important;
+    font-weight: 600 !important;
+  }
+  .maplibregl-popup-tip {
+    background: #ffffff !important;
   }
   .dark .maplibregl-popup-content {
     background: #1e293b !important;
     color: #f1f5f9 !important;
+  }
+  .dark .maplibregl-popup-content a {
+    color: #10b981 !important;
+  }
+  .dark .maplibregl-popup-tip {
+    background: #1e293b !important;
   }
 </style>
 
@@ -861,7 +876,7 @@ const distancePage = page as unknown as Record<string, string>;
         type: 'circle',
         source: 'observations',
         paint: {
-          'circle-radius': 10,
+          'circle-radius': 12,
           'circle-color': '#059669',
           'circle-stroke-width': 3,
           'circle-stroke-color': '#ffffff',
@@ -869,7 +884,7 @@ const distancePage = page as unknown as Record<string, string>;
       });
 
       // Make layer interactive
-      mapInstance.on('click', 'observation-pins', (e: any) => {
+      const showPopup = (e: any) => {
         const feat = e.features?.[0];
         if (!feat) return;
         const props = feat.properties;
@@ -878,7 +893,7 @@ const distancePage = page as unknown as Record<string, string>;
         const obsId = props.id;
         
         const popupHtml = `
-          <div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 8px;">
+          <div style="font-family: inherit; font-size: 14px; line-height: 1.4; padding: 8px;">
             <p style="font-weight: 600; font-style: italic; margin: 0 0 4px 0; color: #18181b;">${escapeText(sci)}</p>
             ${common ? `<p style="margin: 0 0 6px 0; color: #71717a;">${escapeText(common)}</p>` : ''}
             <a href="${shareBase}?id=${encodeURIComponent(obsId)}" style="display: inline-block; color: #059669; font-weight: 600; text-decoration: underline;">
@@ -888,7 +903,7 @@ const distancePage = page as unknown as Record<string, string>;
         `;
         
         const popup = new maplibregl.Popup({ 
-          offset: 15, 
+          offset: 25, 
           closeButton: true, 
           closeOnClick: false,
           maxWidth: '300px',
@@ -897,7 +912,10 @@ const distancePage = page as unknown as Record<string, string>;
           .setLngLat(e.lngLat)
           .setHTML(popupHtml)
           .addTo(mapInstance);
-      });
+      };
+
+      mapInstance.on('click', 'observation-pins', showPopup);
+      mapInstance.on('pointerdown', 'observation-pins', showPopup);
 
       // Change cursor on hover
       mapInstance.on('mouseenter', 'observation-pins', () => {
