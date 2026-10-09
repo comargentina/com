@@ -17,7 +17,23 @@ export function resolveIdentificationSource(input: {
         'identification has a machine result but no source — refusing to write it as human (consensus-integrity guard, #1128 R1)',
       );
     }
-    return s;
+    // Map client-side sources to allowed database values
+    const sourceMap: Record<string, string> = {
+      'bioclip_2': 'onnx_efficientnet_lite0',
+      'birdnet_lite': 'birdnet_lite',
+      'phi_vision': 'phi_vision',
+      'megadetector': 'camera_trap_megadetector',
+      'plantnet': 'plantnet',
+      'claude_haiku': 'claude_haiku',
+      'claude_sonnet': 'claude_sonnet',
+      'onnx_offline': 'onnx_offline',
+      'bedrock': 'bedrock',
+      'openai': 'openai',
+      'azure_openai': 'azure_openai',
+      'gemini': 'gemini',
+      'vertex_ai': 'vertex_ai',
+    };
+    return sourceMap[s] || s;
   }
   return 'human';
 }
