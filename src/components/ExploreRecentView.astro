@@ -218,6 +218,22 @@ const distancePage = page as unknown as Record<string, string>;
   </div>
 </section>
 
+<style>
+  .rastrum-map-popup {
+    z-index: 1000 !important;
+  }
+  .maplibregl-popup-content {
+    background: white !important;
+    color: #18181b !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+  .dark .maplibregl-popup-content {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+</style>
+
 <script>
   import { getSupabase } from '../lib/supabase';
   import { getCachedUser } from '../lib/supabase';
@@ -875,11 +891,17 @@ const distancePage = page as unknown as Record<string, string>;
         `;
         
         console.log('[rastrum] Creating popup at:', e.lngLat);
-        const popup = new maplibregl.Popup({ offset: 12, closeButton: true, maxWidth: '300px' })
+        const popup = new maplibregl.Popup({ 
+          offset: 15, 
+          closeButton: true, 
+          closeOnClick: false,
+          maxWidth: '300px',
+          className: 'rastrum-map-popup'
+        })
           .setLngLat(e.lngLat)
           .setHTML(popupHtml)
           .addTo(mapInstance);
-        console.log('[rastrum] Popup added');
+        console.log('[rastrum] Popup added, element:', popup.getElement());
       });
 
       // Change cursor on hover
