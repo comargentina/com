@@ -753,6 +753,7 @@ const distancePage = page as unknown as Record<string, string>;
       const colonLngLat: [number, number] = [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat];
       mapTargetCenter = colonLngLat;
       mapTargetZoom = 9;
+      console.log('[rastrum] Map init center:', colonLngLat, 'zoom:', 9);
 
       const map = new maplibregl.Map({
         container: mapBlockEl,
@@ -817,6 +818,7 @@ const distancePage = page as unknown as Record<string, string>;
           .setLngLat(parsed.coordinates as [number, number])
           .setPopup(popup)
           .addTo(mapInstance);
+        console.log('[rastrum] Marker added for', r.id, 'at', parsed.coordinates);
         mapMarkers.push(marker);
       }
     }
