@@ -776,6 +776,7 @@ const distancePage = page as unknown as Record<string, string>;
 
       map.on('idle', () => {
         console.log('[rastrum] Map idle, center:', map.getCenter(), 'zoom:', map.getZoom());
+        console.log('[rastrum] Map markers count:', mapMarkers.length);
       });
 
       map.on('moveend', () => {
@@ -825,7 +826,7 @@ const distancePage = page as unknown as Record<string, string>;
         `;
 
         const popup = new maplibregl.Popup({ offset: 12, closeButton: false }).setHTML(popupHtml);
-        const marker = new maplibregl.Marker({ color: '#059669' })
+        const marker = new maplibregl.Marker({ color: '#ef4444' })
           .setLngLat(parsed.coordinates as [number, number])
           .setPopup(popup)
           .addTo(mapInstance);
