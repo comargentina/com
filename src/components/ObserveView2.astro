@@ -575,13 +575,13 @@ document.addEventListener('rastrum:files-dropped', (e: Event) => {
 
   let hint = '';
   if (hasAudio && hasPhoto) {
-    hint = isEs ? 'PlantNet identificará plantas. BirdNET identificará cantos de ave.' : 'PlantNet will identify plants. BirdNET will identify bird calls.';
+    hint = isEs ? 'La IA está identificando la imagen y el audio.' : 'The AI is identifying the image and audio.';
   } else if (hasAudio) {
-    hint = isEs ? 'BirdNET identificará el canto de ave. Necesitas el modelo descargado (~50 MB).' : 'BirdNET will identify the bird call. Model download required (~50 MB).';
+    hint = isEs ? 'La IA está identificando el audio.' : 'The AI is identifying the audio.';
   } else if (hasVideo) {
-    hint = isEs ? 'Se extraerán fotogramas del video para identificación.' : 'Frames will be extracted from the video for identification.';
+    hint = isEs ? 'La IA está identificando el video.' : 'The AI is identifying the video.';
   } else if (hasPhoto) {
-    hint = isEs ? 'PlantNet identificará plantas y hongos. Agrega una llave de Claude para animales.' : 'PlantNet will identify plants and fungi. Add a Claude key for animals.';
+    hint = isEs ? 'La IA está identificando la imagen.' : 'The AI is identifying the image.';
   }
 
   if (hint) {
