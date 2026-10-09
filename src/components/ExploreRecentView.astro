@@ -766,6 +766,9 @@ const distancePage = page as unknown as Record<string, string>;
       mapInstance = map;
       mapInited = true;
 
+      // Plot markers immediately after map initialization
+      plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
+
       map.on('moveend', () => {
         if (mapBlockEl && mapBlockEl.clientHeight > 0 && !mapBlockEl.classList.contains('hidden')) {
           const c = map.getCenter();
@@ -774,10 +777,6 @@ const distancePage = page as unknown as Record<string, string>;
             mapTargetZoom = map.getZoom();
           }
         }
-      });
-
-      map.on('idle', () => {
-        plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
       });
     }
 
