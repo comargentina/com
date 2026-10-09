@@ -766,8 +766,10 @@ const distancePage = page as unknown as Record<string, string>;
       mapInstance = map;
       mapInited = true;
 
-      // Plot markers immediately after map initialization
-      plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
+      // Plot markers after a short delay to ensure map is visible
+      setTimeout(() => {
+        plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
+      }, 200);
 
       map.on('moveend', () => {
         if (mapBlockEl && mapBlockEl.clientHeight > 0 && !mapBlockEl.classList.contains('hidden')) {
