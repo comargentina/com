@@ -760,10 +760,10 @@ const lang: 'en' | 'es' = 'en';
         let lastAiResult: { scientific_name: string; confidence: number; source: string } | null = null;
 
         askAiBtn.addEventListener('click', async () => {
-          const idleLabel = askAiBtn.dataset.labelIdle ?? 'Ask my AI';
-          const runningLabel = askAiBtn.dataset.labelRunning ?? 'Identifying…';
-          const noPhotoLabel = askAiBtn.dataset.labelNoPhoto ?? 'No photo available.';
-          const noResultLabel = askAiBtn.dataset.labelNoResult ?? 'AI could not identify.';
+          const idleLabel = isEs ? 'Preguntar a mi IA' : (askAiBtn.dataset.labelIdle ?? 'Ask my AI');
+          const runningLabel = isEs ? 'Identificando…' : (askAiBtn.dataset.labelRunning ?? 'Identifying…');
+          const noPhotoLabel = isEs ? 'No hay foto disponible.' : (askAiBtn.dataset.labelNoPhoto ?? 'No photo available.');
+          const noResultLabel = isEs ? 'La IA no pudo identificar.' : (askAiBtn.dataset.labelNoResult ?? 'AI could not identify.');
 
           const heroImg = document.querySelector<HTMLImageElement>('[data-photo-hero] img');
           // Guard: no src, or image definitively failed to load.
