@@ -861,21 +861,18 @@ const distancePage = page as unknown as Record<string, string>;
         type: 'circle',
         source: 'observations',
         paint: {
-          'circle-radius': 8,
+          'circle-radius': 10,
           'circle-color': '#059669',
-          'circle-stroke-width': 2,
+          'circle-stroke-width': 3,
           'circle-stroke-color': '#ffffff',
         },
       });
 
       // Make layer interactive
       mapInstance.on('click', 'observation-pins', (e: any) => {
-        console.log('[rastrum] Click on observation-pins:', e);
         const feat = e.features?.[0];
-        console.log('[rastrum] Feature:', feat);
         if (!feat) return;
         const props = feat.properties;
-        console.log('[rastrum] Properties:', props);
         const sci = props.scientific_name;
         const common = props.common_name;
         const obsId = props.id;
@@ -890,7 +887,6 @@ const distancePage = page as unknown as Record<string, string>;
           </div>
         `;
         
-        console.log('[rastrum] Creating popup at:', e.lngLat);
         const popup = new maplibregl.Popup({ 
           offset: 15, 
           closeButton: true, 
@@ -901,7 +897,6 @@ const distancePage = page as unknown as Record<string, string>;
           .setLngLat(e.lngLat)
           .setHTML(popupHtml)
           .addTo(mapInstance);
-        console.log('[rastrum] Popup added, element:', popup.getElement());
       });
 
       // Change cursor on hover
