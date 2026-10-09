@@ -854,9 +854,12 @@ const distancePage = page as unknown as Record<string, string>;
 
       // Make layer interactive
       mapInstance.on('click', 'observation-pins', (e: any) => {
+        console.log('[rastrum] Click on observation-pins:', e);
         const feat = e.features?.[0];
+        console.log('[rastrum] Feature:', feat);
         if (!feat) return;
         const props = feat.properties;
+        console.log('[rastrum] Properties:', props);
         const sci = props.scientific_name;
         const common = props.common_name;
         const obsId = props.id;
@@ -871,10 +874,12 @@ const distancePage = page as unknown as Record<string, string>;
           </div>
         `;
         
-        new maplibregl.Popup({ offset: 12, closeButton: true, maxWidth: '300px' })
+        console.log('[rastrum] Creating popup at:', e.lngLat);
+        const popup = new maplibregl.Popup({ offset: 12, closeButton: true, maxWidth: '300px' })
           .setLngLat(e.lngLat)
           .setHTML(popupHtml)
           .addTo(mapInstance);
+        console.log('[rastrum] Popup added');
       });
 
       // Change cursor on hover
