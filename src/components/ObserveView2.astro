@@ -1160,7 +1160,7 @@ function showPostForm() {
   // id card is always shown so user can always enter/edit species
   if (bestResult) {
     const taxonInputEl = document.getElementById('obs2-taxon-input') as HTMLInputElement | null;
-    if (taxonInputEl && !taxonInputEl.value) taxonInputEl.value = bestResult.scientific_name;
+    if (taxonInputEl) taxonInputEl.value = bestResult.scientific_name;
   }
 }
 
@@ -1239,6 +1239,7 @@ postForm?.addEventListener('submit', async (e) => {
 
     const machineName = bestResult?.scientific_name || '';
     const observerOwned = observerAffirmed || (!!taxonInput && taxonInput !== machineName);
+    // Always use AI identification if taxon input is empty, regardless of user action
     const identifiedSpecies = taxonInput || observerAffirmedTaxon || machineName;
 
     const obs = await saveObservationToOutbox({
