@@ -217,6 +217,8 @@ export function subscribeToKarmaEvents(
         const row = payload?.new;
         if (!row || typeof row.delta !== 'number') return;
         const lang = detectLang();
+        // Skip toast for observation_synced karma
+        if (row.reason === 'observation_synced') return;
         showKarmaToast({
           delta: row.delta,
           reason: row.reason,

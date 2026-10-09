@@ -1284,6 +1284,7 @@ postForm?.addEventListener('submit', async (e) => {
     });
 
     // Show success immediately so the user isn't waiting for the network
+    if (saveBtn) { saveBtn.textContent = isEs ? 'Guardado' : 'Saved'; }
     postForm?.classList.add('hidden');
     successEl?.classList.remove('hidden');
 
