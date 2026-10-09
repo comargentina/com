@@ -745,9 +745,6 @@ const distancePage = page as unknown as Record<string, string>;
 
     async function initMap(rows: Row[]) {
       if (!mapBlockEl) return;
-      console.log('[rastrum] Map block element:', mapBlockEl);
-      console.log('[rastrum] Map block height:', mapBlockEl.clientHeight);
-      console.log('[rastrum] Map block display:', window.getComputedStyle(mapBlockEl).display);
       const { default: maplibregl } = await import('maplibre-gl' as string) as any;
       const { basemapStyleUrl, installSpriteFallback } = await import('../lib/map-style');
       const { parseLocationToGeoJSON } = await import('../lib/geo');
@@ -756,7 +753,6 @@ const distancePage = page as unknown as Record<string, string>;
       const colonLngLat: [number, number] = [COLON_DEFAULT_CENTER.lng, COLON_DEFAULT_CENTER.lat];
       mapTargetCenter = colonLngLat;
       mapTargetZoom = 9;
-      console.log('[rastrum] Map init center:', colonLngLat, 'zoom:', 9);
 
       const map = new maplibregl.Map({
         container: mapBlockEl,
@@ -769,15 +765,6 @@ const distancePage = page as unknown as Record<string, string>;
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
       mapInstance = map;
       mapInited = true;
-
-      map.on('error', (e: any) => {
-        console.error('[rastrum] Map error:', e);
-      });
-
-      map.on('idle', () => {
-        console.log('[rastrum] Map idle, center:', map.getCenter(), 'zoom:', map.getZoom());
-        console.log('[rastrum] Map markers count:', mapMarkers.length);
-      });
 
       map.on('moveend', () => {
         if (mapBlockEl && mapBlockEl.clientHeight > 0 && !mapBlockEl.classList.contains('hidden')) {
@@ -796,7 +783,6 @@ const distancePage = page as unknown as Record<string, string>;
 
     function plotMapMarkers(rows: Row[], maplibregl: any, parseLocationToGeoJSON: any) {
       if (!mapInstance) return;
-      console.log('[rastrum] plotMapMarkers called with', rows.length, 'rows');
       mapMarkers.forEach(m => m.remove());
       mapMarkers = [];
 
@@ -805,9 +791,7 @@ const distancePage = page as unknown as Record<string, string>;
         const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
           ? r.location_obscured
           : r.location;
-        console.log('[rastrum] Row', r.id, 'location:', raw);
         const parsed = parseLocationToGeoJSON(raw);
-        console.log('[rastrum] Parsed coordinates:', parsed?.coordinates);
         if (!parsed?.coordinates) continue;
 
         bounds.push(parsed.coordinates as [number, number]);
@@ -829,11 +813,10 @@ const distancePage = page as unknown as Record<string, string>;
         `;
 
         const popup = new maplibregl.Popup({ offset: 12, closeButton: false }).setHTML(popupHtml);
-        const marker = new maplibregl.Marker({ color: '#ef4444' })
+        const marker = new maplibregl.Marker({ color: '#059669' })
           .setLngLat(parsed.coordinates as [number, number])
           .setPopup(popup)
           .addTo(mapInstance);
-        console.log('[rastrum] Marker added for', r.id, 'at', parsed.coordinates);
         mapMarkers.push(marker);
       }
 
@@ -842,7 +825,6 @@ const distancePage = page as unknown as Record<string, string>;
         const boundsObj = new maplibregl.LngLatBounds();
         bounds.forEach(b => boundsObj.extend(b));
         mapInstance.fitBounds(boundsObj, { padding: 50, maxZoom: 12 });
-        console.log('[rastrum] Map fitted to bounds:', boundsObj);
       }
     }
 
