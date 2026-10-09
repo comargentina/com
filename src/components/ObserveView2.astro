@@ -417,11 +417,7 @@ document.addEventListener('rastrum:card-vm', (e) => {
   el.querySelectorAll<HTMLButtonElement>('[data-card-action]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.cardAction;
-      if (action === 'affirm') {
-        observerAffirmed = true;
-        observerAffirmedTaxon = vm.headline;
-        redispatchCardVm();
-      } else if (action === 'other') {
+      if (action === 'other') {
         const manual = document.getElementById('obs2-id-manual');
         manual?.classList.remove('hidden');
         const input = document.getElementById('obs2-taxon-input') as HTMLInputElement | null;

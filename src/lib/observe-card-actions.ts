@@ -12,7 +12,7 @@ export function cardActions(state: CardState): CardAction[] {
   switch (state) {
     case 'S1b':
     case 'S2':
-      return ['affirm', 'other', 'review'];
+      return ['other', 'review'];
     case 'S2prime':
       return ['adopt', 'dismiss'];
     case 'S3':
