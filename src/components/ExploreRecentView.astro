@@ -786,11 +786,14 @@ const distancePage = page as unknown as Record<string, string>;
     function plotMapMarkers(rows: Row[], maplibregl: any, parseLocationToGeoJSON: any) {
       if (!mapInstance) return;
       
-      // Remove existing source if any
-      if (mapSource) {
-        mapInstance.removeSource('observations');
-        mapSource = null;
+      // Remove existing layer and source if any
+      if (mapInstance.getLayer('observation-pins')) {
+        mapInstance.removeLayer('observation-pins');
       }
+      if (mapInstance.getSource('observations')) {
+        mapInstance.removeSource('observations');
+      }
+      mapSource = null;
       
       // Build GeoJSON features
       const features = rows
