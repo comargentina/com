@@ -1272,9 +1272,14 @@ postForm?.addEventListener('submit', async (e) => {
 
     // Update pipeline
     const saveNode = pipelineState.nodes.find(n => n.kind === 'save');
+    const locationNode = pipelineState.nodes.find(n => n.kind === 'location');
     if (saveNode) setNodeState(pipelineState, saveNode.id, 'done');
+    if (locationNode) setNodeState(pipelineState, locationNode.id, 'done');
     pipelineState.status = 'done';
     await savePipelineState(pipelineState).catch(() => {});
+
+    // Dispatch pipeline update event to update stepper
+    document.dispatchEvent(new CustomEvent('rastrum:pipeline-update', { detail: { nodes: pipelineState.nodes } }));
 
     // Persist observation defaults for next form open (#942)
     void setObservationDefaults({
