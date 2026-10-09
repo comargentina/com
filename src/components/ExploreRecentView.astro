@@ -824,7 +824,14 @@ const distancePage = page as unknown as Record<string, string>;
       if (bounds.length > 0 && mapInstance) {
         const boundsObj = new maplibregl.LngLatBounds();
         bounds.forEach(b => boundsObj.extend(b));
-        mapInstance.fitBounds(boundsObj, { padding: 50, maxZoom: 12 });
+        // Delay fitBounds to ensure map is fully rendered
+        setTimeout(() => {
+          if (mapInstance) {
+            mapInstance.fitBounds(boundsObj, { padding: 50, maxZoom: 12 });
+            // Force map repaint
+            mapInstance.resize();
+          }
+        }, 100);
       }
     }
 
