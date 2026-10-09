@@ -596,7 +596,7 @@ registerSyncTriggers();
 
     // Provider-agnostic "Cloud AI" label — the EF resolves Anthropic /
     // OpenAI / Bedrock / Azure / Gemini / Vertex via BYO → sponsor → pool.
-    const ready: string[] = ['BioCLIP 2'];
+    const ready: string[] = [isEs ? 'iA de identificación' : 'AI identification'];
     if (runners.birdnet)      ready.push('BirdNET');
 
     if (ready.length === 0) {
