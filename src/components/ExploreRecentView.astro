@@ -888,9 +888,9 @@ const distancePage = page as unknown as Record<string, string>;
         type: 'circle',
         source: 'observations',
         paint: {
-          'circle-radius': 15,
+          'circle-radius': 6,
           'circle-color': '#059669',
-          'circle-stroke-width': 4,
+          'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
         },
       });
@@ -938,6 +938,10 @@ const distancePage = page as unknown as Record<string, string>;
         const popupEl = popup.getElement();
         if (popupEl) {
           popupEl.style.zIndex = '10000';
+          popupEl.style.position = 'fixed';
+          popupEl.style.top = '50%';
+          popupEl.style.left = '50%';
+          popupEl.style.transform = 'translate(-50%, -50%)';
         }
       };
 
@@ -952,6 +956,15 @@ const distancePage = page as unknown as Record<string, string>;
       mapInstance.on('mouseleave', 'observation-pins', () => {
         mapInstance.getCanvas().style.cursor = '';
       });
+
+      // Fit bounds with higher zoom
+      const bounds = new maplibregl.LngLatBounds();
+      features.forEach(f => {
+        if (f.geometry.type === 'Point') {
+          bounds.extend(f.geometry.coordinates as [number, number]);
+        }
+      });
+      mapInstance.fitBounds(bounds, { padding: 100, maxZoom: 14 });
     }
 
     function setViewMode(mode: ViewMode) {
