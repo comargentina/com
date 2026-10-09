@@ -431,17 +431,24 @@ const tabs = [
     type NavShare = Navigator & { share?: (data: ShareData) => Promise<void> };
     const nav = navigator as NavShare;
     try {
-      if (typeof nav.share === 'function') {
-        console.log('[rastrum] Using navigator.share');
+      // navigator.share only works on mobile and some desktop browsers
+      // Prefer clipboard on desktop for better UX
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile && typeof nav.share === 'function') {
+        console.log('[rastrum] Using navigator.share (mobile)');
         await nav.share({ url, title: name, text });
       } else if (navigator.clipboard?.writeText) {
-        console.log('[rastrum] Using clipboard.writeText');
+        console.log('[rastrum] Using clipboard.writeText (desktop)');
         await navigator.clipboard.writeText(url);
+        showToast(lang === 'es' ? '✓ URL copiada al portapapeles' : '✓ URL copied to clipboard', 'ok');
       } else {
         console.log('[rastrum] No share method available');
+        showToast(lang === 'es' ? 'URL: ' + url : 'URL: ' + url, 'ok');
       }
     } catch (err) {
       console.error('[rastrum] Share failed:', err);
+      // Fallback to showing the URL
+      showToast(lang === 'es' ? 'URL: ' + url : 'URL: ' + url, 'ok');
     }
   }
 
