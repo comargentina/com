@@ -19,8 +19,9 @@ export function resolveIdentificationSource(input: {
       );
     }
     // Map client-side sources to allowed database values
+    // IMPORTANT: Do NOT map to 'onnx_efficientnet_lite0' as it's in NON_BINOMIAL_SOURCES in sync.ts
     const sourceMap: Record<string, string> = {
-      'bioclip_2': 'onnx_efficientnet_lite0',
+      'bioclip_2': 'onnx_offline',
       'birdnet_lite': 'birdnet_lite',
       'phi_vision': 'phi_vision',
       'megadetector': 'camera_trap_megadetector',
