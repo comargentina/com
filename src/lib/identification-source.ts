@@ -12,6 +12,7 @@ export function resolveIdentificationSource(input: {
 }): string {
   if (input.hasMachineResult) {
     const s = (input.machineSource ?? '').trim();
+    console.log('[rastrum] resolveIdentificationSource input:', { machineSource: input.machineSource, s });
     if (!s) {
       throw new Error(
         'identification has a machine result but no source — refusing to write it as human (consensus-integrity guard, #1128 R1)',
@@ -33,7 +34,9 @@ export function resolveIdentificationSource(input: {
       'gemini': 'gemini',
       'vertex_ai': 'vertex_ai',
     };
-    return sourceMap[s] || s;
+    const mapped = sourceMap[s] || 'onnx_offline';
+    console.log('[rastrum] resolveIdentificationSource output:', mapped);
+    return mapped;
   }
   return 'human';
 }
