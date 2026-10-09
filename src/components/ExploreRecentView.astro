@@ -777,7 +777,7 @@ const distancePage = page as unknown as Record<string, string>;
       });
 
       map.on('load', () => {
-        plotMapMarkers(rows, maplibregl, parseLocationToGeoJSON);
+        plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
       });
     }
 
@@ -846,11 +846,15 @@ const distancePage = page as unknown as Record<string, string>;
         if (!mapInited) {
           initMap(allRows).catch(() => { /* map unavailable */ });
         } else if (mapInstance) {
-          requestAnimationFrame(() => {
+          requestAnimationFrame(async () => {
             mapInstance?.resize();
             if (mapTargetCenter) {
               mapInstance?.jumpTo({ center: mapTargetCenter, zoom: mapTargetZoom });
             }
+            // Re-plot markers with current data
+            const { maplibregl } = await import('maplibre-gl');
+            const { parseLocationToGeoJSON } = await import('../lib/geo');
+            plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
           });
         }
       }
@@ -1121,6 +1125,11 @@ const distancePage = page as unknown as Record<string, string>;
         const currentMode = readViewMode();
         if (currentMode === 'list') renderListBlock(allRows);
         if (currentMode === 'timeline') renderTimelineBlock(allRows);
+        if (currentMode === 'map' && mapInited && mapInstance) {
+          const { maplibregl } = await import('maplibre-gl');
+          const { parseLocationToGeoJSON } = await import('../lib/geo');
+          plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
+        }
         offset += page.length;
         if (page.length < PAGE_SIZE) exhausted = true;
         if (allRows.length === 0) {
