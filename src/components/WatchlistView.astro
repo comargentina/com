@@ -161,7 +161,25 @@ const tr = t(lang);
       };
     }
 
+    // Check which observations still exist
+    const obsIds = rows
+      .filter(r => r.kind === 'observation_created' && r.subject_id)
+      .map(r => r.subject_id as string);
+    const existingObsIds = new Set<string>();
+    if (obsIds.length > 0) {
+      const { data: existingObs } = await supabase
+        .from('observations')
+        .select('id')
+        .in('id', obsIds);
+      for (const o of existingObs ?? []) {
+        existingObsIds.add(o.id as string);
+      }
+    }
+
     const sharePath = `/share/obs/?id=`;
+    const deletedMessage = lang === 'es'
+      ? ' (no está disponible — puede que haya sido eliminada.)'
+      : ' (not available — may have been deleted.)';
     if (listEl) {
       listEl.innerHTML = rows.map(r => {
         const author = authors[r.actor_id];
@@ -169,14 +187,18 @@ const tr = t(lang);
         const avatar = author?.avatar_url || avatarSvg(name);
         const summary = summarize(r, author, lang);
         const ago = formatTimeAgo(r.created_at, lang);
-        const href = r.subject_id ? `${sharePath}${encodeURIComponent(r.subject_id)}` : '#';
+        const isObsEvent = r.kind === 'observation_created';
+        const obsExists = isObsEvent && r.subject_id ? existingObsIds.has(r.subject_id) : true;
+        const href = isObsEvent && r.subject_id ? `${sharePath}${encodeURIComponent(r.subject_id)}` : '#';
         const unread = !r.read_at ? 'border-emerald-300 dark:border-emerald-700/60 bg-emerald-50/40 dark:bg-emerald-900/10' : '';
+        const deletedSuffix = isObsEvent && !obsExists ? `<span class="text-zinc-500 dark:text-zinc-500">${deletedMessage}</span>` : '';
+        const linkClass = obsExists ? 'hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer' : 'cursor-default pointer-events-none opacity-70';
         return `
           <li>
-            <a href="${href}" class="flex items-start gap-3 rounded-lg border border-zinc-200 dark:border-zinc-800 ${unread} p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
+            <a href="${href}" class="flex items-start gap-3 rounded-lg border border-zinc-200 dark:border-zinc-800 ${unread} p-3 transition-colors ${linkClass}">
               <img src="${avatar}" alt="" class="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 shrink-0" />
               <div class="flex-1 min-w-0">
-                <p class="text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2">${escapeText(summary)}</p>
+                <p class="text-sm text-zinc-800 dark:text-zinc-200 line-clamp-2">${escapeText(summary)}${deletedSuffix}</p>
                 <p class="text-xs text-zinc-600 dark:text-zinc-300 mt-0.5">${ago}</p>
               </div>
             </a>
