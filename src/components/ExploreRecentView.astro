@@ -800,6 +800,7 @@ const distancePage = page as unknown as Record<string, string>;
       mapMarkers.forEach(m => m.remove());
       mapMarkers = [];
 
+      const bounds: any[] = [];
       for (const r of rows) {
         const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
           ? r.location_obscured
@@ -808,6 +809,8 @@ const distancePage = page as unknown as Record<string, string>;
         const parsed = parseLocationToGeoJSON(raw);
         console.log('[rastrum] Parsed coordinates:', parsed?.coordinates);
         if (!parsed?.coordinates) continue;
+
+        bounds.push(parsed.coordinates as [number, number]);
 
         const ident = pickIdent(r);
         const sci = ident?.scientific_name ?? unknownLabel;
@@ -832,6 +835,14 @@ const distancePage = page as unknown as Record<string, string>;
           .addTo(mapInstance);
         console.log('[rastrum] Marker added for', r.id, 'at', parsed.coordinates);
         mapMarkers.push(marker);
+      }
+
+      // Fit map to bounds if we have markers
+      if (bounds.length > 0 && mapInstance) {
+        const boundsObj = new maplibregl.LngLatBounds();
+        bounds.forEach(b => boundsObj.extend(b));
+        mapInstance.fitBounds(boundsObj, { padding: 50, maxZoom: 12 });
+        console.log('[rastrum] Map fitted to bounds:', boundsObj);
       }
     }
 
