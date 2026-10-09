@@ -33,7 +33,7 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
   aria-labelledby="rastrum-crop-title"
   data-lang={lang}
 >
-  <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+  <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
     <header class="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
       <h2 id="rastrum-crop-title" class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
         {obs.crop_title}
@@ -144,22 +144,29 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
       </div>
     </div>
 
-    <footer class="px-5 py-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 justify-end flex-wrap">
+    <footer class="px-5 py-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 justify-between flex-wrap">
       <button
         type="button"
-        id="rastrum-crop-cancel"
-        class="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[40px]"
-      >{obs.crop_cancel}</button>
-      <button
-        type="button"
-        id="rastrum-crop-skip"
-        class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[40px]"
-      >{obs.crop_skip}</button>
-      <button
-        type="button"
-        id="rastrum-crop-use"
-        class="rounded-lg bg-emerald-700 hover:bg-emerald-800 px-3 py-2 text-sm font-semibold text-white min-h-[40px]"
-      >{obs.crop_use}</button>
+        id="rastrum-crop-delete"
+        class="rounded-lg px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 min-h-[40px]"
+      >{obs.crop_delete ?? (lang === 'es' ? 'Eliminar imagen' : 'Delete image')}</button>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          id="rastrum-crop-cancel"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[40px]"
+        >{obs.crop_cancel}</button>
+        <button
+          type="button"
+          id="rastrum-crop-skip"
+          class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 min-h-[40px]"
+        >{obs.crop_skip}</button>
+        <button
+          type="button"
+          id="rastrum-crop-use"
+          class="rounded-lg bg-emerald-700 hover:bg-emerald-800 px-3 py-2 text-sm font-semibold text-white min-h-[40px]"
+        >{obs.crop_use}</button>
+      </div>
     </footer>
   </div>
 </div>
@@ -175,6 +182,7 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
     const useBtn    = document.getElementById('rastrum-crop-use')          as HTMLButtonElement | null;
     const skipBtn   = document.getElementById('rastrum-crop-skip')         as HTMLButtonElement | null;
     const cancelBtn = document.getElementById('rastrum-crop-cancel')       as HTMLButtonElement | null;
+    const deleteBtn  = document.getElementById('rastrum-crop-delete')       as HTMLButtonElement | null;
     const rotLBtn   = document.getElementById('rastrum-crop-rotate-left')  as HTMLButtonElement | null;
     const rotRBtn   = document.getElementById('rastrum-crop-rotate-right') as HTMLButtonElement | null;
     const resetBtn  = document.getElementById('rastrum-crop-reset')        as HTMLButtonElement | null;
@@ -447,6 +455,10 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
     resetBtn?.addEventListener('click', reset);
 
     cancelBtn?.addEventListener('click', () => {
+      emit('cancel');
+      close();
+    });
+    deleteBtn?.addEventListener('click', () => {
       emit('cancel');
       close();
     });
