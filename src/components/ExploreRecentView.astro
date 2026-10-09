@@ -783,6 +783,7 @@ const distancePage = page as unknown as Record<string, string>;
 
     function plotMapMarkers(rows: Row[], maplibregl: any, parseLocationToGeoJSON: any) {
       if (!mapInstance) return;
+      console.log('[rastrum] plotMapMarkers called with', rows.length, 'rows');
       mapMarkers.forEach(m => m.remove());
       mapMarkers = [];
 
@@ -852,7 +853,7 @@ const distancePage = page as unknown as Record<string, string>;
               mapInstance?.jumpTo({ center: mapTargetCenter, zoom: mapTargetZoom });
             }
             // Re-plot markers with current data
-            const { maplibregl } = await import('maplibre-gl');
+            const { default: maplibregl } = await import('maplibre-gl' as string) as any;
             const { parseLocationToGeoJSON } = await import('../lib/geo');
             plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
           });
@@ -1126,7 +1127,7 @@ const distancePage = page as unknown as Record<string, string>;
         if (currentMode === 'list') renderListBlock(allRows);
         if (currentMode === 'timeline') renderTimelineBlock(allRows);
         if (currentMode === 'map' && mapInited && mapInstance) {
-          const { maplibregl } = await import('maplibre-gl');
+          const { default: maplibregl } = await import('maplibre-gl' as string) as any;
           const { parseLocationToGeoJSON } = await import('../lib/geo');
           plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
         }
