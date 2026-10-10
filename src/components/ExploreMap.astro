@@ -620,6 +620,11 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
     }
 
     function addObservationLayers(features: GeoJSON.Feature[]) {
+      // Remove existing source if it exists
+      if (map.getSource('observations')) {
+        map.removeSource('observations');
+      }
+
       map.addSource('observations', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features },
