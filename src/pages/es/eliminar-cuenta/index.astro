@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AccountDeletionView from '../../../components/AccountDeletionView.astro';
+
+const lang = 'es';
+---
+
+<BaseLayout 
+  title="Eliminación de Cuenta y Datos — COM Argentina" 
+  description="Instrucciones para solicitar el borrado de tu cuenta y datos asociados en la aplicación COM Argentina (Club de Observadores de Mariposas de Argentina)." 
+  lang={lang}
+>
+  <AccountDeletionView lang={lang} />
+</BaseLayout>

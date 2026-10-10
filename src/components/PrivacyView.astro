@@ -12,12 +12,12 @@ const isEs = lang === 'es';
       : 'This is a plain-language description of what we do with your data, not a legally reviewed document. Consult a lawyer before treating this as a binding agreement.'}
   </blockquote>
 
-  <p class="text-sm text-zinc-600 dark:text-zinc-300">{isEs ? 'Última actualización: 03/10/2026.' : 'Last updated: 03/10/2026.'}</p>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300">{isEs ? 'Última actualización: 10/10/2026.' : 'Last updated: 10/10/2026.'}</p>
 
   <p>
     {isEs
-      ? 'COM se construye sobre la idea de que observar la biodiversidad no debería implicar ceder el control de tus datos. Esta página describe — sin lenguaje legal — qué recopilamos, a dónde va, qué nunca vemos y qué puedes hacer al respecto.'
-      : 'COM is built around the idea that observing biodiversity should not require giving up control of your data. This page describes — without legalese — what we collect, where it goes, what we never see, and what you can do about any of it.'}
+      ? 'La aplicación COM Argentina es desarrollada y gestionada por el Club de Observadores de Mariposas de Argentina (comargentina). Se construye sobre la idea de que observar la biodiversidad no debería implicar ceder el control de tus datos. Esta página describe — sin lenguaje legal — qué recopilamos, a dónde va, qué nunca vemos y qué puedes hacer al respecto.'
+      : 'The COM Argentina app is developed and managed by the Club de Observadores de Mariposas de Argentina (comargentina). It is built around the idea that observing biodiversity should not require giving up control of your data. This page describes — without legalese — what we collect, where it goes, what we never see, and what you can do about any of it.'}
   </p>
 
   <h2>{isEs ? 'Qué recopilamos' : 'What we collect'}</h2>
@@ -117,19 +117,40 @@ const isEs = lang === 'es';
   </ul>
   <p>{isEs ? 'También puedes optar por oscurecer coordenadas voluntariamente para cualquier observación, sensible o no — el mismo mecanismo aplica.' : 'You can also opt to obscure coordinates voluntarily for any observation, sensitive or not — the same mechanism applies.'}</p>
 
-  <h2>{isEs ? 'Derecho a eliminar' : 'Right to delete'}</h2>
-  <p>{isEs ? 'Puedes eliminar tu cuenta en cualquier momento:' : 'You can delete your account at any time:'}</p>
+  <h2 id="eliminacion-cuenta">{isEs ? 'Eliminación de Cuenta y Datos (Google Play)' : 'Account and Data Deletion (Google Play)'}</h2>
+  <span id="eliminacion-datos"></span>
+  <p>
+    {isEs
+      ? 'En cumplimiento con las directivas de Google Play, cualquier usuario de COM Argentina (desarrollada por el Club de Observadores de Mariposas de Argentina) puede solicitar la eliminación total de su cuenta y de sus datos asociados en cualquier momento.'
+      : 'In compliance with Google Play guidelines, any user of COM Argentina (developed by Club de Observadores de Mariposas de Argentina) can request the total deletion of their account and associated data at any time.'}
+  </p>
+  <p>
+    <strong>{isEs ? 'Opción 1 — Desde la app o la web:' : 'Option 1 — From the app or web:'}</strong>
+  </p>
   <ol>
     <li>{isEs ? 'Inicia sesión.' : 'Sign in.'}</li>
     <li>{isEs ? 'Ve a ' : 'Go to '}<code>/{lang === 'es' ? 'perfil/editar' : 'profile/edit'}/</code>.</li>
-    <li>{isEs ? 'Haz clic en ' : 'Click '}<strong>{isEs ? 'Eliminar cuenta' : 'Delete account'}</strong>.</li>
+    <li>{isEs ? 'Haz clic en ' : 'Click '}<strong>{isEs ? 'Eliminar cuenta' : 'Delete account'}</strong> {isEs ? 'y confirma.' : 'and confirm.'}</li>
   </ol>
-  <p>{isEs ? 'Cuando lo hagas:' : 'When you do:'}</p>
+  <p>
+    <strong>{isEs ? 'Opción 2 — Sin necesidad de tener la app instalada (Vía Correo Electrónico):' : 'Option 2 — Without the app installed (Via Email):'}</strong>
+  </p>
+  <p>
+    {isEs
+      ? 'Puedes enviar un correo a comargentina.app@gmail.com con el asunto "Solicitud de eliminación de cuenta y datos - COM Argentina", indicando la dirección de correo asociada a tu cuenta. Procesaremos la baja definitiva en un plazo máximo de 30 días.'
+      : 'You can email comargentina.app@gmail.com with the subject "Account and Data Deletion Request - COM Argentina", specifying your registered email address. We will process your deletion within 30 days.'}
+  </p>
+  <p>{isEs ? 'Para ver la guía detallada de eliminación visita: ' : 'For detailed deletion instructions, see: '}
+    <a href={`/${lang === 'es' ? 'es/eliminar-cuenta' : 'en/delete-account'}/`}>
+      {isEs ? 'Instrucciones de Eliminación de Cuenta' : 'Account Deletion Instructions'}
+    </a>.
+  </p>
+
+  <h3>{isEs ? 'Tipos de datos que se borran y conservan' : 'Data deleted vs data retained'}</h3>
   <ul>
-    <li>{isEs ? 'Tu fila en ' : 'Your '}<code>auth.users</code>{isEs ? ' se elimina.' : ' row is removed.'}</li>
-    <li>{isEs ? 'Tus observaciones se anonimizan — el vínculo de la fila a tu user id se rompe, pero las observaciones permanecen (porque pueden estar licenciadas a otros bajo CC-BY-4.0 / CC0 / CC-BY-NC y citarlas depende de que sigan existiendo).' : 'Your observations are anonymised — the link from observation rows to your user id is severed, but the observations themselves remain (because they may have been licensed to others under CC-BY-4.0 / CC0 / CC-BY-NC and citing them depends on the data continuing to exist).'}</li>
-    <li>{isEs ? 'Tus fotos en R2 se ponen en cola para eliminarse en 30 días. Los clips de audio se eliminan inmediatamente.' : 'Your photos in R2 are queued for deletion within 30 days. Audio clips are deleted immediately.'}</li>
-    <li>{isEs ? 'Las identificaciones y comentarios que hiciste se conservan pero se anonimizan.' : 'Identifications and comments you made are kept but anonymised.'}</li>
+    <li><strong>{isEs ? 'Datos eliminados definitivamente:' : 'Permanently deleted data:'}</strong> {isEs ? 'Tu registro en auth.users, correo electrónico, perfil público (@usuario, nombre, avatar, bio) y tokens locales de sesión. Las fotos en Cloudflare R2 se ponen en cola de borrado y se eliminan en un plazo de hasta 30 días. Los clips de audio se eliminan inmediatamente.' : 'Your auth.users record, email address, public profile (@username, display name, avatar, bio), and local session tokens. Photos in Cloudflare R2 are queued for deletion within 30 days. Audio clips are deleted immediately.'}</li>
+    <li><strong>{isEs ? 'Datos conservados de forma anónima:' : 'Anonymously retained data:'}</strong> {isEs ? 'Las observaciones de especies y biodiversidad se conservan de forma irreversiblemente anonimizada (desvinculadas de cualquier identificador de usuario) debido a que constituyen registros de ciencia ciudadana protegidos por licencias abiertas (CC-BY / CC0) para la investigación biológica y conservación ecológica.' : 'Biodiversity and species observation records are retained in an irreversibly anonymized form (severing any link to your user ID) as they represent citizen-science contributions under open licenses (CC-BY / CC0) for biological research and ecological conservation.'}</li>
+    <li><strong>{isEs ? 'Registros técnicos de servidor:' : 'Technical server logs:'}</strong> {isEs ? 'Los registros de acceso a la red se purgan automáticamente tras un período rotativo de 30 a 90 días por motivos de seguridad técnica y prevención de fraude.' : 'Network server logs are automatically purged after a rolling 30-90 day period for technical security and fraud prevention.'}</li>
   </ul>
 
   <h2>{isEs ? 'Cookies y almacenamiento local' : 'Cookies and local storage'}</h2>

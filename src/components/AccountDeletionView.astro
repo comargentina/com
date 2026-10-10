@@ -1,0 +1,90 @@
+---
+interface Props { lang: 'en' | 'es' }
+const { lang } = Astro.props;
+const isEs = lang === 'es';
+---
+
+<article class="prose prose-zinc dark:prose-invert max-w-3xl mx-auto px-4 py-8">
+  <div class="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+    <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300 m-0">
+      <strong>{isEs ? 'Aplicación:' : 'App:'}</strong> COM Argentina<br />
+      <strong>{isEs ? 'Desarrollador / Organización:' : 'Developer / Organization:'}</strong> {isEs ? 'Club de Observadores de Mariposas de Argentina (comargentina)' : 'Club de Observadores de Mariposas de Argentina (comargentina)'}<br />
+      <strong>{isEs ? 'Última actualización:' : 'Last updated:'}</strong> {isEs ? '10 de octubre de 2026' : 'October 10, 2026'}
+    </p>
+  </div>
+
+  <h1>{isEs ? 'Solicitud de Eliminación de Cuenta y Datos' : 'Request Account and Data Deletion'}</h1>
+
+  <p class="lead">
+    {isEs
+      ? 'Esta página describe los pasos que los usuarios de la aplicación COM Argentina (desarrollada por el Club de Observadores de Mariposas de Argentina) pueden seguir para solicitar el borrado definitivo de su cuenta y de sus datos asociados, en cumplimiento con las directivas de seguridad y privacidad de Google Play Store.'
+      : 'This page details how users of the COM Argentina app (developed by Club de Observadores de Mariposas de Argentina) can request the permanent deletion of their account and associated personal data, in full compliance with Google Play Store policies.'}
+  </p>
+
+  <h2>{isEs ? '1. Cómo solicitar la eliminación de tu cuenta' : '1. How to request account deletion'}</h2>
+  <p>
+    {isEs
+      ? 'Puedes gestionar la eliminación a través de cualquiera de los siguientes dos métodos:'
+      : 'You can request deletion through either of the following two methods:'}
+  </p>
+
+  <div class="grid gap-4 my-6">
+    <div class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <h3 class="text-base font-semibold m-0 mb-2">{isEs ? 'Método A: Desde la aplicación o sitio web' : 'Method A: Directly from the app or website'}</h3>
+      <ol class="m-0 pl-5 text-sm space-y-1">
+        <li>{isEs ? 'Inicia sesión con tu cuenta en la app o web.' : 'Sign in to your account on the app or web.'}</li>
+        <li>{isEs ? 'Dirígete a tu ' : 'Go to your '}<strong>{isEs ? 'Perfil' : 'Profile'}</strong> → <strong>{isEs ? 'Editar perfil' : 'Edit profile'}</strong> ({isEs ? 'o visita ' : 'or visit '}<code>/perfil/editar/</code>).</li>
+        <li>{isEs ? 'Al final de la página, pulsa ' : 'At the bottom of the page, click '}<strong>"{isEs ? 'Eliminar cuenta' : 'Delete account'}"</strong>.</li>
+        <li>{isEs ? 'Confirma la acción en la ventana de advertencia.' : 'Confirm the action in the prompt.'}</li>
+      </ol>
+    </div>
+
+    <div class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <h3 class="text-base font-semibold m-0 mb-2">{isEs ? 'Método B: Sin la aplicación instalada (Vía Correo Electrónico)' : 'Method B: Without the app installed (Via Email)'}</h3>
+      <p class="text-sm m-0 mb-2">
+        {isEs
+          ? 'Si ya no tienes la app instalada o deseas solicitar la baja por soporte externo:'
+          : 'If you have uninstalled the app or prefer contacting support directly:'}
+      </p>
+      <ol class="m-0 pl-5 text-sm space-y-1">
+        <li>{isEs ? 'Envía un email a: ' : 'Send an email to: '}<strong><code>comargentina.app@gmail.com</code></strong></li>
+        <li>{isEs ? 'Asunto: ' : 'Subject: '}<code>Solicitud de Eliminación de Cuenta - COM Argentina</code></li>
+        <li>{isEs ? 'Indica en el cuerpo del correo la dirección de email registrada con la que creaste tu cuenta.' : 'Include in the body the registered email address linked to your account.'}</li>
+        <li>{isEs ? 'Tu solicitud será procesada y confirmada en un plazo máximo de 30 días.' : 'Your request will be processed and confirmed within a maximum of 30 days.'}</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>{isEs ? '2. Tipos de datos que se borran' : '2. Types of data that are deleted'}</h2>
+  <ul>
+    <li>
+      <strong>{isEs ? 'Credenciales de acceso:' : 'Authentication credentials:'}</strong> {isEs ? 'Tu registro en auth.users y tu correo electrónico se eliminan permanentemente de nuestros servidores.' : 'Your record in auth.users and your email address are permanently removed from our servers.'}
+    </li>
+    <li>
+      <strong>{isEs ? 'Perfil público:' : 'Public profile:'}</strong> {isEs ? 'Tu nombre de usuario (@usuario), nombre visible, avatar y biografía se eliminan de inmediato.' : 'Your username (@username), display name, avatar, and bio are removed immediately.'}
+    </li>
+    <li>
+      <strong>{isEs ? 'Archivos multimedia personales:' : 'Personal media files:'}</strong> {isEs ? 'Las fotos asociadas en Cloudflare R2 se ponen en cola de borrado y se eliminan en un plazo de hasta 30 días. Los clips de audio se borran de inmediato.' : 'Associated photos in Cloudflare R2 are queued for deletion within 30 days. Audio clips are deleted immediately.'}
+    </li>
+    <li>
+      <strong>{isEs ? 'Tokens locales:' : 'Local storage tokens:'}</strong> {isEs ? 'Cualquier sesión activa o preferencia en tu dispositivo deja de ser válida.' : 'Any active session tokens or preferences on your device become invalid.'}
+    </li>
+  </ul>
+
+  <h2>{isEs ? '3. Tipos de datos que se conservan y períodos de retención' : '3. Types of data retained and retention periods'}</h2>
+  <ul>
+    <li>
+      <strong>{isEs ? 'Observaciones de biodiversidad anonimizadas:' : 'Anonymized biodiversity observations:'}</strong> {isEs ? 'Debido a que las observaciones biológicas de mariposas constituyen registros de ciencia ciudadana bajo licencias abiertas (como CC-BY o CC0) para la investigación científica y conservación, los datos de avistamiento (fecha, especie observada y coordenadas protegidas) se conservan de forma totalmente anonimizada e irreversible, rompiendo de forma permanente todo vínculo con tu persona o cuenta.' : 'Because butterfly sightings are citizen-science records published under open licenses (such as CC-BY or CC0) for research and ecological monitoring, observation records (date, observed species, and protected coordinates) are retained in a strictly anonymized form, permanently severing any connection to your account or identity.'}
+    </li>
+    <li>
+      <strong>{isEs ? 'Registros técnicos de red (Server logs):' : 'Technical network logs:'}</strong> {isEs ? 'Por razones de seguridad técnica y prevención de fraude, los registros de acceso a los servidores se purgan automáticamente tras un período rotativo de 30 a 90 días.' : 'For system security and fraud prevention, server access logs are automatically purged after a rolling retention period of 30 to 90 days.'}
+    </li>
+  </ul>
+
+  <h2>{isEs ? '4. Contacto y enlaces oficiales' : '4. Contact & official links'}</h2>
+  <ul>
+    <li>{isEs ? 'Política de Privacidad en GitHub: ' : 'Privacy Policy on GitHub: '}<a href="https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md" target="_blank" rel="noopener">PRIVACY_POLICY.md</a></li>
+    <li>{isEs ? 'Página de Eliminación de Cuenta en GitHub: ' : 'Account Deletion on GitHub: '}<a href="https://github.com/comargentina/com/blob/main/ACCOUNT_DELETION.md" target="_blank" rel="noopener">ACCOUNT_DELETION.md</a></li>
+    <li>{isEs ? 'Soporte por email: ' : 'Email support: '}<code>comargentina.app@gmail.com</code></li>
+  </ul>
+</article>
