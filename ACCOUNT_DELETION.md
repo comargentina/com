@@ -26,7 +26,7 @@ Puedes solicitar la eliminación de tu cuenta y datos a través de cualquiera de
 ### Opción 2: Sin la aplicación instalada (Vía Correo Electrónico)
 Si has desinstalado la aplicación, no tienes acceso a tu dispositivo o prefieres gestionar la baja de forma externa:
 1. Envía un correo electrónico a nuestro equipo de atención:  
-   📧 **comargentina.app@gmail.com**
+   📧 **comargentina1@gmail.com**
 2. **Asunto del correo:** `Solicitud de Eliminación de Cuenta y Datos - COM Argentina`
 3. **Cuerpo del mensaje:** Indica la dirección de correo electrónico vinculada a la cuenta de COM Argentina que deseas dar de baja.
 4. Un administrador confirmará la recepción de tu pedido y completará la eliminación de tus datos en un plazo no mayor a **30 días corridos**.
@@ -59,5 +59,5 @@ Con el fin de preservar la validez científica y el rigor de los proyectos de ci
 Para cualquier consulta adicional respecto al tratamiento o supresión de tus datos personales, puedes contactar al desarrollador:
 
 - **Responsable:** Club de Observadores de Mariposas de Argentina (COM Argentina)
-- **Email:** `comargentina.app@gmail.com`
+- **Email:** `comargentina1@gmail.com`
 - **Política de Privacidad completa:** [https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md](https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md)

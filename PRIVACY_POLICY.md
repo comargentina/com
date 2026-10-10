@@ -75,7 +75,7 @@ Los usuarios pueden solicitar la eliminación a través de cualquiera de los sig
 #### Método B: Sin necesidad de instalar la aplicación (Vía Correo Electrónico)
 Si no tienes la aplicación instalada o no puedes acceder a tu cuenta:
 1. Envía un correo electrónico a nuestro equipo de soporte:  
-   📧 **comargentina.app@gmail.com** (o a través del repositorio oficial de GitHub [https://github.com/comargentina/com/issues](https://github.com/comargentina/com/issues)).
+   📧 **comargentina1@gmail.com** (o a través del repositorio oficial de GitHub [https://github.com/comargentina/com/issues](https://github.com/comargentina/com/issues)).
 2. Utiliza como asunto: `Solicitud de Eliminación de Cuenta y Datos - COM Argentina`.
 3. Indica en el mensaje la dirección de correo electrónico asociada a la cuenta que deseas eliminar.
 4. Tu solicitud será verificada y procesada en un plazo máximo de **30 días corridos**.
@@ -113,7 +113,7 @@ Podemos actualizar nuestra Política de Privacidad periódicamente para reflejar
 Si tienes dudas, consultas o requerimientos vinculados con esta Política de Privacidad o con el tratamiento de tus datos personales, puedes contactar al desarrollador:
 
 - **Organización / Desarrollador:** Club de Observadores de Mariposas de Argentina (COM Argentina)
-- **Correo de soporte:** `comargentina.app@gmail.com`
+- **Correo de soporte:** `comargentina1@gmail.com`
 - **Repositorio de soporte y código:** [https://github.com/comargentina/com](https://github.com/comargentina/com)
 - **URL pública de Política de Privacidad:** [https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md](https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md)
 - **URL pública de Eliminación de Cuenta y Datos:** [https://github.com/comargentina/com/blob/main/ACCOUNT_DELETION.md](https://github.com/comargentina/com/blob/main/ACCOUNT_DELETION.md)
