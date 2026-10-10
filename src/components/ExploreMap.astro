@@ -36,7 +36,7 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
     <!-- Satellite layer toggle -->
     <button
       id="satellite-toggle"
-      class="absolute top-3 right-3 z-10 flex min-h-[44px] min-w-[44px] items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:border-emerald-400 transition-colors"
+      class="absolute top-3 left-3 z-10 flex min-h-[44px] min-w-[44px] items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:border-emerald-400 transition-colors"
       data-active="false"
     >
       <span>🛰️</span>
@@ -610,145 +610,37 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
     const satelliteBtn = document.getElementById('satellite-toggle') as HTMLButtonElement | null;
     const satelliteLabel = document.getElementById('satellite-toggle-label');
     let isSatellite = false;
-    let originalFeatures: GeoJSON.Feature[] = [];
 
-    // Store observation features before switching
-    const obsSource = map.getSource('observations') as maplibregl.GeoJSONSource | undefined;
-    if (obsSource) {
-      const data = obsSource.getData() as GeoJSON.FeatureCollection;
-      originalFeatures = data.features || [];
-    }
+    // Add satellite source at startup (hidden initially)
+    map.addSource('satellite', {
+      type: 'raster',
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256,
+      attribution: '© Esri',
+    });
 
-    function addObservationLayers(features: GeoJSON.Feature[]) {
-      // Remove existing source if it exists
-      if (map.getSource('observations')) {
-        map.removeSource('observations');
-      }
-
-      map.addSource('observations', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features },
-        cluster: true,
-        clusterMaxZoom: 14,
-        clusterRadius: 50,
-      });
-
-      map.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'observations',
-        filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': ['step', ['get', 'point_count'], '#10b981', 10, '#059669', 50, '#047857'],
-          'circle-radius': ['step', ['get', 'point_count'], 18, 10, 26, 50, 34],
-        },
-      });
-      map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'observations',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': ['get', 'point_count_abbreviated'],
-          'text-font': ['Noto Sans Regular'],
-          'text-size': 12,
-        },
-        paint: { 'text-color': '#ffffff' },
-      });
-      map.addLayer({
-        id: 'pin',
-        type: 'circle',
-        source: 'observations',
-        filter: ['!', ['has', 'point_count']],
-        paint: {
-          'circle-color': [
-            'match', ['get', 'kingdom'],
-            'Plantae',  KINGDOM_COLORS.Plantae,
-            'Animalia', KINGDOM_COLORS.Animalia,
-            'Fungi',    KINGDOM_COLORS.Fungi,
-            DEFAULT_COLOR,
-          ],
-          'circle-radius': 7,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': isDark ? '#0f172a' : '#ffffff',
-        },
-      });
-
-      // Re-attach event listeners
-      map.on('click', 'pin', (e) => {
-        const feat = e.features?.[0];
-        if (!feat) return;
-        const props = feat.properties as Record<string, string | boolean>;
-        if (props.pending === true || props.pending === 'true') return;
-        const coords = (feat.geometry as GeoJSON.Point).coordinates.slice() as [number, number];
-        const thumbUrl = props.thumb ?? '';
-        const obsAudioUrl = props.audioUrl ?? '';
-        const speciesName = props.species ?? '';
-        const date = props.date ?? '';
-        const obsId = props.id ?? '';
-        const obsVideoUrl: string | undefined = props.videoUrl;
-        const hasPhoto = !!thumbUrl;
-        const hasAudio = !!obsAudioUrl;
-        const hasVideo = !!obsVideoUrl;
-
-        let mediaContent = '';
-        if (hasPhoto) {
-          mediaContent = `<img src="${thumbUrl}" alt="" class="w-20 h-20 object-cover rounded" loading="lazy">`;
-        } else if (hasAudio) {
-          mediaContent = `<div class="w-20 h-20 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded text-2xl">🎵</div>`;
-        } else if (hasVideo) {
-          mediaContent = `<div class="w-20 h-20 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 rounded text-2xl">🎬</div>`;
-        }
-
-        new maplibregl.Popup({ closeButton: true, maxWidth: '240px' })
-          .setLngLat(coords)
-          .setHTML(`<div class="flex gap-3"><div>${mediaContent}</div><div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">${speciesName || tr.map.unknown_species}</div><div class="text-xs text-zinc-600 dark:text-zinc-300 mt-0.5">${date}</div><a href="${shareBase}?id=${obsId}" class="text-xs text-emerald-600 underline decoration-emerald-300 underline-offset-2 mt-1 block">${tr.map.view_observation}</a></div></div>`)
-          .addTo(map);
-      });
-
-      map.on('mouseenter', 'pin', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'pin', () => { map.getCanvas().style.cursor = ''; });
-      map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
-    }
+    // Add satellite layer (hidden initially, added before observations so observations are on top)
+    map.addLayer({
+      id: 'satellite',
+      type: 'raster',
+      source: 'satellite',
+      layout: { visibility: 'none' },
+    }, 'clusters');
 
     satelliteBtn?.addEventListener('click', () => {
       isSatellite = !isSatellite;
 
-      if (isSatellite) {
-        // Switch to satellite imagery
-        map.setStyle({
-          version: 8,
-          sources: {
-            'satellite': {
-              type: 'raster',
-              tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-              tileSize: 256,
-              attribution: '© Esri',
-            },
-          },
-          layers: [
-            {
-              id: 'satellite',
-              type: 'raster',
-              source: 'satellite',
-            },
-          ],
-        });
-        // Re-add observation layers
-        addObservationLayers(originalFeatures);
-        if (satelliteLabel) satelliteLabel.textContent = isEs ? 'Normal' : 'Normal';
-        satelliteBtn.dataset.active = 'true';
-        satelliteBtn.classList.add('border-emerald-400', 'text-emerald-700');
-      } else {
-        // Switch back to normal style
-        map.setStyle(REMOTE_STYLE);
-        // Re-add observation layers
-        addObservationLayers(originalFeatures);
-        if (satelliteLabel) satelliteLabel.textContent = isEs ? 'Satélite' : 'Satellite';
-        satelliteBtn.dataset.active = 'false';
-        satelliteBtn.classList.remove('border-emerald-400', 'text-emerald-700');
-      }
+      console.log('[satellite] Toggle clicked, isSatellite:', isSatellite);
+
+      const visibility = isSatellite ? 'visible' : 'none';
+      map.setLayoutProperty('satellite', 'visibility', visibility);
+
+      if (satelliteLabel) satelliteLabel.textContent = isEs ? (isSatellite ? 'Normal' : 'Satélite') : (isSatellite ? 'Normal' : 'Satellite');
+      satelliteBtn.dataset.active = isSatellite ? 'true' : 'false';
+      satelliteBtn.classList.toggle('border-emerald-400', isSatellite);
+      satelliteBtn.classList.toggle('text-emerald-700', isSatellite);
+
+      console.log('[satellite] Satellite visibility set to:', visibility);
     });
   });
 </script>
