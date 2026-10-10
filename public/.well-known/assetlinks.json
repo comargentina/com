@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.entrerios.com",
+      "sha256_cert_fingerprints": [
+        "C2:1C:60:90:E0:76:3F:97:18:B5:BF:12:98:75:67:38:FC:31:7E:5A:81:D8:AF:A1:B4:45:4C:7D:3B:0E:44:36"
+      ]
+    }
+  }
+]
