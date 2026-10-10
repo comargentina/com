@@ -33,6 +33,15 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
       <span id="places-toggle-label">{lang === 'es' ? 'Mostrar áreas' : 'Show areas'}</span>
     </button>
     -->
+    <!-- Satellite layer toggle -->
+    <button
+      id="satellite-toggle"
+      class="absolute top-3 right-3 z-10 flex min-h-[44px] min-w-[44px] items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:border-emerald-400 transition-colors"
+      data-active="false"
+    >
+      <span>🛰️</span>
+      <span id="satellite-toggle-label">{lang === 'es' ? 'Satélite' : 'Satellite'}</span>
+    </button>
   </div>
   <p id="map-source-note" class="hidden mt-2 text-[11px] text-zinc-600 dark:text-zinc-400"></p>
   <p id="map-offline-hint" class="hidden mt-2 text-xs text-amber-700 dark:text-amber-400"></p>
@@ -595,6 +604,46 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
       }
       toggleBtn.classList.toggle('border-emerald-400', !isActive);
       toggleBtn.classList.toggle('text-emerald-700', !isActive);
+    });
+
+    // ── Satellite layer toggle ───────────────────────────────────────────────
+    const satelliteBtn = document.getElementById('satellite-toggle') as HTMLButtonElement | null;
+    const satelliteLabel = document.getElementById('satellite-toggle-label');
+    let isSatellite = false;
+
+    satelliteBtn?.addEventListener('click', () => {
+      isSatellite = !isSatellite;
+
+      if (isSatellite) {
+        // Switch to satellite imagery
+        map.setStyle({
+          version: 8,
+          sources: {
+            'satellite': {
+              type: 'raster',
+              tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+              tileSize: 256,
+              attribution: '© Esri',
+            },
+          },
+          layers: [
+            {
+              id: 'satellite',
+              type: 'raster',
+              source: 'satellite',
+            },
+          ],
+        });
+        if (satelliteLabel) satelliteLabel.textContent = isEs ? 'Normal' : 'Normal';
+        satelliteBtn.dataset.active = 'true';
+        satelliteBtn.classList.add('border-emerald-400', 'text-emerald-700');
+      } else {
+        // Switch back to normal style
+        map.setStyle(REMOTE_STYLE);
+        if (satelliteLabel) satelliteLabel.textContent = isEs ? 'Satélite' : 'Satellite';
+        satelliteBtn.dataset.active = 'false';
+        satelliteBtn.classList.remove('border-emerald-400', 'text-emerald-700');
+      }
     });
   });
 </script>
