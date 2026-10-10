@@ -539,6 +539,9 @@ const exploreHref       = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'exp
   }
 
   function renderMissingToolbar() {
+    // Temporarily disabled - hiding the Falta-dex toolbar
+    return;
+    
     if (!missingToolbarEl || !state) return;
     const r = root!;
     const showMissing = state.showMissing;
