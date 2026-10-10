@@ -15,10 +15,10 @@ const signInHref = lang === 'es' ? '/es/ingresar/' : '/en/sign-in/';
      script below reveals this nav only when getCachedUser() resolves to a
      user. The four destinations all require a session and would land the
      visitor on a sign-in wall, so we never paint them for anon. -->
-<nav class="hc-root hidden grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6" data-lang={lang} aria-label="Home actions">
+<nav class="hc-root hidden grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6" data-lang={lang} aria-label="Home actions">
   <a class="hc-tile" href={inboxHref} data-key="inbox"><span class="hc-icon" aria-hidden="true">📬</span><span class="hc-label">{c.inbox}</span><span class="hc-count tabular-nums" aria-hidden="true"></span></a>
   <a class="hc-tile" href={validateHref} data-key="validate"><span class="hc-icon" aria-hidden="true">🔍</span><span class="hc-label">{c.validate}</span><span class="hc-count tabular-nums" aria-hidden="true"></span></a>
-  <a class="hc-tile" href={faltaDexHref} data-key="falta_dex"><span class="hc-icon" aria-hidden="true">📊</span><span class="hc-label">{c.falta_dex}</span><span class="hc-count tabular-nums" aria-hidden="true"></span></a>
+  <!-- <a class="hc-tile" href={faltaDexHref} data-key="falta_dex"><span class="hc-icon" aria-hidden="true">📊</span><span class="hc-label">{c.falta_dex}</span><span class="hc-count tabular-nums" aria-hidden="true"></span></a> -->
   <a class="hc-tile" href={watchlistHref} data-key="watchlist"><span class="hc-icon" aria-hidden="true">👀</span><span class="hc-label">{c.watchlist}</span><span class="hc-count tabular-nums" aria-hidden="true"></span></a>
 </nav>
 
