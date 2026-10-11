@@ -2479,6 +2479,7 @@
       "streak_days_one": "{n} day streak",
       "streak_days_other": "{n} day streak",
       "highest_rarity_label": "Your highest rarity",
+      "featured_species_label": "Featured species",
       "to_catch_label": "To catch",
       "to_catch_why": "Common in AR, you haven't seen it",
       "to_catch_cta": "More suggestions →",

@@ -63,6 +63,7 @@ const exploreHref       = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'exp
   data-label-hero-rares={heroT.rares_label ?? ''}
   data-label-hero-obs={heroT.obs_label ?? ''}
   data-label-hero-rare={heroT.highest_rarity_label ?? ''}
+  data-label-hero-featured={heroT.featured_species_label ?? ''}
   data-label-hero-catch={heroT.to_catch_label ?? ''}
   data-label-hero-catch-why={heroT.to_catch_why ?? ''}
   data-label-hero-catch-cta={heroT.to_catch_cta ?? ''}
@@ -411,7 +412,7 @@ const exploreHref       = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'exp
              ? `<img src="${escAttr(rare.thumbnail_url)}" alt="${escAttr(rare.scientific_name)}" loading="eager" class="flex-none w-24 h-24 rounded-lg object-cover" style="box-shadow: 0 0 0 3px #fbbf24, 0 4px 12px rgba(180,83,9,0.25);">`
              : `<div class="flex-none w-24 h-24 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 text-2xl">★</div>`}
            <div class="min-w-0">
-             <div class="text-[10px] uppercase tracking-widest text-amber-700 font-bold">${escAttr(r.dataset.labelHeroRare ?? '')}</div>
+             <div class="text-[10px] uppercase tracking-widest text-amber-700 font-bold">${escAttr((rare.rarity_bucket ?? 1) >= 3 ? (r.dataset.labelHeroRare ?? '') : (r.dataset.labelHeroFeatured ?? ''))}</div>
              <div class="text-base font-bold italic text-zinc-900 dark:text-zinc-100 truncate">${escAttr(rare.scientific_name)}</div>
              ${commonNameOf(rare) ? `<div class="text-sm text-zinc-600 dark:text-zinc-300 truncate">${escAttr(commonNameOf(rare)!)}${rare.kingdom ? ` · ${escAttr(rare.kingdom)}` : ''}</div>` : ''}
              <div class="text-amber-600 mt-1 tracking-widest text-sm">${'★'.repeat(rare.rarity_bucket ?? 1)}${'☆'.repeat(5 - (rare.rarity_bucket ?? 1))}</div>
