@@ -8,7 +8,6 @@ import InstallDiscoveryHint from '../components/InstallDiscoveryHint.astro';
 import OnboardingTour from '../components/OnboardingTour.astro';
 import JourneyGuideLoader from '../components/JourneyGuideLoader.astro';
 import ReportIssueButton from '../components/ReportIssueButton.astro';
-import GlobalShareFab from '../components/GlobalShareFab.astro';
 import SwUpdateToast from '../components/SwUpdateToast.astro';
 import OfflineBanner from '../components/OfflineBanner.astro';
 import ReportDialog from '../components/ReportDialog.astro';
@@ -402,7 +401,6 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
     <CommandPalette lang={lang} />
     {!isChat && <InstallPwaButton lang={installLang} />}
     {!isChat && <ReportIssueButton lang={lang} />}
-    <GlobalShareFab lang={lang} currentPath={currentPath} />
     <OnboardingTour lang={installLang} />
     <JourneyGuideLoader lang={installLang} currentPath={currentPath} />
     <SwUpdateToast lang={lang} />
