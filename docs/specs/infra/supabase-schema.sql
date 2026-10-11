@@ -11143,9 +11143,10 @@ BEGIN
       v_country_code IS NULL
       OR EXISTS (
         SELECT 1 FROM public.observations o
+        JOIN public.users u ON u.id = o.observer_id
         JOIN public.identifications i ON i.observation_id = o.id AND i.taxon_id = t.id AND i.is_primary
         WHERE o.sync_status = 'synced'
-          AND (o.country_code = v_country_code OR o.country_code IS NULL)
+          AND (u.country_code = v_country_code OR u.country_code IS NULL)
       )
     )
     AND t.id NOT IN (
@@ -11159,8 +11160,7 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.daily_challenge_for_user(uuid) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION public.daily_challenge_for_user(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.daily_challenge_for_user(uuid) TO anon, authenticated;
 
 -- ============================================================
 -- #710 — suggest_nearby_species RPC
