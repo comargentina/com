@@ -138,7 +138,13 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
   if (modal && form && submitBtn && submitLabel) {
     let observationId: string | null = null;
     let observerName: string | null = null;
-    const original   = submitLabel.textContent ?? 'Submit';
+    function resetSubmitButtonText() {
+      const isEs = getIsEs();
+      const label = isEs
+        ? (submitLabel?.getAttribute('data-es') ?? 'Enviar sugerencia')
+        : (submitLabel?.getAttribute('data-en') ?? 'Submit suggestion');
+      if (submitLabel) submitLabel.textContent = label;
+    }
     const microcopyEl = document.getElementById('suggest-id-microcopy') as HTMLElement | null;
 
     function getIsEs() {
@@ -223,10 +229,32 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
 
     const karmaGateEl = document.getElementById('suggest-id-karma-gate') as HTMLElement | null;
 
-    /** Check karma gate and show soft warning (#558). Non-blocking for v1. */
+    /** Check karma gate and show soft warning (#558). */
     async function checkKarmaGate(): Promise<void> {
-      // Disabled - karma gate messages hidden
-      return;
+      if (!karmaGateEl) return;
+      try {
+        const supabase = getSupabase();
+        const user = await getCachedUser();
+        if (!user) return;
+        const { data: u } = await supabase
+          .from('users')
+          .select('karma_total')
+          .eq('id', user.id)
+          .maybeSingle();
+        const karma = (u as { karma_total?: number } | null)?.karma_total ?? 0;
+        const MIN_KARMA = 100;
+        if (karma < MIN_KARMA) {
+          const isEs = getIsEs();
+          const tpl = (isEs ? modal!.dataset.labelKarmaGateValidateEs : modal!.dataset.labelKarmaGateValidateEn)
+            ?? (isEs ? 'Alcanza {min_karma} karma para sugerir identificaciones' : 'Reach {min_karma} karma to suggest identifications');
+          karmaGateEl.textContent = tpl.replace('{min_karma}', String(MIN_KARMA));
+          karmaGateEl.classList.remove('hidden');
+        } else {
+          karmaGateEl.classList.add('hidden');
+        }
+      } catch {
+        // Gate check failure is non-blocking: silently skip.
+      }
     }
 
     function open(obsId: string, observer: string | null) {
@@ -269,7 +297,7 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
       modal!.classList.remove('flex');
       observationId = null;
       submitBtn!.disabled = false;
-      submitLabel!.textContent = original;
+      resetSubmitButtonText();
     }
 
     // Public open hook the queue view calls.
@@ -522,14 +550,22 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
         } else {
           msg = String(err);
         }
+        const isEs = getIsEs();
+        if (msg === 'not_signed_in') {
+          msg = isEs ? 'Debes iniciar sesión para sugerir una identificación.' : 'You must sign in to suggest an identification.';
+        } else if (msg.includes('row-level security policy') || msg.includes('violates row-level security')) {
+          msg = isEs
+            ? 'Se requieren al menos 100 puntos de karma para sugerir identificaciones en observaciones de la comunidad.'
+            : 'You need at least 100 karma points to suggest identifications on community observations.';
+        }
+
         if (errorEl) {
-          const isEs = getIsEs();
           const failedTpl = (isEs ? modal!.dataset.labelFailedEs : modal!.dataset.labelFailedEn) ?? (isEs ? 'No se pudo enviar: {error}' : 'Could not submit: {error}');
           errorEl.textContent = failedTpl.replace('{error}', msg);
           errorEl.classList.remove('hidden');
         }
         submitBtn!.disabled = false;
-        submitLabel!.textContent = original;
+        resetSubmitButtonText();
       }
     });
   }
