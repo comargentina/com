@@ -88,13 +88,13 @@ const lang: 'en' | 'es' = 'en';
         if (askLink && lang === 'es') {
           var href = askLink.getAttribute('href') || '';
           askLink.setAttribute('href', href.replace('/en/', '/es/'));
-          askLink.setAttribute('aria-label', 'Pregunta a la IA del COM');
-          askLink.setAttribute('title', 'Pregunta a la IA del COM');
+          askLink.setAttribute('aria-label', 'Chat con la iA');
+          askLink.setAttribute('title', 'Chat con la iA');
         } else if (askLink && lang === 'en') {
           var hrefEn = askLink.getAttribute('href') || '';
           askLink.setAttribute('href', hrefEn.replace('/es/', '/en/'));
-          askLink.setAttribute('aria-label', 'Ask COM AI');
-          askLink.setAttribute('title', 'Ask COM AI');
+          askLink.setAttribute('aria-label', 'Chat with AI');
+          askLink.setAttribute('title', 'Chat with AI');
         }
       }
 
@@ -153,11 +153,11 @@ const lang: 'en' | 'es' = 'en';
         askLink.href = `/${lang}/chat/?attach=observation:${encodeURIComponent(id)}`;
         // Also update aria-label and title attributes
         if (lang === 'es') {
-          askLink.setAttribute('aria-label', 'Pregunta a la IA del COM');
-          askLink.setAttribute('title', 'Pregunta a la IA del COM');
+          askLink.setAttribute('aria-label', 'Chat con la iA');
+          askLink.setAttribute('title', 'Chat con la iA');
         } else {
-          askLink.setAttribute('aria-label', 'Ask COM AI');
-          askLink.setAttribute('title', 'Ask COM AI');
+          askLink.setAttribute('aria-label', 'Chat with AI');
+          askLink.setAttribute('title', 'Chat with AI');
         }
       }
       load(id).catch(e => {
@@ -766,7 +766,7 @@ const lang: 'en' | 'es' = 'en';
         let lastAiResult: { scientific_name: string; confidence: number; source: string } | null = null;
 
         askAiBtn.addEventListener('click', async () => {
-          const idleLabel = isEs ? 'Preguntar a mi IA' : (askAiBtn.dataset.labelIdle ?? 'Ask my AI');
+          const idleLabel = isEs ? 'Preguntar a mi iA' : (askAiBtn.dataset.labelIdle ?? 'Ask my AI');
           const runningLabel = isEs ? 'Identificando…' : (askAiBtn.dataset.labelRunning ?? 'Identifying…');
           const noPhotoLabel = isEs ? 'No hay foto disponible.' : (askAiBtn.dataset.labelNoPhoto ?? 'No photo available.');
           const noResultLabel = isEs ? 'La IA no pudo identificar.' : (askAiBtn.dataset.labelNoResult ?? 'AI could not identify.');
