@@ -12459,16 +12459,16 @@ CREATE POLICY karma_thresholds_public_read ON public.karma_thresholds
 GRANT SELECT ON public.karma_thresholds TO anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.karma_thresholds TO service_role;
 
--- Seed default thresholds (#558 acceptance criteria values).
+-- Seed default thresholds. validation_suggest requires 0 karma (any logged-in user can validate).
 INSERT INTO public.karma_thresholds (privilege, min_karma, description_en, description_es)
 VALUES
-  ('validation_suggest', 100,  'Suggest species IDs on others'' observations',
+  ('validation_suggest', 0,    'Suggest species IDs on others'' observations',
                                 'Sugerir identificaciones de especie en observaciones ajenas'),
   ('observation_flag',   500,  'Flag observations for moderation',
                                 'Reportar observaciones para moderación'),
   ('expert_application', 1000, 'Apply for expert status in a taxon group',
                                 'Solicitar estatus de experto en un grupo taxonómico')
-ON CONFLICT (privilege) DO NOTHING;
+ON CONFLICT (privilege) DO UPDATE SET min_karma = EXCLUDED.min_karma;
 
 -- Helper function: check if a user has a privilege by karma.
 CREATE OR REPLACE FUNCTION public.has_karma_privilege(
@@ -12488,8 +12488,7 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.has_karma_privilege(uuid, text) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION public.has_karma_privilege(uuid, text) TO authenticated;
 
--- RLS: gate validation_suggest on identifications INSERT (#558).
--- Replaces id_validator_insert with a karma-aware version.
+-- RLS: allow any authenticated user to suggest IDs on identifications INSERT (no karma required).
 DROP POLICY IF EXISTS "id_validator_insert" ON public.identifications;
 CREATE POLICY "id_validator_insert" ON public.identifications
   FOR INSERT TO authenticated
@@ -12497,7 +12496,6 @@ CREATE POLICY "id_validator_insert" ON public.identifications
     (SELECT auth.uid()) = validated_by
     AND validated_by IS NOT NULL
     AND is_primary = false
-    AND public.has_karma_privilege(auth.uid(), 'validation_suggest')
     AND EXISTS (
       SELECT 1 FROM public.observations o
       WHERE o.id = observation_id

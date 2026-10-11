@@ -229,32 +229,9 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
 
     const karmaGateEl = document.getElementById('suggest-id-karma-gate') as HTMLElement | null;
 
-    /** Check karma gate and show soft warning (#558). */
+    /** Check karma gate: validation suggestions no longer require karma. */
     async function checkKarmaGate(): Promise<void> {
-      if (!karmaGateEl) return;
-      try {
-        const supabase = getSupabase();
-        const user = await getCachedUser();
-        if (!user) return;
-        const { data: u } = await supabase
-          .from('users')
-          .select('karma_total')
-          .eq('id', user.id)
-          .maybeSingle();
-        const karma = (u as { karma_total?: number } | null)?.karma_total ?? 0;
-        const MIN_KARMA = 100;
-        if (karma < MIN_KARMA) {
-          const isEs = getIsEs();
-          const tpl = (isEs ? modal!.dataset.labelKarmaGateValidateEs : modal!.dataset.labelKarmaGateValidateEn)
-            ?? (isEs ? 'Alcanza {min_karma} karma para sugerir identificaciones' : 'Reach {min_karma} karma to suggest identifications');
-          karmaGateEl.textContent = tpl.replace('{min_karma}', String(MIN_KARMA));
-          karmaGateEl.classList.remove('hidden');
-        } else {
-          karmaGateEl.classList.add('hidden');
-        }
-      } catch {
-        // Gate check failure is non-blocking: silently skip.
-      }
+      karmaGateEl?.classList.add('hidden');
     }
 
     function open(obsId: string, observer: string | null) {
@@ -555,8 +532,8 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
           msg = isEs ? 'Debes iniciar sesión para sugerir una identificación.' : 'You must sign in to suggest an identification.';
         } else if (msg.includes('row-level security policy') || msg.includes('violates row-level security')) {
           msg = isEs
-            ? 'Se requieren al menos 100 puntos de karma para sugerir identificaciones en observaciones de la comunidad.'
-            : 'You need at least 100 karma points to suggest identifications on community observations.';
+            ? 'No puedes sugerir identificaciones en tus propias observaciones o no has iniciado sesión.'
+            : 'You cannot suggest identifications on your own observations or you are not signed in.';
         }
 
         if (errorEl) {
