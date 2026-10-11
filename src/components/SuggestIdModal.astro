@@ -142,7 +142,11 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
     const microcopyEl = document.getElementById('suggest-id-microcopy') as HTMLElement | null;
 
     function getIsEs() {
-      return document.documentElement.lang === 'es' || localStorage.getItem('rastrum.lang') === 'es';
+      return (
+        document.documentElement.lang === 'es' ||
+        localStorage.getItem('rastrum.lang') === 'es' ||
+        navigator.language.startsWith('es')
+      );
     }
 
     async function refreshMicrocopy(taxonId: string | null, confidence: 0.5 | 0.7 | 0.9) {
