@@ -21,7 +21,7 @@ export function entityChipHtml(opts: {
   return `<div data-chat-entity-chip class="flex items-center gap-2 rounded-lg border border-emerald-300 dark:border-emerald-700/40 bg-emerald-50 dark:bg-emerald-900/10 p-2 text-sm">
     <span class="text-base flex-shrink-0">${escapeHtml(opts.icon)}</span>
     <a href="${url}" target="_blank" rel="noopener" class="flex-1 min-w-0 truncate font-medium text-emerald-900 dark:text-emerald-100 hover:underline">${escapeHtml(opts.label)}</a>
-    <button data-chip-detach type="button" aria-label="Remove" class="w-6 h-6 rounded-full bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 text-xs flex items-center justify-center hover:bg-emerald-300">×</button>
+    <button data-chip-detach type="button" aria-label="${opts.lang === 'es' ? 'Quitar' : 'Remove'}" class="w-6 h-6 rounded-full bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 text-xs flex items-center justify-center hover:bg-emerald-300">×</button>
   </div>`;
 }
 
