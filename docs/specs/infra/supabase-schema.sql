@@ -7805,59 +7805,73 @@ DECLARE
   v_other_rg_exists boolean;
   v_already_awarded boolean;
 BEGIN
-  WITH weighted AS (
-    SELECT i.taxon_id,
-           SUM(
-             CASE
-               WHEN EXISTS (
-                 SELECT 1 FROM public.user_expertise ue
-                 WHERE ue.user_id = i.validated_by
-                   AND ue.taxon_id = ANY(
-                     SELECT array_prepend(t.id, t.ancestor_path)
-                     FROM public.taxa t WHERE t.id = i.taxon_id
-                   )
-               )
-               THEN 3.0
-               ELSE 1.0
-             END
-           ) AS score,
-           count(DISTINCT i.validated_by) AS validators
+  WITH all_supporters AS (
+    -- 1. Community validators supporting this taxon
+    SELECT i.taxon_id, i.validated_by AS user_id,
+           CASE
+             WHEN EXISTS (
+               SELECT 1 FROM public.user_expertise ue
+               WHERE ue.user_id = i.validated_by
+                 AND ue.taxon_id = ANY(
+                   SELECT array_prepend(t.id, t.ancestor_path)
+                   FROM public.taxa t WHERE t.id = i.taxon_id
+                 )
+             )
+             THEN 3.0
+             ELSE 1.0
+           END AS weight
     FROM   public.identifications i
     WHERE  i.observation_id = p_observation_id
       AND  i.taxon_id IS NOT NULL
       AND  i.validated_by IS NOT NULL
-    GROUP BY i.taxon_id
+
+    UNION
+
+    -- 2. Original observer (if observation or initial identification proposed this taxon)
+    SELECT i.taxon_id, o.observer_id AS user_id, 1.0 AS weight
+    FROM   public.identifications i
+    JOIN   public.observations o ON o.id = i.observation_id
+    WHERE  i.observation_id = p_observation_id
+      AND  i.taxon_id IS NOT NULL
+      AND  (i.validated_by IS NULL OR i.validated_by = o.observer_id)
+  ),
+  weighted AS (
+    SELECT taxon_id,
+           sum(weight) AS score,
+           count(DISTINCT user_id) AS total_users
+    FROM   all_supporters
+    GROUP BY taxon_id
   )
-  SELECT taxon_id, score, validators
+  SELECT taxon_id, score, total_users
     INTO winning_taxon, winning_score, validator_count
     FROM weighted
-   ORDER BY score DESC
+   ORDER BY total_users DESC, score DESC
    LIMIT 1;
 
   IF winning_taxon IS NULL THEN RETURN; END IF;
 
+  -- Tie guard: if multiple taxa share the maximum number of distinct agreeing users
   IF (
+    WITH all_supporters AS (
+      SELECT i.taxon_id, i.validated_by AS user_id
+      FROM   public.identifications i
+      WHERE  i.observation_id = p_observation_id
+        AND  i.taxon_id IS NOT NULL
+        AND  i.validated_by IS NOT NULL
+      UNION
+      SELECT i.taxon_id, o.observer_id AS user_id
+      FROM   public.identifications i
+      JOIN   public.observations o ON o.id = i.observation_id
+      WHERE  i.observation_id = p_observation_id
+        AND  i.taxon_id IS NOT NULL
+        AND  (i.validated_by IS NULL OR i.validated_by = o.observer_id)
+    )
     SELECT count(*) FROM (
-      SELECT i.taxon_id,
-             SUM(CASE
-                   WHEN EXISTS (
-                     SELECT 1 FROM public.user_expertise ue
-                     WHERE ue.user_id = i.validated_by
-                       AND ue.taxon_id = ANY(
-                         SELECT array_prepend(t.id, t.ancestor_path)
-                         FROM public.taxa t WHERE t.id = i.taxon_id
-                       )
-                   )
-                   THEN 3.0
-                   ELSE 1.0
-                 END) AS s
-      FROM public.identifications i
-      WHERE i.observation_id = p_observation_id
-        AND i.taxon_id IS NOT NULL
-        AND i.validated_by IS NOT NULL
-      GROUP BY i.taxon_id
+      SELECT taxon_id
+      FROM   all_supporters
+      GROUP BY taxon_id
+      HAVING count(DISTINCT user_id) = validator_count
     ) sub
-    WHERE sub.s = winning_score
   ) > 1 THEN
     RETURN;
   END IF;
@@ -7867,12 +7881,21 @@ BEGIN
     FROM public.identifications
    WHERE observation_id = p_observation_id AND is_primary;
 
-  IF winning_score >= 2.0 AND validator_count >= 2 THEN
+  -- Option A: Requires at least 3 distinct agreeing users (e.g. author + 2 validators, or 3 validators)
+  IF validator_count >= 3 THEN
+    -- Demote other identifications on this observation
     UPDATE public.identifications
-       SET is_research_grade = true
+       SET is_primary = false
      WHERE observation_id = p_observation_id
-       AND taxon_id = winning_taxon
-       AND is_primary;
+       AND taxon_id <> winning_taxon;
+
+    -- Promote winning taxon identification to primary and Research Grade
+    UPDATE public.identifications
+       SET is_primary = true,
+           is_research_grade = true
+     WHERE observation_id = p_observation_id
+       AND taxon_id = winning_taxon;
+
     was_promoted := NOT prev_research_grade;
   END IF;
 
