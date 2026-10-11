@@ -1133,7 +1133,7 @@
   },
   "chat": {
     "title": "Chat",
-    "subtitle": "Asistente de biodiversidad impulsado por Gemini Flash. También puedes adjuntar una foto o un audio.",
+    "subtitle": "En el asistente de biodiversidad impulsado por iA, también puedes adjuntar una foto, video o un audio.",
     "placeholder": "Pregunta lo que quieras sobre especies, hábitats o tus observaciones…",
     "send": "Enviar",
     "sending": "Pensando…",

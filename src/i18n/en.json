@@ -1133,7 +1133,7 @@
   },
   "chat": {
     "title": "Chat",
-    "subtitle": "Biodiversity assistant powered by Gemini Flash. You can also attach a photo or audio.",
+    "subtitle": "Biodiversity assistant powered by AI. You can also attach a photo, video, or audio.",
     "placeholder": "Ask anything about species, habitats, or your observations…",
     "send": "Send",
     "sending": "Thinking…",
