@@ -172,6 +172,8 @@ export const routes: Record<string, Record<Locale, string>> = {
   communityDonate:     { en: '/community/donate',      es: '/comunidad/donar' },
   // Personalized discover feed (#865)
   discover:            { en: '/discover',               es: '/descubrir' },
+  // Featured observers spotlight (#748)
+  featured:            { en: '/featured',               es: '/destacados' },
   privacy: { en: '/privacy', es: '/privacidad' },
   terms: { en: '/terms', es: '/terminos' },
   faq: { en: '/faq', es: '/preguntas-frecuentes' },

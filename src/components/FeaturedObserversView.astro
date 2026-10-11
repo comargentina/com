@@ -1,0 +1,277 @@
+---
+/**
+ * FeaturedObserversView — "Observadores destacados" / "Featured Observers" (#748)
+ *
+ * Displays current and past "Observador del mes" spotlights from `featured_observers`.
+ */
+interface Props {
+  lang: 'en' | 'es';
+}
+
+const { lang } = Astro.props;
+const isEs = lang === 'es';
+
+const copy = {
+  title: isEs ? 'Observadores destacados' : 'Featured Observers',
+  subtitle: isEs
+    ? 'Reconocimiento a los miembros de la comunidad que impulsan el registro y la conservación de la biodiversidad.'
+    : 'Recognizing community members who champion biodiversity observation and conservation.',
+  currentTitle: isEs ? 'Observador del mes' : 'Observer of the month',
+  pastTitle: isEs ? 'Meses anteriores' : 'Past months',
+  viewLeaderboard: isEs ? 'Ver tabla de líderes' : 'View leaderboard',
+  leaderboardHref: isEs ? '/es/comunidad/tabla-de-lideres/' : '/en/community/leaderboard/',
+  viewProfile: isEs ? 'Ver perfil' : 'View profile',
+  loading: isEs ? 'Cargando observadores destacados…' : 'Loading featured observers…',
+  emptyTitle: isEs ? 'Próximamente' : 'Coming soon',
+  emptyDesc: isEs
+    ? 'El reconocimiento mensual destaca a observadores por su constancia y contribución. ¡Sigue observando para ser el próximo destacado!'
+    : 'The monthly spotlight recognizes observers for consistency and contributions. Keep observing to be the next featured observer!',
+  exploreCta: isEs ? 'Explorar la comunidad' : 'Explore community',
+  exploreHref: isEs ? '/es/comunidad/observadores/' : '/en/community/observers/',
+  observationsLabel: isEs ? 'observaciones' : 'observations',
+};
+---
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-2xl" aria-hidden="true">🏅</span>
+        <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{copy.title}</h1>
+      </div>
+      <p class="text-sm text-zinc-600 dark:text-zinc-400 max-w-xl">
+        {copy.subtitle}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a
+        href={copy.leaderboardHref}
+        class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
+      >
+        <span>🏆</span>
+        <span>{copy.viewLeaderboard}</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div id="destacados-skeleton" class="space-y-6 animate-pulse">
+    <div class="h-44 rounded-2xl bg-zinc-200 dark:bg-zinc-800"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="h-32 rounded-xl bg-zinc-200 dark:bg-zinc-800"></div>
+      <div class="h-32 rounded-xl bg-zinc-200 dark:bg-zinc-800"></div>
+    </div>
+  </div>
+
+  <!-- Empty state (hidden by default) -->
+  <div id="destacados-empty" class="hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-8 text-center space-y-4">
+    <div class="w-16 h-16 mx-auto rounded-full bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-3xl">
+      🏅
+    </div>
+    <div class="max-w-md mx-auto space-y-1">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{copy.emptyTitle}</h2>
+      <p class="text-sm text-zinc-600 dark:text-zinc-400">{copy.emptyDesc}</p>
+    </div>
+    <div class="pt-2 flex justify-center gap-3">
+      <a
+        href={copy.leaderboardHref}
+        class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white transition-colors"
+      >
+        {copy.viewLeaderboard}
+      </a>
+      <a
+        href={copy.exploreHref}
+        class="px-4 py-2 text-xs font-semibold rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors"
+      >
+        {copy.exploreCta}
+      </a>
+    </div>
+  </div>
+
+  <!-- Spotlight container -->
+  <div id="destacados-content" class="hidden space-y-8">
+    <!-- Current month spotlight -->
+    <section id="destacados-current-section" class="space-y-3">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
+        ✨ {copy.currentTitle}
+      </h2>
+      <div id="destacados-current-card"></div>
+    </section>
+
+    <!-- Past months grid -->
+    <section id="destacados-past-section" class="hidden space-y-3">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+        🗓️ {copy.pastTitle}
+      </h2>
+      <div id="destacados-past-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+  import { getSupabase } from '../lib/supabase';
+
+  interface FeaturedRow {
+    month_date: string;
+    user_id: string;
+    headline_es: string | null;
+    headline_en: string | null;
+    custom_photo_url: string | null;
+    users: {
+      username: string | null;
+      display_name: string | null;
+      avatar_url: string | null;
+    };
+  }
+
+  const isEs = document.documentElement.lang === 'es';
+  const skeleton = document.getElementById('destacados-skeleton');
+  const empty = document.getElementById('destacados-empty');
+  const content = document.getElementById('destacados-content');
+  const currentCard = document.getElementById('destacados-current-card');
+  const pastSection = document.getElementById('destacados-past-section');
+  const pastGrid = document.getElementById('destacados-past-grid');
+
+  function formatMonth(dateStr: string): string {
+    const [year, month] = dateStr.split('-');
+    const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+    return date.toLocaleDateString(isEs ? 'es-AR' : 'en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function escapeHtml(str: string | null | undefined): string {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[m] || m));
+  }
+
+  async function load() {
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from('featured_observers')
+        .select(`
+          month_date,
+          user_id,
+          headline_es,
+          headline_en,
+          custom_photo_url,
+          users!user_id ( username, display_name, avatar_url )
+        `)
+        .order('month_date', { ascending: false })
+        .limit(24);
+
+      skeleton?.classList.add('hidden');
+
+      if (error || !data || data.length === 0) {
+        empty?.classList.remove('hidden');
+        return;
+      }
+
+      const rows = data as unknown as FeaturedRow[];
+      const [current, ...past] = rows;
+
+      // Render current
+      if (current && currentCard) {
+        const u = current.users;
+        const name = u.display_name ?? u.username ?? '—';
+        const handle = u.username ? `@${u.username}` : '';
+        const avatar = current.custom_photo_url ?? u.avatar_url ?? '/img/default-avatar.svg';
+        const blurb = (isEs ? current.headline_es : current.headline_en) ?? current.headline_es ?? current.headline_en ?? '';
+        const profileHref = u.username ? (isEs ? `/es/u/?username=${encodeURIComponent(u.username)}` : `/en/u/?username=${encodeURIComponent(u.username)}`) : '#';
+        const monthLabel = formatMonth(current.month_date);
+
+        currentCard.innerHTML = `
+          <div class="rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-zinc-900 dark:to-zinc-900 p-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <a href="${escapeHtml(profileHref)}" class="flex-shrink-0">
+                <img
+                  src="${escapeHtml(avatar)}"
+                  alt="${escapeHtml(name)}"
+                  class="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-zinc-800 shadow-md"
+                  loading="lazy"
+                />
+              </a>
+              <div class="flex-1 min-w-0">
+                <div class="inline-block text-[11px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded-full mb-1">
+                  ${escapeHtml(monthLabel)}
+                </div>
+                <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                  <a href="${escapeHtml(profileHref)}" class="hover:underline">
+                    ${escapeHtml(name)}
+                  </a>
+                </h3>
+                ${handle ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">${escapeHtml(handle)}</p>` : ''}
+                ${blurb ? `<p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">${escapeHtml(blurb)}</p>` : ''}
+              </div>
+              <div class="self-stretch sm:self-center flex sm:flex-col justify-end gap-2 pt-2 sm:pt-0">
+                <a
+                  href="${escapeHtml(profileHref)}"
+                  class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white transition-colors"
+                >
+                  ${isEs ? 'Ver perfil' : 'View profile'}
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Render past months
+      if (past.length > 0 && pastSection && pastGrid) {
+        pastSection.classList.remove('hidden');
+        pastGrid.innerHTML = past.map((row) => {
+          const u = row.users;
+          const name = u.display_name ?? u.username ?? '—';
+          const avatar = row.custom_photo_url ?? u.avatar_url ?? '/img/default-avatar.svg';
+          const blurb = (isEs ? row.headline_es : row.headline_en) ?? '';
+          const profileHref = u.username ? (isEs ? `/es/u/?username=${encodeURIComponent(u.username)}` : `/en/u/?username=${encodeURIComponent(u.username)}`) : '#';
+          const monthLabel = formatMonth(row.month_date);
+
+          return `
+            <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 flex flex-col justify-between hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  ${escapeHtml(monthLabel)}
+                </span>
+                <div class="flex items-center gap-3 mt-2 mb-2">
+                  <img
+                    src="${escapeHtml(avatar)}"
+                    alt="${escapeHtml(name)}"
+                    class="w-10 h-10 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
+                    loading="lazy"
+                  />
+                  <div class="min-w-0">
+                    <h4 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                      <a href="${escapeHtml(profileHref)}" class="hover:underline">
+                        ${escapeHtml(name)}
+                      </a>
+                    </h4>
+                  </div>
+                </div>
+                ${blurb ? `<p class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">${escapeHtml(blurb)}</p>` : ''}
+              </div>
+              <div class="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+                <a href="${escapeHtml(profileHref)}" class="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
+                  ${isEs ? 'Ver perfil →' : 'View profile →'}
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      content?.classList.remove('hidden');
+    } catch {
+      skeleton?.classList.add('hidden');
+      empty?.classList.remove('hidden');
+    }
+  }
+
+  void load();
+</script>
