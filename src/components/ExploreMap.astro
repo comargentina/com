@@ -239,7 +239,7 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
     // RLS still gates the rows.
     const { data, error } = await supabase
       .from('observations')
-      .select('id, location, location_obscured, obscure_level, observed_at, taxa:primary_taxon_id(kingdom), identifications(scientific_name, is_primary), media_files(url, thumbnail_url, is_primary, media_type)')
+      .select('id, location, location_obscured, obscure_level, observed_at, taxa:primary_taxon_id(kingdom), identifications(scientific_name, is_primary), media_files(url, thumbnail_url, is_primary, media_type), observer:observer_id(username)')
       .eq('sync_status', 'synced')
       .eq('hidden', false)
       .limit(500);
@@ -279,6 +279,8 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
       const audioUrl = audios[0]?.url ?? '';
       const videoUrl = videos[0]?.url ?? '';
       const dateStr = observedAt ? new Date(observedAt).toLocaleDateString(isEs ? 'es-MX' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+      const observerRaw = (row as { observer?: { username?: string | null } | null }).observer;
+      const observerHandle = observerRaw?.username ?? '';
       features.push({
         type: 'Feature',
         geometry: geom,
@@ -291,6 +293,7 @@ const observersMapHref = getLocalizedPath(lang, routes.communityMap[locale] + '/
           videoUrl,
           date: dateStr,
           observed_month: observedMonth,
+          observer_handle: observerHandle,
           pending: false,
         },
       });

@@ -34,14 +34,7 @@ const MAP_EN = '/en/explore/map/';
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
-async function gotoMap(page: Parameters<typeof test>[2] extends { page: infer P } ? P : never, path: string, params?: Record<string, string>) {
-  const url = params
-    ? `${path}?${new URLSearchParams(params).toString()}`
-    : path;
-  await page.goto(url);
-  // Wait for the filter form to be visible (it's SSR so it's instant)
-  await page.waitForSelector('#explore-filter-form', { timeout: 8_000 });
-}
+
 
 // ── tests ────────────────────────────────────────────────────────────────────
 
