@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <rect width="100" height="100" rx="20" fill="#09090b"/>
+  <!-- Outer glow/circle -->
   <circle cx="50" cy="50" r="46" fill="#059669" fill-opacity="0.1" stroke="#059669" stroke-width="3"/>
   <!-- Butterfly Left Wing Top -->
   <path d="M47 48 C30 20, 10 28, 15 50 C18 64, 40 55, 47 50 Z" fill="url(#wingLeftTop)" />
@@ -17,6 +17,8 @@
   <circle cx="36" cy="16" r="1.5" fill="#064E3B" />
   <path d="M51 30 Q58 18, 64 16" stroke="#064E3B" stroke-width="2" stroke-linecap="round"/>
   <circle cx="64" cy="16" r="1.5" fill="#064E3B" />
+
+  <!-- Gradients -->
   <defs>
     <linearGradient id="wingLeftTop" x1="10" y1="20" x2="47" y2="50" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#38BDF8" />
