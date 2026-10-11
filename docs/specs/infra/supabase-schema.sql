@@ -3018,41 +3018,68 @@ GRANT SELECT ON public.profile_karma TO anon, authenticated;
 -- db-validate's top-to-bottom replay needs the column to exist here.
 ALTER TABLE public.taxa ADD COLUMN IF NOT EXISTS slug text;
 
--- Pokédex — every taxon the user has observed, joined to taxon_rarity.
--- M34 (2026-05-06): added common_name_*, slug, endemic_mx, nom059_status,
--- thumbnail_url for the visual redesign. Existing column order preserved.
+-- Pokédex — every taxon the user has observed OR correctly identified/validated, joined to taxon_rarity.
+-- Redesigned so community validations confirmed at primary level also count towards the user's Pokédex.
 CREATE OR REPLACE VIEW public.profile_pokedex AS
-WITH base AS (
+WITH user_species_events AS (
+  -- 1. Especies observadas directamente por el usuario
   SELECT
     o.observer_id    AS user_id,
-    i.taxon_id,
+    i.taxon_id       AS taxon_id,
     COALESCE(t.scientific_name, i.scientific_name) AS scientific_name,
+    o.observed_at    AS event_at,
+    o.id             AS obs_id
+  FROM public.observations o
+  JOIN public.identifications i
+    ON i.observation_id = o.id AND i.is_primary = true
+  LEFT JOIN public.taxa t ON t.id = i.taxon_id
+  WHERE o.sync_status = 'synced'
+    AND o.obscure_level <> 'private'
+    AND i.scientific_name IS NOT NULL
+    AND public.can_see_facet(o.observer_id, 'pokedex', (SELECT auth.uid()))
+
+  UNION ALL
+
+  -- 2. Especies identificadas/validadas correctamente por el usuario en observaciones ajenas
+  SELECT
+    v.validated_by   AS user_id,
+    i.taxon_id       AS taxon_id,
+    COALESCE(t.scientific_name, i.scientific_name) AS scientific_name,
+    COALESCE(v.validated_at, o.observed_at) AS event_at,
+    o.id             AS obs_id
+  FROM public.identifications v
+  JOIN public.observations o
+    ON o.id = v.observation_id
+  JOIN public.identifications i
+    ON i.observation_id = o.id AND i.is_primary = true AND i.taxon_id = v.taxon_id
+  LEFT JOIN public.taxa t ON t.id = i.taxon_id
+  WHERE v.validated_by IS NOT NULL
+    AND v.validated_by <> o.observer_id
+    AND o.sync_status = 'synced'
+    AND o.obscure_level <> 'private'
+    AND i.scientific_name IS NOT NULL
+    AND public.can_see_facet(v.validated_by, 'pokedex', (SELECT auth.uid()))
+),
+base AS (
+  SELECT
+    e.user_id,
+    e.taxon_id,
+    e.scientific_name,
     t.kingdom,
     tr.bucket        AS rarity_bucket,
-    MIN(o.observed_at)    AS first_observed_at,
-    -- sample_obs_id picks the user's earliest observation of this taxon as
-    -- the source of the dex thumbnail. Same MIN(uuid::text)::uuid trick as
-    -- profile_top_species — Postgres has no min(uuid).
-    MIN(o.id::text)::uuid AS sample_obs_id,
+    MIN(e.event_at)  AS first_observed_at,
+    MIN(e.obs_id::text)::uuid AS sample_obs_id,
     COUNT(*)::int    AS obs_count,
     t.common_name_es,
     t.common_name_en,
     t.slug,
     t.is_endemic_mexico   AS endemic_mx,
     t.nom059_status
-  FROM public.observations o
-  JOIN public.identifications i
-    ON i.observation_id = o.id AND i.is_primary = true
-  LEFT JOIN public.taxa t          ON t.id = i.taxon_id
-  LEFT JOIN public.taxon_rarity tr ON tr.taxon_id = i.taxon_id
-  WHERE
-    o.sync_status = 'synced'
-    AND o.obscure_level <> 'private'
-    AND i.scientific_name IS NOT NULL
-    AND public.can_see_facet(o.observer_id, 'pokedex', (SELECT auth.uid()))
+  FROM user_species_events e
+  LEFT JOIN public.taxa t          ON t.id = e.taxon_id
+  LEFT JOIN public.taxon_rarity tr ON tr.taxon_id = e.taxon_id
   GROUP BY
-    o.observer_id, i.taxon_id,
-    COALESCE(t.scientific_name, i.scientific_name),
+    e.user_id, e.taxon_id, e.scientific_name,
     t.kingdom, tr.bucket,
     t.common_name_es, t.common_name_en, t.slug,
     t.is_endemic_mexico, t.nom059_status
