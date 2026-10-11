@@ -109,6 +109,15 @@ const stringsJson = JSON.stringify({
   </div>
 
   <div id="cm-map-container" class="flex-1 relative bg-zinc-100 dark:bg-zinc-900">
+    <!-- Satellite layer toggle -->
+    <button
+      id="cm-satellite-toggle"
+      class="hidden absolute top-3 left-3 z-10 flex min-h-[44px] min-w-[44px] items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:border-emerald-400 transition-colors"
+      data-active="false"
+    >
+      <span>🛰️</span>
+      <span id="cm-satellite-toggle-label">{lang === 'es' ? 'Satélite' : 'Satellite'}</span>
+    </button>
     <p id="cm-loading" class="absolute inset-0 flex items-center justify-center text-sm text-zinc-600 dark:text-zinc-300 italic">
       {cm.map_loading}
     </p>
@@ -427,6 +436,34 @@ const stringsJson = JSON.stringify({
         await new Promise<void>((resolve) => {
           map!.on('load', () => resolve());
         });
+
+        map.addSource('satellite', {
+          type: 'raster',
+          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tileSize: 256,
+          attribution: '© Esri',
+        });
+        map.addLayer({
+          id: 'satellite',
+          type: 'raster',
+          source: 'satellite',
+          layout: { visibility: 'none' },
+        });
+
+        const satBtn = document.getElementById('cm-satellite-toggle');
+        const satLabel = document.getElementById('cm-satellite-toggle-label');
+        let isSatellite = false;
+        if (satBtn) {
+          satBtn.classList.remove('hidden');
+          satBtn.onclick = () => {
+            isSatellite = !isSatellite;
+            map?.setLayoutProperty('satellite', 'visibility', isSatellite ? 'visible' : 'none');
+            if (satLabel) satLabel.textContent = STRINGS.lang === 'es' ? (isSatellite ? 'Normal' : 'Satélite') : (isSatellite ? 'Normal' : 'Satellite');
+            satBtn.dataset.active = isSatellite ? 'true' : 'false';
+            satBtn.classList.toggle('border-emerald-400', isSatellite);
+            satBtn.classList.toggle('text-emerald-700', isSatellite);
+          };
+        }
       }
 
       loadingEl.classList.add('hidden');

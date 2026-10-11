@@ -75,6 +75,17 @@ const initialLng  = initialCoords?.lng ?? '';
     data-mappicker-obscure-level={obscureLevel}
     data-mappicker-lang={lang}
   >
+    <button
+      type="button"
+      id={`view-sat-toggle-${pickerId}`}
+      data-view-sat-toggle={pickerId}
+      class="hidden absolute top-2 left-2 z-10 flex min-h-[36px] items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:border-emerald-400 transition-colors"
+      data-active="false"
+      aria-label={lang === 'es' ? 'Satélite' : 'Satellite'}
+    >
+      <span>🛰️</span>
+      <span data-view-sat-label={pickerId}>{lang === 'es' ? 'Satélite' : 'Satellite'}</span>
+    </button>
     {(initialCoords == null || !Number.isFinite(initialCoords.lat) || !Number.isFinite(initialCoords.lng)) && (
       <p
         data-mappicker-fallback={pickerId}
@@ -441,13 +452,51 @@ const initialLng  = initialCoords?.lng ?? '';
         style: MAP_STYLE_STREET,
         center: [lng, lat],
         zoom: 12,
-        interactive: false,
+        interactive: true,
+        scrollZoom: false,
         attributionControl: false,
       });
       const marker = new maplibre.Marker({ color: '#047857' }).setLngLat([lng, lat]).addTo(map);
       installSpriteFallback(map);
       const id = el.dataset.mappickerId ?? '';
       if (id) viewPickerMaps.set(id, { map, marker });
+
+      const satBtn = el.querySelector<HTMLButtonElement>(`[data-view-sat-toggle="${id}"]`);
+      const satLabel = el.querySelector<HTMLElement>(`[data-view-sat-label="${id}"]`);
+      const isEs = (el.dataset.mappickerLang ?? 'en') === 'es';
+
+      map.on('load', () => {
+        if (!map.getSource('satellite')) {
+          map.addSource('satellite', {
+            type: 'raster',
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+            tileSize: 256,
+            attribution: '© Esri',
+          });
+          map.addLayer({
+            id: 'satellite',
+            type: 'raster',
+            source: 'satellite',
+            layout: { visibility: 'none' },
+          });
+        }
+
+        if (satBtn) {
+          satBtn.classList.remove('hidden');
+          let isSat = false;
+          satBtn.onclick = (e) => {
+            e.stopPropagation();
+            isSat = !isSat;
+            if (map.getSource('satellite')) {
+              map.setLayoutProperty('satellite', 'visibility', isSat ? 'visible' : 'none');
+            }
+            if (satLabel) satLabel.textContent = isEs ? (isSat ? 'Normal' : 'Satélite') : (isSat ? 'Normal' : 'Satellite');
+            satBtn.dataset.active = isSat ? 'true' : 'false';
+            satBtn.classList.toggle('border-emerald-400', isSat);
+            satBtn.classList.toggle('text-emerald-700', isSat);
+          };
+        }
+      });
 
       // Automatically resize map canvas when container becomes visible or changes size
       if (typeof ResizeObserver !== 'undefined') {
