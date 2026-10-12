@@ -35,6 +35,12 @@ const TOKEN_BUDGET_CHARS = 4000;
 const SYSTEM_TOOLS_PROMPT = `You may emit a JSON tool call to look up data. Tools available:\n%TOOLS%\nWhen calling a tool, respond with ONLY a JSON object: {"tool": "<name>", "args": { ... }}. Otherwise reply in prose. Use tools sparingly.`;
 
 export const BYO_GEMINI_KEY = 'rastrum.byoKeys.gemini';
+export const BYO_GEMINI_KEY_BACKUP = 'rastrum.byoKeys.gemini_backup';
+
+// Built-in keys baked into the bundle at build time (Vite replaces import.meta.env.*).
+// These are browser-origin AQ. keys — work for client-side vision calls only.
+const BUILT_IN_KEY_1: string = import.meta.env.PUBLIC_GEMINI_KEY_1 ?? '';
+const BUILT_IN_KEY_2: string = import.meta.env.PUBLIC_GEMINI_KEY_2 ?? '';
 
 export function readByoGeminiKey(): string | null {
   try {
@@ -44,12 +50,82 @@ export function readByoGeminiKey(): string | null {
   }
 }
 
+export function readByoGeminiBackupKey(): string | null {
+  try {
+    return localStorage.getItem(BYO_GEMINI_KEY_BACKUP) || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Returns all non-empty unique Gemini keys in priority order:
+ *   1. User BYO primary key
+ *   2. User BYO backup key
+ *   3. Built-in key 1 (comargentina project — vision only)
+ *   4. Built-in key 2 (comargentina2 project — vision only)
+ */
+export function readAllGeminiKeys(): string[] {
+  const k1 = readByoGeminiKey()?.trim();
+  const k2 = readByoGeminiBackupKey()?.trim();
+  const seen = new Set<string>();
+  const list: string[] = [];
+  for (const k of [k1, k2, BUILT_IN_KEY_1, BUILT_IN_KEY_2]) {
+    if (k && !seen.has(k)) { seen.add(k); list.push(k); }
+  }
+  return list;
+}
+
 export function writeByoGeminiKey(key: string): void {
-  try { localStorage.setItem(BYO_GEMINI_KEY, key); } catch { /* ignore */ }
+  try {
+    if (key.trim()) {
+      localStorage.setItem(BYO_GEMINI_KEY, key.trim());
+    } else {
+      localStorage.removeItem(BYO_GEMINI_KEY);
+    }
+  } catch { /* ignore */ }
+}
+
+export function writeByoGeminiBackupKey(key: string): void {
+  try {
+    if (key.trim()) {
+      localStorage.setItem(BYO_GEMINI_KEY_BACKUP, key.trim());
+    } else {
+      localStorage.removeItem(BYO_GEMINI_KEY_BACKUP);
+    }
+  } catch { /* ignore */ }
+}
+
+export function clearByoGeminiKeys(): void {
+  try {
+    localStorage.removeItem(BYO_GEMINI_KEY);
+    localStorage.removeItem(BYO_GEMINI_KEY_BACKUP);
+  } catch { /* ignore */ }
 }
 
 export function clearByoGeminiKey(): void {
-  try { localStorage.removeItem(BYO_GEMINI_KEY); } catch { /* ignore */ }
+  clearByoGeminiKeys();
+}
+
+/**
+ * Rotates the key pool: swaps backup into primary when primary is exhausted.
+ * Returns true if a backup key was promoted to primary.
+ */
+export function rotateGeminiKeys(): boolean {
+  try {
+    const k1 = localStorage.getItem(BYO_GEMINI_KEY);
+    const k2 = localStorage.getItem(BYO_GEMINI_KEY_BACKUP);
+    if (k2 && k2.trim()) {
+      localStorage.setItem(BYO_GEMINI_KEY, k2.trim());
+      if (k1 && k1.trim()) {
+        localStorage.setItem(BYO_GEMINI_KEY_BACKUP, k1.trim());
+      } else {
+        localStorage.removeItem(BYO_GEMINI_KEY_BACKUP);
+      }
+      return true;
+    }
+  } catch { /* ignore */ }
+  return false;
 }
 
 function withToolPrompt(messages: ChatMessage[]): ChatMessage[] {
@@ -167,7 +243,7 @@ async function* streamGeminiEdge(
  */
 export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamEvent> {
   const messages = withToolPrompt(input.messages);
-  const geminiKey = input.geminiKey ?? readByoGeminiKey() ?? undefined;
+  let currentKey = input.geminiKey ?? readByoGeminiKey() ?? undefined;
   let toolRounds = 0;
   let accumulatedTextChars = 0;
   const calledTools: Array<{ tool: string; argsStr: string }> = [];
@@ -177,8 +253,14 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
     let toolCallText: string | null = null;
     const buffered: StreamEvent[] = [];
 
-    for await (const ev of streamGeminiEdge(messages, geminiKey)) {
+    let didRotate = false;
+    for await (const ev of streamGeminiEdge(messages, currentKey)) {
       if (ev.type === 'quota_exceeded') {
+        if (rotateGeminiKeys()) {
+          currentKey = readByoGeminiKey() ?? undefined;
+          didRotate = true;
+          break; // break the streamGeminiEdge loop and restart with rotated key
+        }
         yield ev;
         return;
       }
@@ -203,6 +285,11 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
         buffered.length = 0;
         yield ev;
       }
+    }
+
+    if (didRotate) {
+      // Re-run the turn with the promoted backup key
+      continue;
     }
 
     if (accumulatedTextChars >= TOKEN_BUDGET_CHARS) {

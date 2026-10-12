@@ -143,7 +143,7 @@ describe('streamChat (Gemini Flash SSE)', () => {
     expect(events.some(e => e.type === 'circuit_break')).toBe(true);
   });
 
-  it('emits quota_exceeded when edge function returns 429', async () => {
+  it('emits quota_exceeded when edge function returns 429 and no backup key exists', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('Rate limited', { status: 429 }));
 
     const events: Array<{ type: string }> = [];
@@ -153,3 +153,83 @@ describe('streamChat (Gemini Flash SSE)', () => {
     expect(events.some(e => e.type === 'quota_exceeded')).toBe(true);
   });
 });
+
+describe('Gemini key rotation and failover', () => {
+  const store = new Map<string, string>();
+  beforeEach(() => {
+    store.clear();
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => store.set(k, v),
+        removeItem: (k: string) => store.delete(k),
+        clear: () => store.clear(),
+      },
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it('manages primary and backup keys correctly', async () => {
+    const {
+      writeByoGeminiKey,
+      writeByoGeminiBackupKey,
+      readByoGeminiKey,
+      readByoGeminiBackupKey,
+      readAllGeminiKeys,
+      rotateGeminiKeys,
+      clearByoGeminiKeys,
+    } = await import('./chat-engine');
+
+    writeByoGeminiKey('key-primary-1');
+    writeByoGeminiBackupKey('key-backup-2');
+
+    expect(readByoGeminiKey()).toBe('key-primary-1');
+    expect(readByoGeminiBackupKey()).toBe('key-backup-2');
+    expect(readAllGeminiKeys()).toEqual(['key-primary-1', 'key-backup-2']);
+
+    // Rotate keys: backup becomes primary, primary becomes backup
+    const didRotate = rotateGeminiKeys();
+    expect(didRotate).toBe(true);
+    expect(readByoGeminiKey()).toBe('key-backup-2');
+    expect(readByoGeminiBackupKey()).toBe('key-primary-1');
+
+    clearByoGeminiKeys();
+    expect(readByoGeminiKey()).toBeNull();
+    expect(readByoGeminiBackupKey()).toBeNull();
+    expect(readAllGeminiKeys()).toEqual([]);
+  });
+
+  it('streamChat auto-rotates to backup key when primary key returns 429', async () => {
+    const {
+      writeByoGeminiKey,
+      writeByoGeminiBackupKey,
+      readByoGeminiKey,
+    } = await import('./chat-engine');
+
+    writeByoGeminiKey('failing-key-1');
+    writeByoGeminiBackupKey('working-key-2');
+
+    let callCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, opts) => {
+      callCount++;
+      const body = JSON.parse(opts?.body as string);
+      if (body.client_gemini_key === 'failing-key-1') {
+        return new Response('Rate limit', { status: 429 });
+      }
+      return createSseResponse(['Responded from backup key!']);
+    });
+
+    const out: string[] = [];
+    for await (const chunk of streamChat({ messages: [{ role: 'user', content: 'test' }] })) {
+      if (chunk.type === 'text') out.push(chunk.delta);
+    }
+
+    expect(out.join('')).toContain('Responded from backup key!');
+    // Verified that it called twice (first failing, then working key)
+    expect(callCount).toBe(2);
+    // Verified that the working key is now the primary key
+    expect(readByoGeminiKey()).toBe('working-key-2');
+  });
+});
+

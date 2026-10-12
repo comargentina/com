@@ -36,8 +36,9 @@ describe('detectAnyKind (M32 — multi-provider)', () => {
     expect(detectAnyKind('sk-proj-abc')).toBe('openai_api_key');
     expect(detectAnyKind('sk-svcacct-abc')).toBe('openai_api_key');
   });
-  it('matches AIza* as Gemini', () => {
+  it('matches AIza* (legacy) and AQ* (new) as Gemini API keys', () => {
     expect(detectAnyKind('AIzaSyABC123')).toBe('gemini_api_key');
+    expect(detectAnyKind('AQabc123xyz')).toBe('gemini_api_key');
   });
   it('returns null for JSON envelopes (Bedrock / Vertex — no prefix)', () => {
     expect(detectAnyKind('{"accessKeyId":"x"}')).toBeNull();

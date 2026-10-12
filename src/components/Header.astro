@@ -150,7 +150,7 @@ const docColumns = [
 ];
 ---
 
-<header class="border-b border-zinc-200 dark:border-zinc-800">
+<header class:list={['border-b border-zinc-200 dark:border-zinc-800', currentPath.includes('/chat') ? 'hidden sm:block' : '']}>
   <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-4">
     <!-- Lockup -->
     <a href={getLocalizedPath(lang, '/')}
@@ -334,7 +334,7 @@ const docColumns = [
 </header>
 
 <MobileDrawer lang={locale} currentPath={currentPath} />
-<MobileBottomBar lang={locale} currentPath={currentPath} />
+{!currentPath.includes('/chat') && <MobileBottomBar lang={locale} currentPath={currentPath} />}
 
 <script is:inline>
   // Theme + lang toggles (desktop chrome — kept until PR 3 moves them into the footer/Preferences)

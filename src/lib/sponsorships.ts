@@ -25,7 +25,8 @@ export function detectAnyKind(secret: string): CredentialKind | null {
   if (secret.startsWith('sk-ant-api03-')) return 'api_key';
   if (secret.startsWith('sk-ant-oat01-')) return 'oauth_token';
   if (secret.startsWith('sk-'))           return 'openai_api_key';
-  if (secret.startsWith('AIza'))          return 'gemini_api_key';
+  // Google AI Studio keys: legacy prefix AIzaSy... or new prefix AQ...
+  if (secret.startsWith('AIza') || secret.startsWith('AQ')) return 'gemini_api_key';
   // Bedrock + Vertex are JSON envelopes; can't disambiguate by prefix.
   return null;
 }

@@ -29,6 +29,10 @@ interface ImportMetaEnv {
    * unset (good enough for local dev).
    */
   readonly PUBLIC_BUILD_VERSION?: string;
+  /** Built-in Gemini vision key — primary (comargentina project). */
+  readonly PUBLIC_GEMINI_KEY_1?: string;
+  /** Built-in Gemini vision key — backup (comargentina2 project). */
+  readonly PUBLIC_GEMINI_KEY_2?: string;
 }
 
 interface ImportMeta {

@@ -126,7 +126,8 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
     <link rel="icon" type="image/png" sizes="120x120" href={`${import.meta.env.BASE_URL}com-logo-120.png?v=3`} />
     <link rel="apple-touch-icon" sizes="180x180" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
     <link rel="manifest" href={`${import.meta.env.BASE_URL}manifest.webmanifest`} />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content={isChat ? "#09090b" : "#10b981"} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
     <!--
       Standard `mobile-web-app-capable` (the cross-vendor name Chrome
       now warns when only the Apple-prefixed variant is present).
@@ -387,17 +388,23 @@ const resolvedOgImage = ogImage ?? `${SITE_URL}/og/${ogLang}/${ogSlugForPath(cur
       }
     </style>
   </head>
-  <body class="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors pb-20 sm:pb-0">
+  <body class:list={[
+    'min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors',
+    isChat ? 'pb-32 sm:pb-0' : 'pb-20 sm:pb-0',
+  ]}>
     <BanBanner lang={installLang} />
     <ConsentBanner lang={installLang} />
     <OfflineBanner lang={installLang} />
     <Header lang={lang} currentPath={currentPath} />
     {!isChat && <InstallDiscoveryHint lang={installLang} />}
-    <main class="max-w-5xl mx-auto px-4 py-8">
+    <main class:list={[
+      'max-w-5xl mx-auto px-4',
+      isChat ? 'py-1 sm:py-6' : 'py-8',
+    ]}>
       <Breadcrumbs lang={installLang} currentPath={currentPath} />
       <slot />
     </main>
-    <Footer lang={lang} currentPath={currentPath} />
+    {!isChat && <Footer lang={lang} currentPath={currentPath} />}
     <CommandPalette lang={lang} />
     {!isChat && <InstallPwaButton lang={installLang} />}
     {!isChat && <ReportIssueButton lang={lang} />}

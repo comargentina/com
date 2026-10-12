@@ -14,13 +14,42 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
 <!-- The chat lays out as full-height with a fixed input bar on small screens.
      `pb-44` reserves room above the sticky composer + the iOS home indicator. -->
 <div class="max-w-3xl mx-auto -mt-2 sm:mt-0">
-  <div class="mb-2 flex items-baseline justify-between gap-3 flex-wrap">
+  <!-- Mobile-only sleek header bar: back button + title + Keys button -->
+  <div class="sm:hidden flex items-center justify-between py-1 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+    <a href={getLocalizedPath(lang, '/')} class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 py-1">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      <span>{lang === 'es' ? 'Volver' : 'Back'}</span>
+    </a>
+    <span class="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+      <img src={`${import.meta.env.BASE_URL}com-logo-120.png`} alt="" class="w-4 h-4 rounded-full" />
+      <span>COM Chat</span>
+    </span>
+    <button
+      id="chat-toggle-keys-btn-mobile"
+      type="button"
+      class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700/50"
+    >
+      <span>🔑</span>
+      <span>{lang === 'es' ? 'Claves' : 'Keys'}</span>
+    </button>
+  </div>
+
+  <div class="mb-2 hidden sm:flex items-baseline justify-between gap-3 flex-wrap">
     <div class="flex items-center gap-2 flex-wrap">
       <h1 class="text-2xl font-bold tracking-tight">{tr.chat.title}</h1>
       <span id="chat-model-badge" class="inline-flex items-center gap-1 rounded-full border border-emerald-300 dark:border-emerald-700/40 bg-emerald-50 dark:bg-emerald-900/10 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:text-emerald-300">
         <span aria-hidden="true">✨</span>
         <span id="chat-model-badge-text">{tr.chat.badge.fallback}</span>
       </span>
+      <button
+        id="chat-toggle-keys-btn"
+        type="button"
+        class="inline-flex items-center gap-1 rounded-full border border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-0.5 text-[11px] font-medium text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer"
+        title="Configurar claves de API de Google AI Studio"
+      >
+        <span>🔑</span>
+        <span>{lang === 'es' ? 'Configurar claves' : 'Configure keys'}</span>
+      </button>
     </div>
     <button
       id="chat-clear-btn"
@@ -30,37 +59,70 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       {tr.chat.clear}
     </button>
   </div>
-  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">{tr.chat.subtitle}</p>
+  <p class="hidden sm:block text-sm text-zinc-600 dark:text-zinc-300 mb-4">{tr.chat.subtitle}</p>
 
-  <!-- Quota exceeded / BYO key prompt — hidden unless quota is hit -->
+  <!-- Quota exceeded / BYO key prompt — shown when quota is hit OR when an image is sent without a key -->
   <div id="chat-quota-banner" class="hidden rounded-xl border border-amber-300 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-900/10 p-4 mb-4">
-    <p class="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
-      {lang === 'es'
-        ? '⚡ Límite de uso alcanzado. Para seguir chateando, ingresá tu clave gratuita de Google AI Studio:'
-        : '⚡ Usage limit reached. To keep chatting, enter your free Google AI Studio key:'}
-    </p>
-    <div class="flex gap-2">
-      <input
-        id="chat-byo-key-input"
-        type="password"
-        placeholder="AIzaSy..."
-        autocomplete="off"
-        class="flex-1 min-h-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-      />
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">
+        {lang === 'es'
+          ? '🔑 Claves de Google AI Studio (Gemini Flash)'
+          : '🔑 Google AI Studio Keys (Gemini Flash)'}
+      </p>
       <button
-        id="chat-byo-key-save"
+        id="chat-quota-banner-close"
         type="button"
-        class="min-h-10 rounded-lg bg-emerald-700 px-4 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        class="text-xs text-amber-800 dark:text-amber-300 hover:underline"
       >
-        {lang === 'es' ? 'Guardar' : 'Save'}
+        ✕
       </button>
     </div>
-    <p class="mt-2 text-[11px] text-amber-800 dark:text-amber-300/80">
+    <p class="text-xs text-amber-800 dark:text-amber-300/90 mb-3">
       {lang === 'es'
-        ? 'La clave se guarda solo en este dispositivo. Obtené una gratis en '
-        : 'Key is stored only on this device. Get one free at '}
-      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="underline">aistudio.google.com/apikey</a>
+        ? 'La app ya incluye claves integradas para analizar imágenes. Podés agregar tus propias claves para sumar cuota extra. Si la Cuenta 1 se agota, el sistema pasa automáticamente a la Cuenta 2.'
+        : 'The app already includes built-in keys for image analysis. You can add your own keys to add extra quota. If Account 1 is exhausted, the system automatically switches to Account 2.'}
     </p>
+    <div class="space-y-2.5">
+      <div>
+        <label for="chat-byo-key-input" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          {lang === 'es' ? 'Cuenta 1 (Clave principal):' : 'Account 1 (Primary key):'}
+        </label>
+        <input
+          id="chat-byo-key-input"
+          type="password"
+          placeholder="AQ... o AIzaSy..."
+          autocomplete="off"
+          class="w-full min-h-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs"
+        />
+      </div>
+      <div>
+        <label for="chat-byo-backup-key-input" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          {lang === 'es' ? 'Cuenta 2 (Respaldo opcional — rotación automática al agotar créditos):' : 'Account 2 (Optional backup — auto-failover when quota depleted):'}
+        </label>
+        <input
+          id="chat-byo-backup-key-input"
+          type="password"
+          placeholder="AQ... o AIzaSy... (opcional)"
+          autocomplete="off"
+          class="w-full min-h-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs"
+        />
+      </div>
+      <div class="flex items-center justify-between pt-1 flex-wrap gap-2">
+        <p class="text-[11px] text-amber-800 dark:text-amber-300/80">
+          {lang === 'es'
+            ? 'Las claves se guardan solo en tu navegador. Obtenelas en '
+            : 'Keys are stored only in your browser. Get them at '}
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="underline font-medium">aistudio.google.com/apikey</a>
+        </p>
+        <button
+          id="chat-byo-key-save"
+          type="button"
+          class="min-h-10 rounded-lg bg-emerald-700 px-4 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50 ml-auto"
+        >
+          {lang === 'es' ? 'Guardar claves' : 'Save keys'}
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Scrollable message list -->
@@ -486,18 +548,42 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <span id="chat-model-badge-text">Gemini Flash</span>`;
   }
 
-  // ── BYO key banner — show if a key is already saved ──
-  // Pre-fill the input if the user previously saved a key.
-  const { readByoGeminiKey, writeByoGeminiKey } = await import('../lib/chat-engine');
+  // ── BYO key banner — show if keys are saved ──
+  const backupKeyInput = document.getElementById('chat-byo-backup-key-input') as HTMLInputElement | null;
+  const quotaBannerClose = document.getElementById('chat-quota-banner-close') as HTMLButtonElement | null;
+  const { readByoGeminiKey, readByoGeminiBackupKey, writeByoGeminiKey, writeByoGeminiBackupKey } = await import('../lib/chat-engine');
+  
   const savedKey = readByoGeminiKey();
+  const savedBackupKey = readByoGeminiBackupKey();
   if (savedKey && byoKeyInput) byoKeyInput.value = savedKey;
+  if (savedBackupKey && backupKeyInput) backupKeyInput.value = savedBackupKey;
 
   byoKeySave?.addEventListener('click', () => {
     const key = byoKeyInput?.value.trim() ?? '';
-    if (!key) return;
-    writeByoGeminiKey(key);
+    const backupKey = backupKeyInput?.value.trim() ?? '';
+    if (key) writeByoGeminiKey(key);
+    if (backupKey) writeByoGeminiBackupKey(backupKey);
     quotaBanner?.classList.add('hidden');
   });
+
+  quotaBannerClose?.addEventListener('click', () => {
+    quotaBanner?.classList.add('hidden');
+  });
+
+  function toggleKeysBanner() {
+    if (!quotaBanner) return;
+    const isHidden = quotaBanner.classList.contains('hidden');
+    if (isHidden) {
+      quotaBanner.classList.remove('hidden');
+      quotaBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      byoKeyInput?.focus();
+    } else {
+      quotaBanner.classList.add('hidden');
+    }
+  }
+
+  document.getElementById('chat-toggle-keys-btn')?.addEventListener('click', toggleKeysBanner);
+  document.getElementById('chat-toggle-keys-btn-mobile')?.addEventListener('click', toggleKeysBanner);
 
   // ── Chat init — always ready with Gemini Flash ──
   await restoreChatHistory();
@@ -815,35 +901,56 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     });
   }
 
-  /** Best-effort vision-LLM fallback. Returns the text reply or null if unavailable. */
+  /** Best-effort vision-LLM fallback. Returns the text reply or null if unavailable.
+   *
+   * Priority:
+   *   1. Gemini Flash (BYO key in localStorage — zero download, cloud vision)
+   *   2. Claude Haiku (BYO Anthropic key)
+   *   3. Phi-3.5-vision (local WebLLM — requires 4 GB model download)
+   */
   async function runVisionFallback(
     att: ChatAttachment,
     userText: string,
     onUpdate: (s: string) => void,
   ): Promise<string | null> {
     if (att.kind !== 'photo') return null;
+
+    // 1. Try Gemini Flash vision (BYO key, no download required)
+    const geminiReply = await tryGeminiVisionFallback(att, userText, onUpdate);
+    if (geminiReply) return geminiReply;
+
+    // 2. Try Claude BYO key
+    const claudeReply = await tryClaudeVisionFallback(att, userText);
+    if (claudeReply) return claudeReply;
+
+    // 3. Fall back to local Phi-3.5-vision only when no cloud vision path exists:
+    //    - Skip if the quota banner is visible (no key → user is being asked to enter one)
+    //    - Skip if a Gemini key is saved (Gemini was already tried; don't confuse the user
+    //      with a 4 GB download dialog after "Analizando imagen con Gemini..." already ran)
+    if (quotaBanner && !quotaBanner.classList.contains('hidden')) return null;
+    const { readAllGeminiKeys: _checkKeys } = await import('../lib/chat-engine');
+    if (_checkKeys().length > 0) return null;
+
     const lib = await import('../lib/local-ai');
-    if (!lib.localAISupported()) {
-      // Try Claude BYO key fallback
-      return await tryClaudeVisionFallback(att, userText);
-    }
+    if (!lib.localAISupported()) return null;
+
     const status = await lib.getModelCacheStatus(lib.VISION_MODEL_ID);
     if (!status.cached) {
-      if (!visionDialog) return await tryClaudeVisionFallback(att, userText);
+      if (!visionDialog) return null;
       visionDialog.returnValue = '';
       const ok: boolean = await new Promise((resolve) => {
         const handler = () => { resolve(visionDialog.returnValue === 'ok'); visionDialog.removeEventListener('close', handler); };
         visionDialog.addEventListener('close', handler);
         visionDialog.showModal();
       });
-      if (!ok) return await tryClaudeVisionFallback(att, userText);
+      if (!ok) return null;
       onUpdate(i18nGet('vision-download-progress'));
       try {
         await lib.loadVisionEngine((p) => {
           onUpdate(`${i18nGet('vision-download-progress')} ${Math.round((p.progress ?? 0) * 100)}%`);
         });
       } catch {
-        return await tryClaudeVisionFallback(att, userText);
+        return null;
       }
     }
     onUpdate(i18nGet('looking-more-carefully'));
@@ -865,6 +972,153 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     });
     const raw = reply.choices?.[0]?.message?.content ?? '';
     return typeof raw === 'string' ? raw.trim() : null;
+  }
+
+  /**
+   * Send a photo to Gemini Flash using the BYO key stored in localStorage.
+   * Returns the text reply, or null if no key is present or the call fails.
+   * When no key is found, surfaces the quota banner so the user can paste
+   * their free Google AI Studio key without needing to download anything.
+   */
+  async function tryGeminiVisionFallback(
+    att: ChatAttachment,
+    userText: string,
+    onUpdate: (s: string) => void,
+  ): Promise<string | null> {
+    if (att.kind !== 'photo') return null;
+    const { readAllGeminiKeys, rotateGeminiKeys } = await import('../lib/chat-engine');
+    const keys = readAllGeminiKeys();
+    if (keys.length === 0) {
+      quotaBanner?.classList.remove('hidden');
+      return null;
+    }
+    try {
+      let processedBlob = att.blob;
+      try {
+        const { resizeImage } = await import('../lib/upload');
+        processedBlob = await resizeImage(
+          new File([att.blob], 'obs.jpg', { type: att.blob.type || 'image/jpeg' }),
+          { maxLongEdge: 1024, quality: 0.85 },
+        );
+      } catch {
+        /* keep original blob if resize fails */
+      }
+
+      const dataUrl = await blobToDataUrl(processedBlob);
+      const m = /^data:([^;]+);base64,(.+)$/.exec(dataUrl);
+      if (!m) return null;
+      const [, mimeType, base64] = m;
+      const prompt = buildVisionFallbackPrompt({ userText, locale: docLocale });
+
+      const cleanMime = (mimeType || 'image/jpeg').split(';')[0].trim();
+      const makeBody = () => JSON.stringify({
+        contents: [{
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                mimeType: cleanMime,
+                data: base64,
+              },
+            },
+            { text: prompt },
+          ],
+        }],
+        generationConfig: { maxOutputTokens: 512, temperature: 0.4 },
+      });
+
+      // gemini-1.5-flash first: confirmed to work with AQ. browser keys.
+      // 3.8 and 2.5 tried second as upgrades if available.
+      const MODELS = ['gemini-1.5-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+      const accountErrors: string[] = [];
+      let anyHitRateLimit = false;
+
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (i === 0) onUpdate(isEs ? 'Analizando imagen con Gemini…' : 'Analysing image with Gemini…');
+
+        let hitRateLimit = false;
+        let authFailed = false;
+        const failedAttempts: string[] = [];
+
+        for (const model of MODELS) {
+          if (hitRateLimit || authFailed) break;
+
+          const ac = new AbortController();
+          const t = setTimeout(() => ac.abort(), 20_000);
+          let res: Response;
+          try {
+            res = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+              {
+                method: 'POST',
+                signal: ac.signal,
+                headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+                body: makeBody(),
+              },
+            ).finally(() => clearTimeout(t));
+          } catch {
+            failedAttempts.push(`${model}: timeout/network`);
+            continue;
+          }
+
+          if (res.status === 429) {
+            hitRateLimit = true;
+            anyHitRateLimit = true;
+            failedAttempts.push(isEs ? 'Límite de cuota (429)' : 'Quota limit (429)');
+            break;
+          }
+
+          // 401/403 means the key is invalid — no point retrying other models with the same key.
+          if (res.status === 401 || res.status === 403) {
+            authFailed = true;
+            failedAttempts.push(`${model}: HTTP ${res.status} (clave inválida)`);
+            break;
+          }
+
+          if (!res.ok) {
+            let errMsg = `HTTP ${res.status}`;
+            try {
+              const errJson = await res.json() as { error?: { message?: string } };
+              if (errJson?.error?.message) errMsg = errJson.error.message;
+            } catch { /* ignore */ }
+            failedAttempts.push(`${model}: ${errMsg}`);
+            continue;
+          }
+
+          const data = await res.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+          const text = data.candidates?.[0]?.content?.parts?.find(p => p.text)?.text?.trim() ?? null;
+          if (text) return text;
+        }
+
+        if (failedAttempts.length > 0) {
+          accountErrors.push(`Cuenta ${i + 1}: ${failedAttempts[0]}`);
+        }
+
+        if (hitRateLimit && i < keys.length - 1) {
+          rotateGeminiKeys();
+          continue;
+        }
+      }
+
+      // If any account hit quota (even if others timed out), credits reset in 24h — no banner needed.
+      if (anyHitRateLimit) {
+        return isEs
+          ? '⏳ Los créditos de análisis de imagen se agotaron por hoy. Se restablecen automáticamente en 24 horas. Volvé a intentar mañana, o podés ingresar tu propia clave en el panel 🔑.'
+          : '⏳ Image analysis credits are exhausted for today. They reset automatically in 24 hours. Try again tomorrow, or add your own free key via the 🔑 panel.';
+      }
+
+      // All keys failed for non-quota reasons — open the banner so the user can fix/add keys.
+      quotaBanner?.classList.remove('hidden');
+      quotaBanner?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      const detailSuffix = accountErrors.length > 0 ? ` (${accountErrors.join(' | ')})` : '';
+      return isEs
+        ? `⚠️ No se pudo analizar la imagen con las cuentas configuradas${detailSuffix}. Abrimos el panel de claves arriba para que puedas verificarlas o actualizarlas.`
+        : `⚠️ Could not analyse the image with the configured accounts${detailSuffix}. We opened the keys panel above so you can verify or update them.`;
+    } catch {
+      return null;
+    }
   }
 
   /** If any Anthropic key is resolvable (project, runtime, or BYO), send the image to Claude Haiku for a vision-native reply. */
@@ -1039,7 +1293,9 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
                 };
               }
             } else {
-              conversation[placeholderIdx].content = i18nGet('vision-unavailable-hint');
+              conversation[placeholderIdx].content = isEs
+                ? '🔍 No pude identificar la imagen. Ingresá tu clave gratuita de Google AI Studio arriba para habilitar la visión con Gemini Flash (sin descargas).'
+                : '🔍 Could not identify the image. Enter your free Google AI Studio key above to enable Gemini Flash vision (no download needed).';
               conversation[placeholderIdx].pending = false;
             }
             paintConversation();
