@@ -10579,9 +10579,9 @@ AS $$
       'karma_total',        u.karma_total
     ),
     'suggested_questions', jsonb_build_array(
-      'How is my karma calculated?',
-      'What badges am I close to earning?',
-      'Show my last 10 observations.'
+      '¿Cuándo una observación es primaria?',
+      '¿Qué insignias me faltan por ganar?',
+      'Mostrame mis últimas 10 observaciones.'
     ),
     'related',       jsonb_build_object(
       'observer_id', u.id::text
