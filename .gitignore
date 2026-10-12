@@ -42,3 +42,6 @@ src-tauri/gen/
 src-tauri/icons/*.png
 src-tauri/icons/*.icns
 src-tauri/icons/*.ico
+
+# User import files
+importacion/

@@ -132,6 +132,19 @@ const weathers = WEATHERS;
       <MapPicker mode="edit" lang={lang} pickerId="obs2-map" initialCoords={null} />
     </div>
 
+    <!-- Date and time of observation -->
+    <div>
+      <label for="obs2-observed-at" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+        {isEs ? "Fecha y hora" : "Date and time"}
+      </label>
+      <input
+        type="datetime-local"
+        id="obs2-observed-at"
+        class="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      />
+      <div id="obs2-date-hint" class="mt-1 text-xs text-zinc-500 dark:text-zinc-400"></div>
+    </div>
+
     <!-- Notes -->
     <div>
       <label for="obs2-notes" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -307,6 +320,7 @@ import { buildCardViewModel } from '../lib/observe-card-vm';
 import { renderProgressiveCardHtml, type CardStrings } from '../lib/observe-card-render';
 import { t } from '../i18n/utils';
 import { resolveIdentificationSource } from '../lib/identification-source';
+import { parse as parseExif } from 'exifr';
 
 // ── State ──────────────────────────────────────────────────────────────────
 const lang = document.documentElement.lang === 'es' ? 'es' : 'en';
@@ -319,6 +333,7 @@ const tr = t(lang);
 
 let pipelineState: PipelineState | null = null;
 let location: { lat: number; lng: number; accuracyM: number; altitudeM: number | null; capturedFrom?: 'gps' | 'exif' | 'manual' } | null = null;
+let photoCapturedAt: string | null = null;
 let bestResult: { scientific_name: string; common_name_en: string | null; confidence: number; source: string } | null = null;
 let identifyErrorReason: string | null = null;
 let cardAttempts: import('../lib/identify-cascade-client').IdentifyAttempt[] = [];
@@ -761,7 +776,13 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
   pipelineSection?.classList.remove('hidden');
   updatePipelineUI();
 
-  // Start GPS in parallel
+  // Extract photo EXIF metadata (GPS & capture date) in parallel
+  const firstPhoto = files.find(f => f?.type?.startsWith('image/'));
+  if (firstPhoto) {
+    void extractPhotoMetadata(firstPhoto);
+  }
+
+  // Start GPS in parallel (fallback if photo has no EXIF GPS)
   startGPS();
 
   // Escape hatch: show "Skip and continue" after 15s if still processing.
@@ -1036,15 +1057,129 @@ function updatePipelineUI() {
   }
 }
 
+// ── EXIF metadata helpers ──────────────────────────────────────────────────
+function pickNumber(...candidates: unknown[]): number | null {
+  for (const c of candidates) {
+    if (typeof c === 'number' && Number.isFinite(c)) return c;
+  }
+  return null;
+}
+
+function parseExifDateToIso(v: unknown): string | null {
+  if (v == null) return null;
+  if (v instanceof Date) {
+    const t = v.getTime();
+    return Number.isFinite(t) ? v.toISOString() : null;
+  }
+  if (typeof v === 'number' && Number.isFinite(v)) {
+    return new Date(v).toISOString();
+  }
+  if (typeof v === 'string' && v.trim().length > 0) {
+    const exifLike = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/;
+    const m = v.match(exifLike);
+    let s = v;
+    if (m) s = `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`;
+    const t = Date.parse(s);
+    return Number.isFinite(t) ? new Date(t).toISOString() : null;
+  }
+  return null;
+}
+
+function toDatetimeLocalString(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function setObservedAtInput(iso: string, fromExif: boolean) {
+  const input = document.getElementById('obs2-observed-at') as HTMLInputElement | null;
+  const hint = document.getElementById('obs2-date-hint');
+  if (!input) return;
+  const d = new Date(iso);
+  if (!isNaN(d.getTime())) {
+    input.value = toDatetimeLocalString(d);
+    if (hint) {
+      if (fromExif) {
+        hint.innerHTML = `<span class="text-emerald-700 dark:text-emerald-400 font-medium">📅 ${isEs ? 'Fecha y hora detectadas de la foto' : 'Date and time detected from photo'}</span>`;
+      } else {
+        hint.textContent = isEs ? 'Fecha y hora actual' : 'Current date and time';
+        hint.className = 'mt-1 text-xs text-zinc-500 dark:text-zinc-400';
+      }
+    }
+  }
+}
+
+// Initialize date input with current time
+setObservedAtInput(new Date().toISOString(), false);
+
+async function extractPhotoMetadata(file: File) {
+  try {
+    const exif = await parseExif(file, { gps: true, tiff: true, exif: true }) as Record<string, unknown> | undefined;
+    if (!exif) return;
+
+    // 1. GPS extraction
+    const lat = pickNumber(exif.latitude, exif.Latitude, exif.GPSLatitude);
+    const lng = pickNumber(exif.longitude, exif.Longitude, exif.GPSLongitude);
+    if (lat != null && lng != null && !(lat === 0 && lng === 0)) {
+      location = {
+        lat,
+        lng,
+        accuracyM: 15,
+        altitudeM: pickNumber(exif.GPSAltitude, exif.altitude, exif.Altitude),
+        capturedFrom: 'exif',
+      };
+      if (gpsStatus) {
+        gpsStatus.innerHTML = `<span class="text-emerald-700 dark:text-emerald-400 font-medium">📍 ${lat.toFixed(4)}, ${lng.toFixed(4)} (${isEs ? 'Ubicación de la foto' : 'Location from photo'})</span>`;
+      }
+      window.dispatchEvent(new CustomEvent('rastrum:mappicker-set-initial', {
+        detail: { id: 'obs2-map', coords: { lat, lng } },
+      }));
+      window.dispatchEvent(new CustomEvent('rastrum:observe-location-ready', {
+        detail: { lat, lng },
+      }));
+      const obs2MapModal = document.querySelector<HTMLElement>('[data-mappicker-modal="obs2-map"]');
+      if (obs2MapModal) {
+        obs2MapModal.dataset.mappickerInitialLat = String(lat);
+        obs2MapModal.dataset.mappickerInitialLng = String(lng);
+      }
+      if (pipelineState) {
+        const locNode = pipelineState.nodes.find(n => n.kind === 'location');
+        if (locNode) setNodeState(pipelineState, locNode.id, 'done');
+        updatePipelineUI();
+      }
+    }
+
+    // 2. Date extraction
+    const dateRaw = exif.DateTimeOriginal ?? exif.CreateDate ?? exif.ModifyDate;
+    const isoString = parseExifDateToIso(dateRaw);
+    if (isoString) {
+      photoCapturedAt = isoString;
+      setObservedAtInput(isoString, true);
+    }
+  } catch (err) {
+    console.warn('[rastrum] EXIF metadata extraction failed', err);
+  }
+}
+
 // ── GPS ────────────────────────────────────────────────────────────────────
 function startGPS() {
+  if (location?.capturedFrom === 'exif') return;
   if (!navigator.geolocation) {
-    if (gpsStatus) gpsStatus.textContent = isEs ? 'GPS no disponible' : 'GPS not available';
+    if (gpsStatus && location?.capturedFrom !== 'exif') {
+      gpsStatus.textContent = isEs ? 'GPS no disponible' : 'GPS not available';
+    }
     return;
   }
-  if (gpsStatus) gpsStatus.textContent = isEs ? 'Obteniendo GPS...' : 'Acquiring GPS...';
+  if (gpsStatus && location?.capturedFrom !== 'exif') {
+    gpsStatus.textContent = isEs ? 'Obteniendo GPS...' : 'Acquiring GPS...';
+  }
   navigator.geolocation.getCurrentPosition(
     pos => {
+      if (location?.capturedFrom === 'exif') return;
       location = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
@@ -1052,7 +1187,9 @@ function startGPS() {
         altitudeM: pos.coords.altitude,
         capturedFrom: 'gps',
       };
-      if (gpsStatus) gpsStatus.textContent = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)} (±${Math.round(location.accuracyM)}m)`;
+      if (gpsStatus && location.capturedFrom !== 'exif') {
+        gpsStatus.textContent = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)} (±${Math.round(location.accuracyM)}m)`;
+      }
       // Notify map picker
       window.dispatchEvent(new CustomEvent('rastrum:mappicker-set-initial', {
         detail: { id: 'obs2-map', coords: { lat: location.lat, lng: location.lng } },
@@ -1068,6 +1205,7 @@ function startGPS() {
       }
     },
     (err) => {
+      if (location?.capturedFrom === 'exif') return;
       const msg = err.code === 1
         ? (isEs ? 'Permiso de ubicación denegado' : 'Location permission denied')
         : (isEs ? 'No se pudo obtener ubicación — usa el mapa para elegir' : 'Could not get location — use the map to pick one');
@@ -1215,8 +1353,20 @@ postForm?.addEventListener('submit', async (e) => {
     // Always use AI identification if taxon input is empty or whitespace only
     const identifiedSpecies = (taxonInput && taxonInput.trim()) || observerAffirmedTaxon || machineName;
 
+    const dateInput = document.getElementById('obs2-observed-at') as HTMLInputElement | null;
+    let createdAtIso: string | undefined = undefined;
+    if (dateInput?.value) {
+      const d = new Date(dateInput.value);
+      if (!isNaN(d.getTime())) {
+        createdAtIso = d.toISOString();
+      }
+    } else if (photoCapturedAt) {
+      createdAtIso = photoCapturedAt;
+    }
+
     const obs = await saveObservationToOutbox({
       observerRef,
+      createdAt: createdAtIso,
       media: mediaInputs,
       location: location ? {
         lat: location.lat,
@@ -1337,6 +1487,8 @@ postForm?.addEventListener('submit', async (e) => {
 // ── New observation ────────────────────────────────────────────────────────
 document.getElementById('obs2-new-btn')?.addEventListener('click', () => {
   location = null;
+  photoCapturedAt = null;
+  setObservedAtInput(new Date().toISOString(), false);
   bestResult = null;
   identifyErrorReason = null;
   cardAttempts = [];
