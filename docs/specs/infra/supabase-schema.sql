@@ -11028,11 +11028,14 @@ CREATE OR REPLACE FUNCTION public.count_distinct_observed_species()
   STABLE
   SECURITY INVOKER
 AS $$
-  SELECT COUNT(DISTINCT primary_taxon_id)::integer
-  FROM public.observations
-  WHERE primary_taxon_id IS NOT NULL
-    AND sync_status = 'synced'
-    AND obscure_level <> 'private';
+  SELECT COUNT(DISTINCT TRIM(BOTH '.' FROM LOWER(i.scientific_name)))::integer
+  FROM public.identifications i
+  JOIN public.observations o ON o.id = i.observation_id
+  WHERE i.is_primary = true
+    AND i.scientific_name IS NOT NULL
+    AND o.sync_status = 'synced'
+    AND o.hidden = false
+    AND o.obscure_level <> 'private';
 $$;
 
 GRANT EXECUTE ON FUNCTION public.count_distinct_observed_species() TO anon, authenticated;

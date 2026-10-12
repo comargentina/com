@@ -82,8 +82,30 @@ async function exactCount(
 
 async function distinctSpeciesCount(url: string, key: string): Promise<number | null> {
   try {
-    // Use the count_distinct_observed_species() RPC for a server-side
-    // DISTINCT count (avoids fetching up to 10 000 rows client-side).
+    const res = await fetch(
+      `${url.replace(/\/$/, '')}/rest/v1/identifications?select=scientific_name&is_primary=eq.true&scientific_name=not.is.null`,
+      {
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+        },
+      },
+    );
+    if (res.ok) {
+      const rows = await res.json() as Array<{ scientific_name?: string }> | null;
+      if (Array.isArray(rows) && rows.length > 0) {
+        const unique = new Set(
+          rows.map(r => r.scientific_name?.trim().replace(/\.+$/, '').toLowerCase()).filter(Boolean)
+        );
+        return unique.size;
+      }
+    }
+  } catch {
+    // fall through to RPC
+  }
+
+  try {
+    // Fallback: count_distinct_observed_species() RPC
     const res = await fetch(
       `${url.replace(/\/$/, '')}/rest/v1/rpc/count_distinct_observed_species`,
       {
@@ -119,8 +141,8 @@ async function main() {
   }
 
   const [obsCount, observerCount, speciesCount] = await Promise.all([
-    exactCount(url, key, 'observations?select=id&deleted_at=is.null'),
-    exactCount(url, key, 'community_observers?select=user_id'),
+    exactCount(url, key, 'observations?select=id&sync_status=eq.synced&hidden=eq.false'),
+    exactCount(url, key, 'community_observers?select=id'),
     distinctSpeciesCount(url, key),
   ]);
 
