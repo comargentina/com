@@ -56,6 +56,14 @@ describe('getCohortLabel – country scope', () => {
     expect(getCohortLabel(p, 'en')).toBe('BR');
     expect(getCohortLabel(p, 'es')).toBe('BR');
   });
+
+  it('returns "Argentina" for AR country scope or fallback', () => {
+    const p1: PercentilePayload = { ...basePayload, cohort_country: 'AR' };
+    expect(getCohortLabel(p1, 'es')).toBe('Argentina');
+    expect(getCohortLabel(p1, 'en')).toBe('Argentina');
+    const p2: PercentilePayload = { ...basePayload, cohort_country: undefined as unknown as string };
+    expect(getCohortLabel(p2, 'es')).toBe('Argentina');
+  });
 });
 
 describe('getCohortLabel – state scope', () => {

@@ -654,7 +654,7 @@
     "bio": "Biografía",
     "bio_placeholder": "Unas palabras sobre ti (opcional)",
     "region_primary": "Región principal",
-    "region_placeholder": "ej. Oaxaca, MX",
+    "region_placeholder": "ej. Entre Ríos, AR",
     "avatar_url": "URL del avatar",
     "preferred_lang": "Idioma preferido",
     "license": "Licencia por defecto para tus observaciones",
@@ -766,7 +766,8 @@
       "dismiss": "Aún no"
     },
     "percentiles": {
-      "heading": "Tú vs. observador MX promedio",
+      "heading": "Tú vs. observador AR promedio",
+      "scope_country_label": "AR",
       "subheading": "Comparación normativa anónima — privada, solo tú la ves.",
       "insufficient": "Datos insuficientes — el grupo de comparación es muy pequeño todavía. Vuelve cuando haya más observadores activos.",
       "loading": "Cargando…",

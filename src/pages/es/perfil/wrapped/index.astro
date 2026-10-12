@@ -154,8 +154,8 @@ const year = Astro.url.searchParams.get('year') ?? new Date().getFullYear().toSt
   }
 
   function render(d: WrappedPayload) {
-    setText('w-total-obs', d.total_observations.toLocaleString('es-MX'));
-    setText('w-total-spp', d.total_species.toLocaleString('es-MX'));
+    setText('w-total-obs', d.total_observations.toLocaleString('es-AR'));
+    setText('w-total-spp', d.total_species.toLocaleString('es-AR'));
 
     const ul = document.getElementById('w-top-species');
     if (ul) {
@@ -197,8 +197,8 @@ const year = Astro.url.searchParams.get('year') ?? new Date().getFullYear().toSt
     }
 
     setText('w-streak', String(d.longest_streak_days));
-    setText('w-first-obs', d.first_obs_date ? new Date(d.first_obs_date).toLocaleDateString('es-MX') : '—');
-    setText('w-last-obs',  d.last_obs_date  ? new Date(d.last_obs_date).toLocaleDateString('es-MX')  : '—');
+    setText('w-first-obs', d.first_obs_date ? new Date(d.first_obs_date).toLocaleDateString('es-AR') : '—');
+    setText('w-last-obs',  d.last_obs_date  ? new Date(d.last_obs_date).toLocaleDateString('es-AR')  : '—');
 
     if (d.top_photo_url) {
       const img  = document.getElementById('w-top-photo')  as HTMLImageElement  | null;

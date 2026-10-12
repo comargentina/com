@@ -13,7 +13,7 @@ const tp = (tr as unknown as {
   profile: { percentiles?: Record<string, string> };
 }).profile.percentiles ?? {};
 
-const heading             = tp.heading             ?? (lang === 'es' ? 'Tú vs. observador MX promedio' : 'You vs. average MX observer');
+const heading             = tp.heading             ?? (lang === 'es' ? 'Tú vs. observador AR promedio' : 'You vs. average AR observer');
 const subheading          = tp.subheading          ?? (lang === 'es'
   ? 'Comparación normativa anónima — privada, solo tú la ves.'
   : 'Anonymous normative comparison — private, only you see this.');
@@ -38,7 +38,7 @@ const unitValidations     = tp.unit_validations    ?? (lang === 'es' ? 'IDs'   :
 const unitSpread          = tp.unit_spread         ?? 'km²';
 const ownerOnly           = tp.owner_only          ?? (lang === 'es' ? '🔒 Solo tú lo ves' : '🔒 Only you see this');
 const aria                = tp.aria_bar            ?? (lang === 'es' ? 'Barra de percentil' : 'Percentile bar');
-const scopeCountryLabel   = tp.scope_country_label ?? (lang === 'es' ? 'MX' : 'MX');
+const scopeCountryLabel   = tp.scope_country_label ?? (lang === 'es' ? 'AR' : 'AR');
 const scopeStateLabel     = tp.scope_state_label   ?? (lang === 'es' ? 'Estado' : 'State');
 ---
 
@@ -55,7 +55,7 @@ const scopeStateLabel     = tp.scope_state_label   ?? (lang === 'es' ? 'Estado' 
   </header>
   <p class="text-xs text-zinc-600 dark:text-zinc-400 mb-2">{subheading}</p>
 
-  <!-- Scope toggle: MX country vs state (#805) -->
+  <!-- Scope toggle: AR country vs state (#805) -->
   <div class="flex items-center gap-1 mb-3" data-scope-toggle>
     <button
       data-scope="country"

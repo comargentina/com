@@ -165,12 +165,14 @@ export async function loadPercentilesForScope(
 
 /**
  * Build the human-readable cohort label for the scope toggle caption.
- * e.g. "MX" or "Oaxaca"
+ * e.g. "AR" or "Entre Ríos"
  */
 export function getCohortLabel(payload: PercentilePayload, lang: string): string {
   if (payload.scope === 'state' && payload.cohort_state) {
     return payload.cohort_state;
   }
-  const country = (payload.cohort_country ?? 'MX').toUpperCase();
-  return country === 'MX' ? (lang === 'es' ? 'México' : 'Mexico') : country;
+  const country = (payload.cohort_country ?? 'AR').toUpperCase();
+  if (country === 'AR') return 'Argentina';
+  if (country === 'MX') return lang === 'es' ? 'México' : 'Mexico';
+  return country;
 }

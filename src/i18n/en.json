@@ -654,7 +654,7 @@
     "bio": "Bio",
     "bio_placeholder": "A few words about you (optional)",
     "region_primary": "Primary region",
-    "region_placeholder": "e.g. Oaxaca, MX",
+    "region_placeholder": "e.g. Entre Ríos, AR",
     "avatar_url": "Avatar URL",
     "preferred_lang": "Preferred language",
     "license": "Default license for your observations",
@@ -766,7 +766,8 @@
       "dismiss": "Not yet"
     },
     "percentiles": {
-      "heading": "You vs. average MX observer",
+      "heading": "You vs. average AR observer",
+      "scope_country_label": "AR",
       "subheading": "Anonymous normative comparison — private, only you see this.",
       "insufficient": "Not enough data yet — the comparison cohort is too small. Check back as more observers become active.",
       "loading": "Loading…",
