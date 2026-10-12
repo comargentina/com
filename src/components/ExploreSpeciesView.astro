@@ -419,6 +419,8 @@ const indexBase = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'explore/spe
         const t = Date.parse(r.last_observed_at);
         if (!Number.isNaN(t)) recencyMs.set(r.taxon_id, t);
       }
+    }
+
     // Also include any taxa directly linked to observations in case MV is stale
     try {
       const { data: obsTaxa } = await supabase
