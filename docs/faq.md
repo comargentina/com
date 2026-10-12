@@ -88,15 +88,16 @@ no suggestion:
 
 It depends on the taxon and the photo:
 
-- **Plants** — PlantNet's top-1 in the cascade is correct ~70-90% of the
-  time on a clear photo of a flower or leaf, less for habit shots or fruits
-  out of season.
-- **Birds** — BirdNET-Lite (audio) is strong on the ~6,000 species in its
-  global model when the call is clean and the species is in range. Photos
-  of birds are harder; we route through Phi-3.5-vision or Claude (BYO
-  key).
-- **Insects, fungi, lichens, marine life** — significantly less reliable.
-  Treat any AI ID as a *suggestion*, not a determination.
+- **Butterflies** — Gemini Flash identifies images with high accuracy using
+  high-resolution photos and geographic location context.
+- **Plants** — using PlantNet in the cascade, it is correct 70–90% of the
+  time on clear photos of a flower or leaf (less accurate for habit shots or
+  fruits out of season).
+- **Birds** — recognises photos via vision and calls via BirdNET-Lite, very
+  effective on its 6,000+ global species when the audio is clean and the bird
+  is in range.
+- **Other groups (caterpillars, other insects, fungi)** — Gemini Flash
+  identifies images aided by the date and coordinates of the sighting.
 
 The cascade reports a confidence score with every ID. Below 0.4 we flag it
 as "low confidence" and don't promote the observation to research-grade.
