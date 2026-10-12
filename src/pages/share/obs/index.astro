@@ -745,8 +745,12 @@ const lang: 'en' | 'es' = 'en';
         suggestBtn?.classList.remove('hidden');
         suggestBtn?.addEventListener('click', () => {
           const observerName = document.getElementById('observer')?.textContent ?? null;
-          const opener = (window as unknown as { __rastrumOpenSuggestId?: (id: string, n: string | null) => void }).__rastrumOpenSuggestId;
-          if (typeof opener === 'function') opener(obsId, observerName);
+          const currentSpecies = document.getElementById('species')?.textContent?.trim();
+          const prefill = (currentSpecies && !['Unknown species', 'Sin identificar', 'Especie desconocida', '—'].includes(currentSpecies))
+            ? currentSpecies
+            : null;
+          const opener = (window as unknown as { __rastrumOpenSuggestId?: (id: string, n: string | null, prefill?: string | null) => void }).__rastrumOpenSuggestId;
+          if (typeof opener === 'function') opener(obsId, observerName, prefill);
         });
       } else if (signInLink) {
         const lang = isEs ? 'es' : 'en';

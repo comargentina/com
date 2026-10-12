@@ -1277,10 +1277,39 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       });
     }
 
+    function localizeQuestion(q: string): string {
+      if (!isEs || !q) return q;
+      if (/how is my karma calculated/i.test(q)) return '¿Cuándo una observación es primaria?';
+      if (/what badges am i close to earning/i.test(q)) return '¿Qué insignias me faltan por ganar?';
+      if (/show my last 10 observations/i.test(q)) return 'Mostrame mis últimas 10 observaciones.';
+      if (/why is this research grade/i.test(q)) return '¿Por qué esta observación es de grado de investigación?';
+      if (/why is this needs review/i.test(q)) return '¿Por qué esta observación necesita revisión?';
+      if (/what other observations of this species are nearby/i.test(q)) return '¿Qué otras observaciones de esta especie hay cerca?';
+      const tellMe = q.match(/tell me about (.+)\./i);
+      if (tellMe) return `Contame sobre ${tellMe[1]}.`;
+      const whereMex = q.match(/where in mexico is (.+) typically observed/i);
+      if (whereMex) return `¿Dónde en Argentina se suele observar ${whereMex[1]}?`;
+      const whereArg = q.match(/where in argentina is (.+) typically observed/i);
+      if (whereArg) return `¿Dónde en Argentina se suele observar ${whereArg[1]}?`;
+      if (/what does nom-059 .* mean/i.test(q)) return '¿Qué significa su estado de conservación?';
+      if (/show me recent observations of this species/i.test(q)) return 'Mostrame observaciones recientes de esta especie.';
+      if (/which species are most common in this project/i.test(q)) return '¿Qué especies son más comunes en este proyecto?';
+      if (/how many observations were added in the last 30 days/i.test(q)) return '¿Cuántas observaciones se sumaron en los últimos 30 días?';
+      if (/list the camera stations in this project/i.test(q)) return 'Listá las estaciones de cámaras de este proyecto.';
+      if (/which species have been detected at this station/i.test(q)) return '¿Qué especies se detectaron en esta estación?';
+      if (/what is the detection rate per 100 trap-nights/i.test(q)) return '¿Cuál es la tasa de detección por 100 noches-trampa?';
+      if (/how long has this station been deployed/i.test(q)) return '¿Cuánto tiempo lleva activa esta estación?';
+      const obsMost = q.match(/what species does (.+) observe most/i);
+      if (obsMost) return `¿Qué especies observa más ${obsMost[1]}?`;
+      if (/when were they most active/i.test(q)) return '¿Cuándo tuvo mayor actividad?';
+      if (/what region do they observe in/i.test(q)) return '¿En qué región suele observar?';
+      return q;
+    }
+
     function seedSuggestion(card: EntityCardLite): void {
       const ta = document.getElementById('chat-input') as HTMLTextAreaElement | null;
       if (!ta || ta.value || !card.suggested_questions?.[0]) return;
-      ta.placeholder = card.suggested_questions[0];
+      ta.placeholder = localizeQuestion(card.suggested_questions[0]);
     }
 
     function showAttachError(msg: string): void {

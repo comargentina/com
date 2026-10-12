@@ -234,7 +234,7 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
       karmaGateEl?.classList.add('hidden');
     }
 
-    function open(obsId: string, observer: string | null) {
+    function open(obsId: string, observer: string | null, prefillName?: string | null) {
       observationId = obsId;
       observerName  = observer;
 
@@ -266,7 +266,23 @@ const ves = (t('es') as unknown as { validation: Record<string, string> }).valid
       karmaGateEl?.classList.add('hidden');
       errorEl?.classList.add('hidden');
       form!.reset();
+
+      // Pre-fill species name if provided or detectable from the active page (#1002)
+      const pageSpecies = document.getElementById('species')?.textContent?.trim()
+        || document.querySelector('[data-species-name]')?.getAttribute('data-species-name')
+        || document.querySelector('[data-scientific-name]')?.getAttribute('data-scientific-name');
+      const candidate = prefillName || (pageSpecies && !['Unknown species', 'Sin identificar', 'Especie desconocida', '—'].includes(pageSpecies) ? pageSpecies : null);
+
+      if (candidate && nameInput) {
+        nameInput.value = candidate;
+        nameInput.dispatchEvent(new Event('input'));
+        nameInput.dispatchEvent(new Event('change'));
+      }
+
       nameInput?.focus();
+      if (candidate && nameInput) {
+        nameInput.setSelectionRange(candidate.length, candidate.length);
+      }
       void checkKarmaGate();
     }
     function close() {

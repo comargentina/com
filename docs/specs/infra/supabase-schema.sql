@@ -10324,9 +10324,9 @@ AS $$
       'coords_obscured', (auth.uid() IS DISTINCT FROM o.observer_id AND o.location_obscured IS NOT NULL)
     ),
     'suggested_questions', jsonb_build_array(
-      'Why is this ' || CASE WHEN o.is_research_grade THEN 'research grade' ELSE 'needs review' END || '?',
-      'What other observations of this species are nearby?',
-      'Tell me about ' || coalesce(o.scientific_name, 'this species') || '.'
+      '¿Por qué esta observación ' || CASE WHEN o.is_research_grade THEN 'es grado de investigación' ELSE 'necesita revisión' END || '?',
+      '¿Qué otras observaciones de esta especie hay cerca?',
+      'Contame sobre ' || coalesce(o.scientific_name, 'esta especie') || '.'
     ),
     'related',       jsonb_build_object(
       'primary_taxon_id', o.primary_taxon_id::text,
@@ -10378,9 +10378,9 @@ AS $$
       'obscure_level',       t.obscure_level
     ),
     'suggested_questions', jsonb_build_array(
-      'Where in Mexico is ' || t.scientific_name || ' typically observed?',
-      'What does NOM-059 ' || coalesce(t.nom059_status, 'status') || ' mean?',
-      'Show me recent observations of this species.'
+      '¿Dónde en Argentina se suele observar ' || t.scientific_name || '?',
+      '¿Qué estado de conservación tiene ' || t.scientific_name || '?',
+      'Mostrame observaciones recientes de esta especie.'
     ),
     'related',       jsonb_build_object(
       'primary_taxon_id', t.id::text
@@ -10428,9 +10428,9 @@ AS $$
       'obs_count',    c.obs_count
     ),
     'suggested_questions', jsonb_build_array(
-      'Which species are most common in this project?',
-      'How many observations were added in the last 30 days?',
-      'List the camera stations in this project.'
+      '¿Qué especies son más comunes en este proyecto?',
+      '¿Cuántas observaciones se sumaron en los últimos 30 días?',
+      'Listá las estaciones de cámaras de este proyecto.'
     ),
     'related',       jsonb_build_object(
       'project_id', p.id::text
@@ -10479,9 +10479,9 @@ AS $$
       'lng',          ST_X(s.coords::geometry)
     ),
     'suggested_questions', jsonb_build_array(
-      'Which species have been detected at this station?',
-      'What is the detection rate per 100 trap-nights?',
-      'How long has this station been deployed?'
+      '¿Qué especies se detectaron en esta estación?',
+      '¿Cuál es la tasa de detección por cada 100 noches-trampa?',
+      '¿Cuánto tiempo lleva activa esta estación?'
     ),
     'related',       jsonb_build_object(
       'project_id', s.project_id::text
@@ -10528,9 +10528,9 @@ AS $$
       'karma_total',       u.karma_total
     ),
     'suggested_questions', jsonb_build_array(
-      'What species does ' || coalesce(u.display_name, u.username) || ' observe most?',
-      'When were they most active?',
-      'What region do they observe in?'
+      '¿Qué especies observa más ' || coalesce(u.display_name, u.username) || '?',
+      '¿Cuándo tuvo mayor actividad?',
+      '¿En qué región suele observar?'
     ),
     'related',       jsonb_build_object(
       'observer_id', u.id::text
