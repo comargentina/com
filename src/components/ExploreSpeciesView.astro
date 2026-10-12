@@ -419,8 +419,30 @@ const indexBase = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'explore/spe
         const t = Date.parse(r.last_observed_at);
         if (!Number.isNaN(t)) recencyMs.set(r.taxon_id, t);
       }
-    }
-    const taxonIds = mvRows.map(r => r.taxon_id).filter((id): id is string => !!id);
+    // Also include any taxa directly linked to observations in case MV is stale
+    try {
+      const { data: obsTaxa } = await supabase
+        .from('observations')
+        .select('primary_taxon_id, observed_at')
+        .eq('sync_status', 'synced')
+        .not('primary_taxon_id', 'is', null);
+      for (const o of (obsTaxa ?? []) as Array<{ primary_taxon_id?: string | null; observed_at?: string | null }>) {
+        if (!o.primary_taxon_id) continue;
+        const currentCount = counts.get(o.primary_taxon_id);
+        if (currentCount === undefined) {
+          counts.set(o.primary_taxon_id, 1);
+        }
+        if (o.observed_at) {
+          const t = Date.parse(o.observed_at);
+          if (!Number.isNaN(t)) {
+            const prevT = recencyMs.get(o.primary_taxon_id) ?? -Infinity;
+            if (t > prevT) recencyMs.set(o.primary_taxon_id, t);
+          }
+        }
+      }
+    } catch { /* ignore fallback error */ }
+
+    const taxonIds = Array.from(counts.keys());
 
     if (taxonIds.length === 0) {
       hideSkeleton();
@@ -661,20 +683,72 @@ const indexBase = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'explore/spe
       const heroDataEl = document.getElementById('es-hero-data');
       if (!heroDataEl || heroDataEl.dataset.loaded === 'true') return;
       try {
-        const [{ data: featured }, { data: stats }] = await Promise.all([
+        const [{ data: featured }, { data: stats }, { count: liveObsCount }, { data: idData }, { data: obsData }] = await Promise.all([
           supabase.from('featured_species_current').select('*').limit(1).maybeSingle(),
           supabase.from('mv_platform_stats').select('*').limit(1).maybeSingle(),
+          supabase.from('observations').select('id', { count: 'exact', head: true }).eq('sync_status', 'synced').eq('hidden', false),
+          supabase.from('identifications').select('scientific_name').eq('is_primary', true).not('scientific_name', 'is', null),
+          supabase.from('observations').select('observer_id, observed_at, identifications(scientific_name, is_primary)').eq('sync_status', 'synced'),
         ]);
-        if (featured || stats) {
+        if (featured || stats || liveObsCount !== null) {
           const heroRow = document.querySelector<HTMLElement>('[data-es-hero-row]');
-          if (heroRow && stats) {
+          if (heroRow) {
+            let totalSpecies = (stats as { total_species?: number } | null)?.total_species ?? 0;
+            if (Array.isArray(idData) && idData.length > 0) {
+              const unique = new Set(
+                idData.map(r => r.scientific_name?.trim().replace(/\.+$/, '').toLowerCase()).filter(Boolean)
+              );
+              if (unique.size > totalSpecies) totalSpecies = unique.size;
+            }
+
+            let totalObservers = (stats as { total_observers?: number } | null)?.total_observers ?? 0;
+            if (Array.isArray(obsData) && obsData.length > 0) {
+              const uniqueObservers = new Set(obsData.map(o => o.observer_id).filter(Boolean));
+              if (uniqueObservers.size > totalObservers) totalObservers = uniqueObservers.size;
+            }
+
+            let totalObs = (stats as { total_obs?: number } | null)?.total_obs ?? 0;
+            if (typeof liveObsCount === 'number' && liveObsCount > totalObs) {
+              totalObs = liveObsCount;
+            }
+
+            let newSpeciesThisWeek = (stats as { new_species_this_week?: number } | null)?.new_species_this_week ?? 0;
+            if (Array.isArray(obsData) && obsData.length > 0) {
+              const now = new Date();
+              const day = now.getDay();
+              const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+              const startOfWeek = new Date(now.setDate(diff));
+              startOfWeek.setHours(0, 0, 0, 0);
+
+              const priorSpecies = new Set<string>();
+              const weekSpecies = new Set<string>();
+
+              for (const o of obsData) {
+                const pId = (o.identifications as Array<{ is_primary?: boolean; scientific_name?: string }> | undefined)?.find(i => i.is_primary);
+                const cleanName = pId?.scientific_name?.trim().replace(/\.+$/, '').toLowerCase();
+                if (!cleanName) continue;
+                const obsDate = o.observed_at ? new Date(o.observed_at) : null;
+                if (obsDate && obsDate >= startOfWeek) {
+                  weekSpecies.add(cleanName);
+                } else {
+                  priorSpecies.add(cleanName);
+                }
+              }
+
+              let countNew = 0;
+              for (const s of weekSpecies) {
+                if (!priorSpecies.has(s)) countNew++;
+              }
+              if (countNew > newSpeciesThisWeek) newSpeciesThisWeek = countNew;
+            }
+
             const fmt = (n: number): string => n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : n >= 1000 ? n.toLocaleString() : String(n);
             const counters = heroRow.querySelectorAll<HTMLElement>('.text-3xl');
             if (counters.length >= 4) {
-              counters[0].textContent = fmt((stats as { total_species: number }).total_species ?? 0);
-              counters[1].textContent = fmt((stats as { total_observers: number }).total_observers ?? 0);
-              counters[2].textContent = fmt((stats as { total_obs: number }).total_obs ?? 0);
-              counters[3].textContent = `+${(stats as { new_species_this_week: number }).new_species_this_week ?? 0}`;
+              counters[0].textContent = fmt(totalSpecies);
+              counters[1].textContent = fmt(totalObservers);
+              counters[2].textContent = fmt(totalObs);
+              counters[3].textContent = `+${newSpeciesThisWeek}`;
             }
           }
           if (heroRow && featured) {

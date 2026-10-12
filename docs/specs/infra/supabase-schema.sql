@@ -8411,30 +8411,37 @@ GRANT EXECUTE ON FUNCTION public.consume_pool_slot(uuid) TO service_role;
 -- computed_at lets us REFRESH CONCURRENTLY.
 CREATE MATERIALIZED VIEW IF NOT EXISTS public.mv_platform_stats AS
 SELECT
-  (SELECT COUNT(DISTINCT i.taxon_id)
+  (SELECT COUNT(DISTINCT TRIM(BOTH '.' FROM LOWER(i.scientific_name)))
      FROM public.identifications i
      JOIN public.observations o ON o.id = i.observation_id
     WHERE i.is_primary = true
-      AND o.sync_status = 'synced')                                    AS total_species,
+      AND i.scientific_name IS NOT NULL
+      AND o.sync_status = 'synced'
+      AND o.hidden = false)                                            AS total_species,
   (SELECT COUNT(DISTINCT o.observer_id)
      FROM public.observations o
-    WHERE o.sync_status = 'synced')                                    AS total_observers,
+    WHERE o.sync_status = 'synced'
+      AND o.hidden = false)                                            AS total_observers,
   (SELECT COUNT(*)
      FROM public.observations o
-    WHERE o.sync_status = 'synced')                                    AS total_obs,
-  (SELECT COUNT(DISTINCT i.taxon_id)
+    WHERE o.sync_status = 'synced'
+      AND o.hidden = false)                                            AS total_obs,
+  (SELECT COUNT(DISTINCT TRIM(BOTH '.' FROM LOWER(i.scientific_name)))
      FROM public.identifications i
      JOIN public.observations o ON o.id = i.observation_id
     WHERE i.is_primary = true
+      AND i.scientific_name IS NOT NULL
       AND o.sync_status = 'synced'
+      AND o.hidden = false
       AND date_trunc('week', o.observed_at) = date_trunc('week', now())
       AND NOT EXISTS (
         SELECT 1
           FROM public.identifications i2
           JOIN public.observations o2 ON o2.id = i2.observation_id
-         WHERE i2.taxon_id = i.taxon_id
+         WHERE TRIM(BOTH '.' FROM LOWER(i2.scientific_name)) = TRIM(BOTH '.' FROM LOWER(i.scientific_name))
            AND i2.is_primary = true
            AND o2.sync_status = 'synced'
+           AND o2.hidden = false
            AND o2.observed_at < date_trunc('week', now())
       ))                                                               AS new_species_this_week,
   now()                                                                AS computed_at;
