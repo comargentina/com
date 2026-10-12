@@ -487,6 +487,31 @@ const indexBase = `/${lang}/${lang === 'es' ? 'explorar/especies' : 'explore/spe
       }
     }
 
+    // Fallback: for taxa without a thumbnail in taxa_thumbnails,
+    // match directly from observations/media_files by primary identification scientific_name
+    const missingTaxa = taxaRows.filter(t => !thumbMap.has(t.id));
+    if (missingTaxa.length > 0) {
+      try {
+        const { data: fallbackObs } = await supabase
+          .from('observations')
+          .select('id, identifications(scientific_name, is_primary), media_files(url, thumbnail_url, is_primary)')
+          .eq('sync_status', 'synced')
+          .eq('hidden', false);
+        for (const o of (fallbackObs ?? []) as Array<{ identifications?: Array<{ scientific_name?: string; is_primary?: boolean }>; media_files?: Array<{ url?: string; thumbnail_url?: string; is_primary?: boolean }> }>) {
+          const prim = o.identifications?.find(i => i.is_primary);
+          const cleanName = prim?.scientific_name?.trim().replace(/\.+$/, '').toLowerCase();
+          if (!cleanName) continue;
+          const matchTaxon = missingTaxa.find(t => t.scientific_name?.trim().replace(/\.+$/, '').toLowerCase() === cleanName);
+          if (matchTaxon && !thumbMap.has(matchTaxon.id)) {
+            const photos = o.media_files ?? [];
+            const primaryPhoto = photos.find(m => m.is_primary) ?? photos[0];
+            const url = primaryPhoto?.thumbnail_url ?? primaryPhoto?.url;
+            if (url) thumbMap.set(matchTaxon.id, url);
+          }
+        }
+      } catch { /* ignore fallback errors */ }
+    }
+
     let inDexSet = new Set<string>();
     {
       try {

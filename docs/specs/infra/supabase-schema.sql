@@ -3120,14 +3120,19 @@ GRANT SELECT ON public.profile_pokedex TO anon, authenticated;
 CREATE OR REPLACE VIEW public.taxa_thumbnails AS
 SELECT
   t.id AS taxon_id,
-  (SELECT mf.url
+  (SELECT COALESCE(mf.thumbnail_url, mf.url)
      FROM public.media_files mf
      JOIN public.observations o ON o.id = mf.observation_id
      JOIN public.identifications i ON i.observation_id = o.id
     WHERE i.is_primary = true
-      AND i.taxon_id = t.id
+      AND (
+        i.taxon_id = t.id
+        OR o.primary_taxon_id = t.id
+        OR TRIM(BOTH '.' FROM LOWER(i.scientific_name)) = TRIM(BOTH '.' FROM LOWER(t.scientific_name))
+      )
       AND o.sync_status = 'synced'
       AND o.obscure_level <> 'full'
+      AND mf.deleted_at IS NULL
     ORDER BY mf.is_primary DESC NULLS LAST, mf.created_at DESC
     LIMIT 1) AS thumbnail_url
 FROM public.taxa t;
