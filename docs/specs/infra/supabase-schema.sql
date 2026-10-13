@@ -11198,7 +11198,7 @@ BEGIN
        WHERE mf.is_primary AND mo.sync_status = 'synced'
        LIMIT 1) AS thumbnail_url,
     CASE t.kingdom
-      WHEN 'Animalia' THEN COALESCE(t.common_name_es, t.scientific_name) || ' — animal de la región'
+      WHEN 'Animalia' THEN COALESCE(t.common_name_es, t.scientific_name) || ' — lepidóptero de la región'
       WHEN 'Plantae'  THEN COALESCE(t.common_name_es, t.scientific_name) || ' — planta local'
       ELSE COALESCE(t.common_name_es, t.scientific_name) || ' — especie regional'
     END AS why
