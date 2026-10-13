@@ -151,13 +151,118 @@ function levenshtein(a: string, b: string, maxDist = 100): number {
   return row[b.length];
 }
 
+async function* streamGeminiDirect(
+  messages: ChatMessage[],
+  geminiKey: string,
+): AsyncIterable<StreamEvent> {
+  const systemParts: string[] = [];
+  const contents: { role: string; parts: { text: string }[] }[] = [];
+
+  for (const m of messages) {
+    if (m.role === 'system') {
+      systemParts.push(m.content);
+      continue;
+    }
+    const role = m.role === 'assistant' ? 'model' : 'user';
+    contents.push({ role, parts: [{ text: m.content }] });
+  }
+
+  if (contents.length > 0 && contents[contents.length - 1].role === 'model') {
+    contents.push({ role: 'user', parts: [{ text: '' }] });
+  }
+  if (contents.length === 0) {
+    contents.push({ role: 'user', parts: [{ text: 'Hello' }] });
+  }
+
+  const body = {
+    systemInstruction: systemParts.length > 0
+      ? { parts: [{ text: systemParts.join('\n') }] }
+      : undefined,
+    contents,
+    generationConfig: {
+      maxOutputTokens: 2048,
+      temperature: 0.7,
+    },
+  };
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:streamGenerateContent?alt=sse`;
+
+  const ac = new AbortController();
+  const timeout = setTimeout(() => ac.abort(), 35_000);
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
+      body: JSON.stringify(body),
+      signal: ac.signal,
+    }).finally(() => clearTimeout(timeout));
+  } catch (e) {
+    yield { type: 'error', message: e instanceof Error ? e.message : String(e) };
+    return;
+  }
+
+  if (res.status === 429) {
+    yield { type: 'quota_exceeded' };
+    return;
+  }
+  if (!res.ok) {
+    let errText = `HTTP ${res.status}`;
+    try {
+      const errJson = await res.json() as { error?: { message?: string } };
+      if (errJson?.error?.message) errText = errJson.error.message;
+    } catch { /* empty */ }
+    yield { type: 'error', message: errText };
+    return;
+  }
+
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw) as {
+            candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+          };
+          const delta = parsed.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
+          if (delta) yield { type: 'text', delta };
+        } catch {
+          // skip
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 async function* streamGeminiEdge(
   messages: ChatMessage[],
   geminiKey?: string,
 ): AsyncIterable<StreamEvent> {
+  // If we have a direct client key, call Gemini directly for zero-latency streaming.
+  if (geminiKey) {
+    yield* streamGeminiDirect(messages, geminiKey);
+    return;
+  }
+
   const supabase = getSupabase();
   const body: Record<string, unknown> = { messages };
-  if (geminiKey) body['client_gemini_key'] = geminiKey;
 
   const { data: { session } } = await supabase.auth.getSession();
   const anonKey = getSupabaseAnonKey();
