@@ -207,22 +207,16 @@ async function* streamGeminiDirect(
     return;
   }
 
-  // 429 = rate limit / quota; 401/403 = invalid credentials; 503 = overloaded/high demand
-  if (res.status === 429 || res.status === 401 || res.status === 403 || res.status === 503) {
+  // 429 = rate limit / quota; 401/403 = invalid/unauthorized credentials on this project
+  if (res.status === 429 || res.status === 401 || res.status === 403) {
     yield { type: 'quota_exceeded' };
     return;
   }
   if (!res.ok) {
     let errText = `HTTP ${res.status}`;
     try {
-      const errJson = await res.json() as { error?: { message?: string; status?: string } };
+      const errJson = await res.json() as { error?: { message?: string } };
       if (errJson?.error?.message) errText = errJson.error.message;
-      // If error message mentions high demand or resource exhaustion, trigger rotation/retry
-      const isHighDemand = /high demand|overloaded|temporarily unavailable|resource has been exhausted/i.test(errText);
-      if (isHighDemand) {
-        yield { type: 'quota_exceeded' };
-        return;
-      }
     } catch { /* empty */ }
     yield { type: 'error', message: errText };
     return;
@@ -385,34 +379,12 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
         if (keyIndex < availableKeys.length) {
           currentKey = availableKeys[keyIndex];
           didRotate = true;
-          // Small delay before retrying with next key so transient spikes clear
-          await new Promise(r => setTimeout(r, 1200));
           break; // break the streamGeminiEdge loop and restart with next key
-        }
-        // If we ran through all keys, do one final retry after a brief pause
-        if (keyIndex === availableKeys.length && availableKeys.length > 0) {
-          keyIndex = 0;
-          currentKey = availableKeys[0];
-          didRotate = true;
-          await new Promise(r => setTimeout(r, 2000));
-          break;
         }
         yield ev;
         return;
       }
       if (ev.type === 'error') {
-        // If error message indicates high demand, treat as quota_exceeded to auto-rotate/retry
-        const isDemandSpike = /high demand|overloaded|temporarily unavailable|resource has been exhausted|rate limit/i.test(ev.message);
-        if (isDemandSpike) {
-          rotateGeminiKeys();
-          keyIndex++;
-          if (keyIndex < availableKeys.length) {
-            currentKey = availableKeys[keyIndex];
-            didRotate = true;
-            await new Promise(r => setTimeout(r, 1500));
-            break;
-          }
-        }
         yield ev;
         return;
       }

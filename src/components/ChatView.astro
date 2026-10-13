@@ -1378,14 +1378,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
               : '⚡ Free usage limit reached. Please enter your Google AI Studio key above to continue.';
             paintConversation();
           } else if (event.type === 'error') {
-            const isHighDemand = /high demand|overloaded|temporarily unavailable|resource has been exhausted/i.test(event.message);
-            if (isHighDemand) {
-              conversation[assistantIdx].content = isEs
-                ? '⏳ El asistente está recibiendo muchas consultas en este momento. Hacé clic abajo para reintentar.'
-                : '⏳ The assistant is currently experiencing high demand. Click below to retry.';
-            } else {
-              conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + event.message;
-            }
+            conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + event.message;
             paintConversation();
           } else if (event.type === 'tool_call') {
             window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
@@ -1403,15 +1396,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         paintConversation();
         persistAssistantTurn(conversation[assistantIdx]);
       } catch (err) {
-        const rawMsg = err instanceof Error ? err.message : String(err);
-        const isHighDemand = /high demand|overloaded|temporarily unavailable|resource has been exhausted/i.test(rawMsg);
-        if (isHighDemand) {
-          conversation[assistantIdx].content = isEs
-            ? '⏳ El asistente está recibiendo muchas consultas en este momento. Hacé clic abajo para reintentar.'
-            : '⏳ The assistant is currently experiencing high demand. Click below to retry.';
-        } else {
-          conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + rawMsg;
-        }
+        conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + (err instanceof Error ? err.message : String(err));
         paintConversation();
         persistAssistantTurn(conversation[assistantIdx]);
       }
