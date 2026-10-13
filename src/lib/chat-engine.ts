@@ -37,8 +37,10 @@ const SYSTEM_TOOLS_PROMPT = `You may emit a JSON tool call to look up data. Tool
 export const BYO_GEMINI_KEY = 'rastrum.byoKeys.gemini';
 export const BYO_GEMINI_KEY_BACKUP = 'rastrum.byoKeys.gemini_backup';
 
-// Built-in keys baked into the bundle at build time (Vite replaces import.meta.env.*).
-// These are browser-origin AQ. keys — work for client-side vision calls only.
+// Built-in keys come exclusively from environment variables.
+// Set PUBLIC_GEMINI_KEY_1 / PUBLIC_GEMINI_KEY_2 in .env.local (dev) and in
+// the Vercel / hosting dashboard (production). Never hardcode keys here.
+const IS_TEST = import.meta.env.MODE === 'test';
 const BUILT_IN_KEY_1: string = import.meta.env.PUBLIC_GEMINI_KEY_1 ?? '';
 const BUILT_IN_KEY_2: string = import.meta.env.PUBLIC_GEMINI_KEY_2 ?? '';
 
@@ -235,11 +237,16 @@ async function* streamGeminiDirect(
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const raw = line.slice(6).trim();
-        if (!raw) continue;
+        if (!raw || raw === '[DONE]') continue;
         try {
           const parsed = JSON.parse(raw) as {
+            delta?: string;
             candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
           };
+          if (parsed.delta) {
+            yield { type: 'text', delta: parsed.delta };
+            continue;
+          }
           const parts = parsed.candidates?.[0]?.content?.parts ?? [];
           for (const p of parts) {
             if (p.text) yield { type: 'text', delta: p.text };
