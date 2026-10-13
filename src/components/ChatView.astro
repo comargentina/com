@@ -1628,16 +1628,18 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     (window as Window & { __chatGetAttachedEntity?: () => EntityCardLite | null }).__chatGetAttachedEntity = () => attachedEntity;
 
     // Empty-state suggestion chips: seed the textarea and submit.
-    document.querySelectorAll('[data-empty-prompt]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const prompt = (btn as HTMLButtonElement).dataset.emptyPrompt ?? '';
-        const ta = document.getElementById('chat-input') as HTMLTextAreaElement | null;
-        if (!ta) return;
-        ta.value = prompt;
-        ta.focus();
-        const form = document.getElementById('chat-form') as HTMLFormElement | null;
-        form?.requestSubmit();
-      });
+    document.addEventListener('click', (ev) => {
+      const btn = (ev.target as HTMLElement).closest<HTMLButtonElement>('[data-empty-prompt]');
+      if (!btn) return;
+      const prompt = btn.dataset.emptyPrompt ?? '';
+      const ta = document.getElementById('chat-input') as HTMLTextAreaElement | null;
+      if (!ta) return;
+      ta.value = prompt;
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+      ta.focus();
+      const form = document.getElementById('chat-form') as HTMLFormElement | null;
+      form?.requestSubmit();
     });
   })().catch((e) => {
     console.warn('[chat] entity wiring init failed', e);
