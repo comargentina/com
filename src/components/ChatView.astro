@@ -24,14 +24,25 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       <img src={`${import.meta.env.BASE_URL}com-logo-120.png`} alt="" class="w-4 h-4 rounded-full" />
       <span>COM Chat</span>
     </span>
-    <button
-      id="chat-toggle-keys-btn-mobile"
-      type="button"
-      class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700/50"
-    >
-      <span>🔑</span>
-      <span>{lang === 'es' ? 'Claves' : 'Keys'}</span>
-    </button>
+    <div class="flex items-center gap-1.5">
+      <button
+        id="chat-clear-btn-mobile"
+        type="button"
+        class="hidden text-xs font-medium px-2 py-1 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+        title={tr.chat.clear}
+      >
+        <span>🗑️</span>
+        <span class="sr-only sm:not-sr-only">{tr.chat.clear}</span>
+      </button>
+      <button
+        id="chat-toggle-keys-btn-mobile"
+        type="button"
+        class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700/50"
+      >
+        <span>🔑</span>
+        <span>{lang === 'es' ? 'Claves' : 'Keys'}</span>
+      </button>
+    </div>
   </div>
 
   <div class="mb-2 hidden sm:flex items-baseline justify-between gap-3 flex-wrap">
@@ -234,6 +245,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   const sendBtn        = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
   const sendLabel      = sendBtn?.querySelector('[data-csl]') as HTMLElement | null;
   const clearBtn       = document.getElementById('chat-clear-btn') as HTMLButtonElement | null;
+  const clearBtnMobile = document.getElementById('chat-clear-btn-mobile') as HTMLButtonElement | null;
 
   const photoBtn       = document.getElementById('chat-photo-btn') as HTMLButtonElement | null;
   const photoInput     = document.getElementById('chat-photo-input') as HTMLInputElement | null;
@@ -285,11 +297,13 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
       historyEl.innerHTML = '';
       historyEl.appendChild(emptyState ?? document.createTextNode(''));
       clearBtn?.classList.add('hidden');
+      clearBtnMobile?.classList.add('hidden');
       return;
     }
     emptyState?.remove();
     historyEl.innerHTML = conversation.map((t, i) => bubbleHtml(t, i)).join('');
     clearBtn?.classList.remove('hidden');
+    clearBtnMobile?.classList.remove('hidden');
     wireBubbleActions();
     historyEl.scrollIntoView({ block: 'end', behavior: 'smooth' });
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -694,14 +708,17 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   });
   inputEl?.addEventListener('input', autosize);
 
-  clearBtn?.addEventListener('click', () => {
+  function handleClear() {
     for (const turn of conversation) {
       if (turn.attachment?.objectUrl) URL.revokeObjectURL(turn.attachment.objectUrl);
     }
     conversation.length = 0;
     paintConversation();
     void clearChatHistory(chatStore).catch(() => { /* best effort */ });
-  });
+  }
+
+  clearBtn?.addEventListener('click', handleClear);
+  clearBtnMobile?.addEventListener('click', handleClear);
 
   async function restoreChatHistory(): Promise<void> {
     try {
