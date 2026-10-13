@@ -180,7 +180,7 @@ async function* streamGeminiDirect(
       : undefined,
     contents,
     generationConfig: {
-      maxOutputTokens: 2048,
+      maxOutputTokens: 4096,
       temperature: 0.7,
     },
   };
@@ -240,8 +240,10 @@ async function* streamGeminiDirect(
           const parsed = JSON.parse(raw) as {
             candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
           };
-          const delta = parsed.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
-          if (delta) yield { type: 'text', delta };
+          const parts = parsed.candidates?.[0]?.content?.parts ?? [];
+          for (const p of parts) {
+            if (p.text) yield { type: 'text', delta: p.text };
+          }
         } catch {
           // skip
         }
@@ -256,14 +258,15 @@ async function* streamGeminiEdge(
   messages: ChatMessage[],
   geminiKey?: string,
 ): AsyncIterable<StreamEvent> {
-  // If we have a direct client key, call Gemini directly for zero-latency streaming.
-  if (geminiKey) {
+  // If we have an AQ. key (browser-origin Google AI Studio key), call Gemini directly.
+  if (geminiKey && geminiKey.startsWith('AQ.')) {
     yield* streamGeminiDirect(messages, geminiKey);
     return;
   }
 
   const supabase = getSupabase();
   const body: Record<string, unknown> = { messages };
+  if (geminiKey) body['client_gemini_key'] = geminiKey;
 
   const { data: { session } } = await supabase.auth.getSession();
   const anonKey = getSupabaseAnonKey();
@@ -364,6 +367,7 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
     let didRotate = false;
     for await (const ev of streamGeminiEdge(messages, currentKey)) {
       if (ev.type === 'quota_exceeded') {
+        rotateGeminiKeys();
         keyIndex++;
         if (keyIndex < availableKeys.length) {
           currentKey = availableKeys[keyIndex];
