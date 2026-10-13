@@ -243,7 +243,9 @@ async function* streamGeminiEdge(
  */
 export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamEvent> {
   const messages = withToolPrompt(input.messages);
-  let currentKey = input.geminiKey ?? readByoGeminiKey() ?? undefined;
+  const availableKeys = readAllGeminiKeys();
+  let keyIndex = 0;
+  let currentKey: string | undefined = input.geminiKey ?? availableKeys[keyIndex];
   let toolRounds = 0;
   let accumulatedTextChars = 0;
   const calledTools: Array<{ tool: string; argsStr: string }> = [];
@@ -256,10 +258,11 @@ export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamE
     let didRotate = false;
     for await (const ev of streamGeminiEdge(messages, currentKey)) {
       if (ev.type === 'quota_exceeded') {
-        if (rotateGeminiKeys()) {
-          currentKey = readByoGeminiKey() ?? undefined;
+        keyIndex++;
+        if (keyIndex < availableKeys.length) {
+          currentKey = availableKeys[keyIndex];
           didRotate = true;
-          break; // break the streamGeminiEdge loop and restart with rotated key
+          break; // break the streamGeminiEdge loop and restart with next key
         }
         yield ev;
         return;

@@ -1024,12 +1024,12 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
             { text: prompt },
           ],
         }],
-        generationConfig: { maxOutputTokens: 512, temperature: 0.4 },
+        generationConfig: { maxOutputTokens: 2048, temperature: 0.4 },
       });
 
-      // gemini-1.5-flash first: confirmed to work with AQ. browser keys.
-      // 3.8 and 2.5 tried second as upgrades if available.
-      const MODELS = ['gemini-1.5-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+      // gemini-3.5-flash and gemini-3.5-flash-lite: confirmed active models in Google AI Studio.
+      // (1.5-flash and 2.5-flash have been deprecated/retired by Google).
+      const MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite'];
       const accountErrors: string[] = [];
       let anyHitRateLimit = false;
 
@@ -1092,7 +1092,7 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         }
 
         if (failedAttempts.length > 0) {
-          accountErrors.push(`Cuenta ${i + 1}: ${failedAttempts[0]}`);
+          accountErrors.push(`Cuenta ${i + 1}: ${failedAttempts[failedAttempts.length - 1]}`);
         }
 
         if (hitRateLimit && i < keys.length - 1) {
@@ -1359,6 +1359,9 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
             conversation[assistantIdx].content = isEs
               ? '⚡ Límite de uso gratuito alcanzado. Por favor ingresá tu clave de Google AI Studio arriba para continuar.'
               : '⚡ Free usage limit reached. Please enter your Google AI Studio key above to continue.';
+            paintConversation();
+          } else if (event.type === 'error') {
+            conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + event.message;
             paintConversation();
           } else if (event.type === 'tool_call') {
             window.dispatchEvent(new CustomEvent('rastrum:onboarding-event', {
