@@ -205,7 +205,8 @@ async function* streamGeminiDirect(
     return;
   }
 
-  if (res.status === 429) {
+  // 429 = rate limit / quota; 401/403 = invalid/unauthorized credentials on this project
+  if (res.status === 429 || res.status === 401 || res.status === 403) {
     yield { type: 'quota_exceeded' };
     return;
   }
