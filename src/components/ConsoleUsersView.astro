@@ -290,7 +290,8 @@ const tr = t(lang);
     if (!session?.access_token) return;
 
     try {
-      const result = await adminClient.user.detail({ user_id: userId }, 'view user identity (admin console)', session.access_token);
+      const resp = await adminClient.user.detail({ user_id: userId }, 'view user identity (admin console)', session.access_token);
+      const result = (resp as { result?: typeof resp }).result ?? resp;
       section.classList.remove('hidden');
       const fmtDate = (s: string | null) => s ? new Date(s).toLocaleDateString() : '—';
       const emailRow = `

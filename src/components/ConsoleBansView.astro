@@ -367,7 +367,8 @@ const tr = t(lang);
       const session = await getCachedSession();
       if (session?.access_token) {
         try {
-          const detail = await adminClient.user.detail({ email: searchInput }, '', session.access_token);
+          const resp = await adminClient.user.detail({ email: searchInput }, '', session.access_token);
+          const detail = (resp as { result?: typeof resp }).result ?? resp;
           // Load from users table using the returned id
           const { data } = await supabase.from('users').select('id, username, display_name, avatar_url').eq('id', detail.id).maybeSingle();
           if (data) {
