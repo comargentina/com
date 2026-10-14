@@ -217,8 +217,8 @@ const profileHref = lang === 'es' ? '/es/perfil/' : '/en/profile/';
       : '';
 
     const imgHtml = s.photo_url
-      ? `<img src="${escapeText(s.photo_url)}" alt="${escapeText(s.scientific_name)}" loading="lazy" class="w-full h-full object-cover" />`
-      : '';
+      ? `<img src="${escapeText(s.photo_url)}" alt="${escapeText(s.scientific_name)}" loading="lazy" class="w-full h-full object-cover" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center bg-emerald-950/20\\'><span class=\\'text-3xl opacity-80\\'>🦋</span></div>';" />`
+      : `<div class="w-full h-full flex items-center justify-center bg-emerald-950/20"><span class="text-3xl opacity-80">🦋</span></div>`;
 
     return `<li data-taxon-id="${escapeText(s.taxon_id)}">
       <div class="relative overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 group">
@@ -325,6 +325,54 @@ const profileHref = lang === 'es' ? '/es/perfil/' : '/en/profile/';
 
       listEl.innerHTML = filtered.map(s => suggestionCard(s, lang, sugRoot)).join('');
       sugRoot.classList.remove('hidden');
+
+      // Hydrate photos asynchronously (RPC suggest_nearby_species returns photo_url=NULL)
+      const taxaToFetch = filtered.filter(s => !s.photo_url);
+      if (taxaToFetch.length > 0) {
+        (async () => {
+          let sb;
+          try { sb = getSupabase(); } catch { return; }
+          const taxonIds = taxaToFetch.map(s => s.taxon_id);
+          const { data: obsData } = await sb
+            .from('observations')
+            .select('primary_taxon_id, media_files(url, is_primary, media_type)')
+            .in('primary_taxon_id', taxonIds)
+            .eq('sync_status', 'synced')
+            .order('observed_at', { ascending: false });
+
+          const photoMap = new Map<string, string>();
+          if (obsData) {
+            for (const row of obsData as Array<{ primary_taxon_id: string; media_files: Array<{ url: string | null; is_primary: boolean | null; media_type: string | null }> | null }>) {
+              if (photoMap.has(row.primary_taxon_id)) continue;
+              const pick = (row.media_files ?? []).find(m => m?.url && (!m.media_type || m.media_type === 'photo'));
+              if (pick?.url) photoMap.set(row.primary_taxon_id, pick.url);
+            }
+          }
+
+          // Fallback to iNaturalist public API for any remaining species without photos
+          await Promise.all(taxaToFetch.map(async s => {
+            if (!photoMap.has(s.taxon_id)) {
+              try {
+                const res = await fetch(`https://api.inaturalist.org/v1/taxa?q=${encodeURIComponent(s.scientific_name)}&per_page=1`);
+                if (res.ok) {
+                  const json = await res.json() as { results?: Array<{ default_photo?: { medium_url?: string } }> };
+                  const url = json.results?.[0]?.default_photo?.medium_url;
+                  if (url) photoMap.set(s.taxon_id, url);
+                }
+              } catch { /* best effort */ }
+            }
+          }));
+
+          // Apply found photos to cards
+          for (const [taxonId, url] of photoMap.entries()) {
+            const cardLi = listEl.querySelector<HTMLLIElement>(`li[data-taxon-id="${CSS.escape(taxonId)}"]`);
+            const imgContainer = cardLi?.querySelector('.aspect-square');
+            if (imgContainer) {
+              imgContainer.innerHTML = `<img src="${escapeText(url)}" alt="" loading="lazy" class="w-full h-full object-cover" />`;
+            }
+          }
+        })().catch(() => { /* best effort */ });
+      }
 
       listEl.querySelectorAll<HTMLButtonElement>('button[data-dismiss]').forEach(btn => {
         btn.addEventListener('click', () => {
