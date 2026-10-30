@@ -304,6 +304,40 @@ const weathers = WEATHERS;
 <!-- Photo crop/rotate modal (#787) — single global instance, triggered by DropZone edit buttons -->
 <PhotoCropModal lang={lang} />
 
+<!-- Species conflict modal (Multiple species detected in single observation) -->
+<div id="obs2-conflict-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div class="flex items-center gap-2.5 text-amber-600 dark:text-amber-400">
+      <span class="text-2xl" aria-hidden="true">⚠️</span>
+      <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        {isEs ? "Especies diferentes detectadas" : "Different species detected"}
+      </h3>
+    </div>
+    <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs
+        ? "La IA detectó especies distintas en tus fotos. En COM, cada observación debe corresponder a un único individuo o especie:"
+        : "AI detected different species across your photos. In COM, each observation represents a single specimen:"}
+    </p>
+    <div id="obs2-conflict-list" class="space-y-2 max-h-56 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800">
+      <!-- Populated dynamically: photo thumb + scientific name + confidence -->
+    </div>
+    <div class="space-y-2 pt-2">
+      <button id="obs2-conflict-separate-btn" type="button" class="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2.5 text-sm transition-colors shadow-sm">
+        <span>✨</span>
+        <span id="obs2-conflict-separate-label">
+          {isEs ? "Guardar como observaciones separadas (Recomendado)" : "Save as separate observations (Recommended)"}
+        </span>
+      </button>
+      <button id="obs2-conflict-merge-btn" type="button" class="w-full flex items-center justify-center rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium px-4 py-2 text-xs transition-colors">
+        {isEs ? "Son el mismo espécimen (guardar juntas)" : "Same specimen (save together)"}
+      </button>
+      <button id="obs2-conflict-cancel-btn" type="button" class="w-full text-center text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 py-1">
+        {isEs ? "Volver y revisar" : "Go back and review"}
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 import type { PipelineFile, PipelineNode, PipelineState } from '../lib/pipeline-engine';
 import {
@@ -340,6 +374,7 @@ let cardAttempts: import('../lib/identify-cascade-client').IdentifyAttempt[] = [
 let observerAffirmed = false;
 let observerAffirmedTaxon: string | null = null;
 let reviewRequested = false;
+let conflictBypassed = false;
 
 const cardStrings: CardStrings = {
   analyzing: tr.observe.card.analyzing,
@@ -718,6 +753,7 @@ document.addEventListener('rastrum:photo-deleted', (e: Event) => {
   if (!pipelineState) return;
   const idx = pipelineState.files.findIndex(f => f.file === ev.detail.file);
   if (idx === -1) return;
+  conflictBypassed = false;
   // Remove the file and revoke the blobUrl to free memory
   const old = pipelineState.files[idx];
   URL.revokeObjectURL(old.blobUrl);
@@ -749,6 +785,7 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
   const ev = e as CustomEvent<{ files: File[] }>;
   const files: File[] = ev.detail.files;
   if (!files.length) return;
+  conflictBypassed = false;
 
   const newPipelineFiles: PipelineFile[] = files.map(f => ({
     id: crypto.randomUUID(),
@@ -1332,10 +1369,260 @@ identifyDoneBtn?.addEventListener('click', () => {
 // sentinel (0,0) shortcut was a 5th exit creating choice paralysis.
 // Users without GPS pick a location via the map.
 
+// ── Species conflict detection & resolution ──────────────────────────────
+const escapeHtml = (s: string) => s.replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+
+interface ConflictItem {
+  file: PipelineFile;
+  scientificName: string;
+  commonName?: string | null;
+  confidence: number;
+  source: string;
+}
+
+function checkSpeciesConflict(): { hasConflict: boolean; items: ConflictItem[] } {
+  if (!pipelineState || pipelineState.files.length < 2) {
+    return { hasConflict: false, items: [] };
+  }
+  const photoFiles = pipelineState.files.filter(f => f.kind === 'photo');
+  if (photoFiles.length < 2) {
+    return { hasConflict: false, items: [] };
+  }
+
+  const items: ConflictItem[] = [];
+  for (const pf of photoFiles) {
+    const node = pipelineState.nodes.find(n => n.kind === 'identify' && n.fileId === pf.id);
+    const sci = node?.output?.scientific_name?.trim();
+    if (sci) {
+      items.push({
+        file: pf,
+        scientificName: sci,
+        commonName: node?.output?.common_name_en,
+        confidence: node?.output?.confidence ?? 0,
+        source: node?.output?.source ?? 'bioclip_2',
+      });
+    }
+  }
+
+  if (items.length < 2) return { hasConflict: false, items: [] };
+
+  const uniqueNames = new Set(items.map(i => i.scientificName.toLowerCase()));
+  return { hasConflict: uniqueNames.size > 1, items };
+}
+
+function openConflictModal(items: ConflictItem[]) {
+  const modal = document.getElementById('obs2-conflict-modal');
+  const listEl = document.getElementById('obs2-conflict-list');
+  const sepLabel = document.getElementById('obs2-conflict-separate-label');
+  if (!modal || !listEl) return;
+
+  if (sepLabel) {
+    sepLabel.textContent = isEs
+      ? `Guardar como ${items.length} observaciones separadas (Recomendado)`
+      : `Save as ${items.length} separate observations (Recommended)`;
+  }
+
+  listEl.innerHTML = items.map((item, idx) => {
+    const thumbUrl = item.file.blobUrl;
+    const pct = Math.round(item.confidence * 100);
+    const commonLabel = item.commonName ? `${escapeHtml(item.commonName)} · ` : '';
+    return `
+      <div class="flex items-center gap-3 py-2">
+        <img src="${thumbUrl}" alt="" class="w-12 h-12 rounded-lg object-cover border border-zinc-200 dark:border-zinc-700 shrink-0" />
+        <div class="min-w-0 flex-1">
+          <p class="text-xs text-zinc-600 dark:text-zinc-400 font-medium">${isEs ? 'Foto' : 'Photo'} ${idx + 1}</p>
+          <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 italic truncate">${escapeHtml(item.scientificName)}</p>
+          <p class="text-[11px] text-zinc-600 dark:text-zinc-400">${commonLabel}${pct}% ${isEs ? 'confianza' : 'confidence'}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  modal.classList.remove('hidden');
+}
+
+async function saveAsSeparateObservations() {
+  if (!pipelineState) return;
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = isEs ? 'Guardando...' : 'Saving...'; }
+  if (errorEl) errorEl.classList.add('hidden');
+
+  try {
+    const observerRef = await resolveObserverRef();
+    const notes = (document.getElementById('obs2-notes') as HTMLTextAreaElement | null)?.value.trim() || null;
+    const habitatVal = (document.getElementById('obs2-habitat') as HTMLSelectElement | null)?.value || null;
+    const weatherVal = (document.getElementById('obs2-weather') as HTMLSelectElement | null)?.value || null;
+    const sensitiveVal = (document.getElementById('obs2-sensitive') as HTMLInputElement | null)?.checked ?? false;
+    const licenseVal = (document.getElementById('obs2-license') as HTMLSelectElement | null)?.value || null;
+    const licenseTyped = licenseVal as 'CC BY 4.0' | 'CC BY-NC 4.0' | 'CC0' | null;
+    const lifeStageVal = (document.getElementById('obs2-life-stage') as HTMLSelectElement | null)?.value || null;
+    const vitalStatusVal = (document.getElementById('obs2-vital-status') as HTMLSelectElement | null)?.value || null;
+
+    const dateInput = document.getElementById('obs2-observed-at') as HTMLInputElement | null;
+    let createdAtIso: string | undefined = undefined;
+    if (dateInput?.value) {
+      const d = new Date(dateInput.value);
+      if (!isNaN(d.getTime())) createdAtIso = d.toISOString();
+    } else if (photoCapturedAt) {
+      createdAtIso = photoCapturedAt;
+    }
+
+    const draftLoc = location ? {
+      lat: location.lat,
+      lng: location.lng,
+      accuracyM: location.accuracyM,
+      altitudeM: location.altitudeM,
+      capturedFrom: location.capturedFrom ?? 'manual',
+    } : { lat: 0, lng: 0, accuracyM: 0, altitudeM: null, capturedFrom: 'manual' as const };
+
+    const savedObservations: import('../lib/types').Observation[] = [];
+
+    for (const pf of pipelineState.files) {
+      const node = pipelineState.nodes.find(n => n.kind === 'identify' && n.fileId === pf.id);
+      const sciName = node?.output?.scientific_name || bestResult?.scientific_name || '';
+      const confidence = node?.output?.confidence ?? (bestResult?.confidence ?? 0);
+      const source = node?.output?.source ?? bestResult?.source;
+
+      const mediaInput = {
+        blob: pf.file,
+        blobId: pf.id,
+        mimeType: pf.file.type || (
+          pf.kind === 'audio' ? 'audio/webm' :
+          pf.kind === 'video' ? 'video/webm' :
+          pf.kind === 'photo' ? 'image/jpeg' :
+          'application/octet-stream'
+        ),
+        sizeBytes: pf.file.size,
+        mediaType: pf.kind === 'audio' ? 'audio' as const : pf.kind === 'video' ? 'video' as const : 'photo' as const,
+      };
+
+      const obs = await saveObservationToOutbox({
+        observerRef,
+        createdAt: createdAtIso,
+        media: [mediaInput],
+        location: draftLoc,
+        identification: sciName ? {
+          scientificName: sciName,
+          confidence,
+          source: resolveIdentificationSource({ machineSource: source, hasMachineResult: !!source }) as never,
+          status: 'accepted',
+        } : undefined,
+        habitat: habitatVal as never,
+        weather: weatherVal as never,
+        notes,
+        contentSensitive: sensitiveVal,
+        license: licenseTyped,
+        lifeStage: (lifeStageVal || null) as import('../lib/observe').ObservationDraft['lifeStage'],
+        vitalStatus: (vitalStatusVal || null) as import('../lib/observe').ObservationDraft['vitalStatus'],
+        reviewRequested,
+      });
+      savedObservations.push(obs);
+    }
+
+    // Update pipeline state
+    pipelineState.status = 'done';
+    await savePipelineState(pipelineState).catch(() => {});
+    document.dispatchEvent(new CustomEvent('rastrum:pipeline-update', { detail: { nodes: pipelineState.nodes } }));
+
+    // Persist defaults
+    void setObservationDefaults({
+      habitat: habitatVal ?? undefined,
+      weather: weatherVal ?? undefined,
+      licenseCode: licenseTyped ?? undefined,
+    });
+
+    // Show success
+    if (saveBtn) { saveBtn.textContent = isEs ? 'Guardado' : 'Saved'; }
+    postForm?.classList.add('hidden');
+    successEl?.classList.remove('hidden');
+
+    const successTitle = successEl?.querySelector('p');
+    if (successTitle) {
+      successTitle.textContent = isEs
+        ? `¡${savedObservations.length} observaciones guardadas!`
+        : `¡${savedObservations.length} observations saved!`;
+    }
+
+    // Flush outbox if online
+    if (navigator.onLine) {
+      try {
+        const { syncOutbox } = await import('../lib/sync');
+        await syncOutbox();
+      } catch (err) {
+        console.warn('[rastrum] auto-sync after save failed:', err);
+      }
+    }
+
+    // Render observation links
+    const linkEl = document.getElementById('obs2-success-link');
+    if (linkEl && savedObservations.length > 0) {
+      linkEl.innerHTML = `
+        <div class="space-y-1 py-1">
+          ${savedObservations.map((obs, i) => `
+            <div>
+              <a href="/share/obs/?id=${obs.id}" class="text-emerald-700 dark:text-emerald-400 underline text-sm">
+                ${isEs ? `Ver observación ${i + 1}: ${obs.identification?.scientificName || 'Especie'}` : `View observation ${i + 1}: ${obs.identification?.scientificName || 'Species'}`} →
+              </a>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Toast
+    const toastEl = document.createElement('div');
+    toastEl.setAttribute('role', 'status');
+    toastEl.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-emerald-700 text-white px-5 py-3 text-sm shadow-lg max-w-[340px] text-center pointer-events-none transition-opacity duration-300';
+    toastEl.textContent = isEs
+      ? `¡${savedObservations.length} observaciones guardadas!`
+      : `${savedObservations.length} observations saved!`;
+    document.body.appendChild(toastEl);
+    setTimeout(() => { toastEl.style.opacity = '0'; setTimeout(() => toastEl.remove(), 300); }, 3000);
+
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = (err as Error).message ?? (isEs ? 'Error al guardar' : 'Error saving');
+      errorEl.classList.remove('hidden');
+    }
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = isEs ? 'Guardar observación' : 'Save observation'; }
+  }
+}
+
+// Modal event listeners
+document.getElementById('obs2-conflict-cancel-btn')?.addEventListener('click', () => {
+  document.getElementById('obs2-conflict-modal')?.classList.add('hidden');
+  if (saveBtn) {
+    saveBtn.disabled = false;
+    saveBtn.textContent = isEs ? 'Guardar observación' : 'Save observation';
+  }
+});
+
+document.getElementById('obs2-conflict-merge-btn')?.addEventListener('click', () => {
+  document.getElementById('obs2-conflict-modal')?.classList.add('hidden');
+  conflictBypassed = true;
+  if (typeof postForm?.requestSubmit === 'function') {
+    postForm.requestSubmit();
+  } else {
+    postForm?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  }
+});
+
+document.getElementById('obs2-conflict-separate-btn')?.addEventListener('click', async () => {
+  document.getElementById('obs2-conflict-modal')?.classList.add('hidden');
+  await saveAsSeparateObservations();
+});
+
 // ── Save ───────────────────────────────────────────────────────────────────
 postForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!pipelineState) return;
+
+  const conflict = checkSpeciesConflict();
+  if (!conflictBypassed && conflict.hasConflict) {
+    openConflictModal(conflict.items);
+    return;
+  }
+
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = isEs ? 'Guardando...' : 'Saving...'; }
   if (errorEl) errorEl.classList.add('hidden');
 
@@ -1517,6 +1804,7 @@ document.getElementById('obs2-new-btn')?.addEventListener('click', () => {
   observerAffirmed = false;
   observerAffirmedTaxon = null;
   reviewRequested = false;
+  conflictBypassed = false;
   const cardV2El = document.getElementById('obs2-card-v2');
   if (cardV2El) { cardV2El.innerHTML = ''; cardV2El.classList.add('hidden'); }
   pipelineState = null;
