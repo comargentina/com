@@ -21,10 +21,10 @@ import ShareObsView from '../../../components/ShareObsView.astro';
 //      apps that render JS (Notion, Discord desktop, etc.) get the right meta.
 //      Pure HTTP crawlers (WhatsApp) still see the static fallback — full fix
 //      requires either Cloudflare Worker routing or SSR (tracked in #714).
-const lang: 'en' | 'es' = 'en';
+const lang: 'en' | 'es' = 'es';
 ---
 
-<BaseLayout title="Observation — COM" description="View a shared biodiversity observation from the COM Argentina community — species identification, photo, audio, GPS location, and observer notes." lang={lang}>
+<BaseLayout title="Observación — COM Argentina" description="Ver una observación de biodiversidad compartida en la comunidad COM Argentina — identificación de especie, foto, audio, ubicación GPS y notas de campo." lang={lang}>
 
   <!-- Detect user language preference BEFORE first paint so strings render correctly.
        This page is locale-neutral (no /en/ or /es/ prefix) so lang is always 'en'
