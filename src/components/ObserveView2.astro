@@ -722,6 +722,7 @@ document.addEventListener('rastrum:photo-deleted', (e: Event) => {
   const old = pipelineState.files[idx];
   URL.revokeObjectURL(old.blobUrl);
   pipelineState.files.splice(idx, 1);
+  pipelineState.nodes = pipelineState.nodes.filter(n => n.fileId !== old.id);
   // If no files left, reset the UI
   if (pipelineState.files.length === 0) {
     pipelineState.status = 'idle';
@@ -749,7 +750,7 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
   const files: File[] = ev.detail.files;
   if (!files.length) return;
 
-  const pipelineFiles: PipelineFile[] = files.map(f => ({
+  const newPipelineFiles: PipelineFile[] = files.map(f => ({
     id: crypto.randomUUID(),
     file: f,
     kind: triageFile(f),
@@ -758,12 +759,32 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
 
   // Detect available runners
   const runners = await detectRunners();
-  const nodes = buildGraph(pipelineFiles, runners);
+
+  // If pipeline already has files, append the new ones instead of wiping them out
+  const existingFiles = (pipelineState?.files && pipelineState.files.length > 0)
+    ? pipelineState.files
+    : [];
+  const combinedFiles = [...existingFiles, ...newPipelineFiles];
+
+  const nodes = buildGraph(combinedFiles, runners);
+
+  // Preserve state of already-processed nodes from existing files
+  if (pipelineState?.nodes) {
+    const oldNodesById = new Map(pipelineState.nodes.map(n => [n.id, n]));
+    for (const node of nodes) {
+      const old = oldNodesById.get(node.id);
+      if (old && (old.state === 'done' || old.state === 'failed' || old.state === 'skipped')) {
+        node.state = old.state;
+        node.output = old.output;
+        node.error = old.error;
+      }
+    }
+  }
 
   pipelineState = {
-    id: crypto.randomUUID(),
-    createdAt: Date.now(),
-    files: pipelineFiles,
+    id: pipelineState?.id ?? crypto.randomUUID(),
+    createdAt: pipelineState?.createdAt ?? Date.now(),
+    files: combinedFiles,
     nodes,
     mode: 'full',
     status: 'processing',
@@ -777,18 +798,19 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
   updatePipelineUI();
 
   // Extract photo EXIF metadata (GPS & capture date) in parallel
-  const firstPhoto = files.find(f => f?.type?.startsWith('image/'));
-  if (firstPhoto) {
-    void extractPhotoMetadata(firstPhoto);
+  if (!location) {
+    const firstPhoto = combinedFiles.find(f => f.file?.type?.startsWith('image/'))?.file;
+    if (firstPhoto) {
+      void extractPhotoMetadata(firstPhoto);
+    }
+    // Start GPS in parallel (fallback if photo has no EXIF GPS)
+    startGPS();
   }
-
-  // Start GPS in parallel (fallback if photo has no EXIF GPS)
-  startGPS();
 
   // Escape hatch: show "Skip and continue" after 15s if still processing.
   // Covers the Android Chrome auth-lock timeout and slow network cases.
   const escapeTimer = setTimeout(() => {
-    if (pipelineState.status === 'processing') {
+    if (pipelineState?.status === 'processing') {
       pipelineEscape?.classList.remove('hidden');
       pipelineEscape?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -888,7 +910,7 @@ async function runPipeline(state: PipelineState) {
   }
 
   for (const node of state.nodes) {
-    if (node.kind !== 'identify' || node.state === 'skipped') continue;
+    if (node.kind !== 'identify' || node.state === 'skipped' || node.state === 'done') continue;
     const pf = state.files.find(f => f.id === node.fileId);
     if (!pf) continue;
     setNodeState(state, node.id, 'running');

@@ -296,4 +296,15 @@ function showPreviews(files: File[]) {
     }
   }
 }
+
+// ── Reset dropzone previews on new observation ───────────────────────────
+document.getElementById('obs2-new-btn')?.addEventListener('click', () => {
+  if (!previews || !defaultEl) return;
+  Array.from(previews.children).forEach(child => {
+    if (child !== addMoreBtn) child.remove();
+  });
+  previews.classList.add('hidden');
+  previews.classList.remove('flex');
+  defaultEl.classList.remove('hidden');
+});
 </script>
