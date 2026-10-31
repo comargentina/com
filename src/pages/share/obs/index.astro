@@ -809,20 +809,35 @@ const lang: 'en' | 'es' = 'es';
             const opts = await buildCascadeOptions({ mediaKind: 'photo', evidenceType });
 
             // For external image URLs (e.g. iNaturalist S3) the browser can't
-            // fetch them directly due to CORS. Route through our server-side proxy
-            // at /api/proxy-image so the cascade receives a fetchable same-origin blob.
+            // fetch them directly due to CORS. We try a direct fetch first; if it
+            // fails (CORS / network error), we fall back to our server-side proxy
+            // at /api/proxy-image which downloads the image server-to-server.
+            // Supabase public storage URLs work cross-origin, so they'll succeed on
+            // the first attempt and avoid the extra round-trip.
             const imgSrc = heroImg.src;
             const isSameOrigin = imgSrc.startsWith(window.location.origin) || imgSrc.startsWith('data:') || imgSrc.startsWith('blob:');
-            const fetchUrl = isSameOrigin
-              ? imgSrc
-              : `/api/proxy-image?url=${encodeURIComponent(imgSrc)}`;
-            const resp = await fetch(fetchUrl);
-            if (!resp.ok) throw new Error(`proxy ${resp.status}`);
-            const blob = await resp.blob();
+            let blob: Blob;
+            if (isSameOrigin) {
+              const resp = await fetch(imgSrc);
+              if (!resp.ok) throw new Error(`fetch ${resp.status}`);
+              blob = await resp.blob();
+            } else {
+              // Try direct fetch first (works for CORS-permissive origins like Supabase Storage).
+              let directOk = false;
+              try {
+                const resp = await fetch(imgSrc);
+                if (resp.ok) { blob = await resp.blob(); directOk = true; }
+              } catch { /* will fall through to proxy */ }
+              if (!directOk) {
+                const proxyResp = await fetch(`/api/proxy-image?url=${encodeURIComponent(imgSrc)}`);
+                if (!proxyResp.ok) throw new Error(`proxy ${proxyResp.status}`);
+                blob = await proxyResp.blob();
+              }
+            }
             const mediaInput: { kind: 'blob'; blob: Blob; mime: string } = {
               kind: 'blob',
-              blob,
-              mime: blob.type || 'image/jpeg',
+              blob: blob!,
+              mime: blob!.type || 'image/jpeg',
             };
 
             const result = await runCascade(

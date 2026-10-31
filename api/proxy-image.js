@@ -8,14 +8,20 @@
  * Only allow-listed hostnames are proxied to prevent open-proxy abuse.
  */
 
+// Exact-match hostnames
 const ALLOWED_HOSTNAMES = new Set([
   'inaturalist-open-data.s3.amazonaws.com',
   'static.inaturalist.org',
   'inaturalist.org',
   'www.inaturalist.org',
   'media.rastrum.org',
-  'reppvlqejgoqvitturxp.supabase.co',
 ]);
+
+// Hostname suffix patterns — any subdomain of these domains is allowed
+const ALLOWED_SUFFIXES = [
+  '.supabase.co',
+  '.supabase.in',
+];
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -42,7 +48,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!ALLOWED_HOSTNAMES.has(parsed.hostname)) {
+  if (!ALLOWED_HOSTNAMES.has(parsed.hostname) && !ALLOWED_SUFFIXES.some(s => parsed.hostname.endsWith(s))) {
     res.status(403).json({ error: `Origin not allowed: ${parsed.hostname}` });
     return;
   }
