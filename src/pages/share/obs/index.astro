@@ -808,20 +808,22 @@ const lang: 'en' | 'es' = 'es';
             const evidenceType = askAiBtn.dataset.evidenceType;
             const opts = await buildCascadeOptions({ mediaKind: 'photo', evidenceType });
 
-            // Pass the image URL directly so the server-side Edge Function fetches it
-            // server-to-server, avoiding CORS restrictions on external URLs (e.g. iNaturalist S3).
-            // Falls back to a client blob fetch only for same-origin / data: URLs where
-            // a direct URL round-trip through the Edge Function would be unnecessary.
-            let mediaInput: { kind: 'url'; url: string } | { kind: 'blob'; blob: Blob; mime: string };
+            // For external image URLs (e.g. iNaturalist S3) the browser can't
+            // fetch them directly due to CORS. Route through our server-side proxy
+            // at /api/proxy-image so the cascade receives a fetchable same-origin blob.
             const imgSrc = heroImg.src;
             const isSameOrigin = imgSrc.startsWith(window.location.origin) || imgSrc.startsWith('data:') || imgSrc.startsWith('blob:');
-            if (isSameOrigin) {
-              const resp = await fetch(imgSrc);
-              const blob = await resp.blob();
-              mediaInput = { kind: 'blob', blob, mime: blob.type || 'image/jpeg' };
-            } else {
-              mediaInput = { kind: 'url', url: imgSrc };
-            }
+            const fetchUrl = isSameOrigin
+              ? imgSrc
+              : `/api/proxy-image?url=${encodeURIComponent(imgSrc)}`;
+            const resp = await fetch(fetchUrl);
+            if (!resp.ok) throw new Error(`proxy ${resp.status}`);
+            const blob = await resp.blob();
+            const mediaInput: { kind: 'blob'; blob: Blob; mime: string } = {
+              kind: 'blob',
+              blob,
+              mime: blob.type || 'image/jpeg',
+            };
 
             const result = await runCascade(
               {
