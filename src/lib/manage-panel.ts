@@ -126,7 +126,7 @@ export async function wireManagePanelDetails(
 
   if (sciInput)   sciInput.value   = (_ident?.scientific_name as string | null) ?? '';
   if (notesEl)    notesEl.value    = (obs.notes as string | null) ?? '';
-  if (obsEl)      obsEl.value      = (obs.obscure_level as string) ?? 'none';
+  if (obsEl)      obsEl.value      = (obs.obscure_level === 'full') ? 'full' : 'none';
   if (observedAt) observedAt.value = isoToLocalDatetimeInput(obs.observed_at as string | null | undefined);
   if (habitatEl)  habitatEl.value  = (obs.habitat as string | null) ?? '';
   if (weatherEl)  weatherEl.value  = (obs.weather as string | null) ?? '';

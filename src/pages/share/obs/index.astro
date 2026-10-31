@@ -218,15 +218,19 @@ const lang: 'en' | 'es' = 'es';
             const coordsEl = document.querySelector('[data-obs-coords]');
             if (coordsEl) {
               const isEs = document.documentElement.lang === 'es';
-              const obscured = updatedObs.obscure_level;
-              const isObscured = !!obscured && obscured !== 'none';
+              const obsLevel = updatedObs.obscure_level ?? 'none';
+              const isFull = obsLevel === 'full';
               const obsLoc = parseLocationToGeoJSON(updatedObs.location);
               const coords = obsLoc?.coordinates;
               if (Array.isArray(coords) && coords.length >= 2) {
                 const formatted = `${coords[1].toFixed(4)}, ${coords[0].toFixed(4)}`;
-                coordsEl.textContent = isObscured
-                  ? (isEs ? `~${formatted} (aproximado)` : `~${formatted} (coarsened)`)
-                  : formatted;
+                if (isFull) {
+                  coordsEl.textContent = `${formatted} ${isEs ? '(Oculta para otros usuarios)' : '(Hidden from others)'}`;
+                } else if (obsLevel !== 'none') {
+                  coordsEl.textContent = isEs ? `~${formatted} (aproximado)` : `~${formatted} (coarsened)`;
+                } else {
+                  coordsEl.textContent = formatted;
+                }
               }
             }
 
@@ -521,25 +525,41 @@ const lang: 'en' | 'es' = 'es';
             // Coords readout + view-mode mini-map hydration. PostgREST returns
       // `location` as EWKB hex for geography columns — parsed via geo.ts.
       // For non-owner viewers we prefer `location_obscured` when present.
+      const isEs = document.documentElement.lang === 'es';
+      const obsLevel = (obs as { obscure_level?: string }).obscure_level ?? 'none';
+      const isFull = obsLevel === 'full';
       const obsLoc = parseLocationToGeoJSON((obs as Record<string,unknown>).location);
       const obscuredLoc = parseLocationToGeoJSON((obs as Record<string,unknown>).location_obscured);
-      const usePoint = (!viewerIsObserver && obscuredLoc?.coordinates) ? obscuredLoc : obsLoc;
-      const coords = usePoint?.coordinates;
-      if (Array.isArray(coords) && coords.length >= 2) {
-        const lng = coords[0];
-        const lat = coords[1];
-        window.dispatchEvent(new CustomEvent('rastrum:mappicker-set', {
-          detail: { id: 'obs-detail', coords: { lat, lng } },
-        }));
-        const coordsEl = document.querySelector('[data-obs-coords]');
+      const coordsEl = document.querySelector('[data-obs-coords]');
+
+      if (!viewerIsObserver && isFull) {
+        // Location is hidden by observer for all other viewers
         if (coordsEl) {
-          const isEs = document.documentElement.lang === 'es';
-          const obscured = (obs as { obscure_level?: string }).obscure_level;
-          const isObscured = !!obscured && obscured !== 'none';
-          const formatted = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-          coordsEl.textContent = isObscured
-            ? (isEs ? `~${formatted} (aproximado)` : `~${formatted} (coarsened)`)
-            : formatted;
+          coordsEl.textContent = isEs ? 'Ubicación oculta por el observador' : 'Location hidden by observer';
+        }
+        const mapFallback = document.querySelector<HTMLElement>('[data-mappicker-fallback="obs-detail"]');
+        if (mapFallback) {
+          mapFallback.textContent = isEs ? 'Ubicación oculta por privacidad' : 'Location hidden for privacy';
+        }
+      } else {
+        const usePoint = (!viewerIsObserver && obscuredLoc?.coordinates) ? obscuredLoc : obsLoc;
+        const coords = usePoint?.coordinates;
+        if (Array.isArray(coords) && coords.length >= 2) {
+          const lng = coords[0];
+          const lat = coords[1];
+          window.dispatchEvent(new CustomEvent('rastrum:mappicker-set', {
+            detail: { id: 'obs-detail', coords: { lat, lng } },
+          }));
+          if (coordsEl) {
+            const formatted = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            if (viewerIsObserver && isFull) {
+              coordsEl.textContent = `${formatted} ${isEs ? '(Oculta para otros usuarios)' : '(Hidden from others)'}`;
+            } else if (obsLevel !== 'none') {
+              coordsEl.textContent = isEs ? `~${formatted} (aproximado)` : `~${formatted} (coarsened)`;
+            } else {
+              coordsEl.textContent = formatted;
+            }
+          }
         }
       }
 

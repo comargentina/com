@@ -1086,7 +1086,7 @@
       "privacy_10km": "Aproximar a ~10 km",
       "privacy_20km": "Aproximar a ~20 km",
       "privacy_5km": "Aproximar a ~5 km",
-      "privacy_hide": "Ocultar ubicación completamente",
+      "privacy_hide": "Ocultar ubicación",
       "delete_obs": "Eliminar observación",
       "place_chip_label": "Ver lugar"
     },

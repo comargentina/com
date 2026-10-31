@@ -1086,7 +1086,7 @@
       "privacy_10km": "Coarsen to ~10 km",
       "privacy_20km": "Coarsen to ~20 km",
       "privacy_5km": "Coarsen to ~5 km",
-      "privacy_hide": "Hide location entirely",
+      "privacy_hide": "Hide location",
       "delete_obs": "Delete observation",
       "place_chip_label": "View place"
     },
