@@ -776,12 +776,11 @@ const lang: 'en' | 'es' = 'es';
           const noResultLabel = isEs ? 'La IA no pudo identificar.' : (askAiBtn.dataset.labelNoResult ?? 'AI could not identify.');
 
           const heroImg = document.querySelector<HTMLImageElement>('[data-photo-hero] img');
-          // Guard: no src, or image definitively failed to load.
-          // We only treat it as broken when complete===true AND naturalWidth===0,
-          // which means the browser finished attempting to load and got nothing.
-          // If complete===false the image is still in-flight (slow connection) —
-          // let the fetch() attempt proceed; it may succeed or surface a real error.
-          if (!heroImg?.src || (heroImg.complete && heroImg.naturalWidth === 0)) {
+          // Guard: only block if there is truly no URL to work with.
+          // Even when the browser failed to render the image (naturalWidth===0, e.g.
+          // iNaturalist S3 blocking direct browser requests), the src attribute still
+          // holds a valid URL that our server-side proxy can fetch successfully.
+          if (!heroImg?.src) {
             askAiBtn.textContent = noPhotoLabel;
             setTimeout(() => { askAiBtn.textContent = idleLabel; }, 3000);
             return;
