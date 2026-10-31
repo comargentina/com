@@ -792,9 +792,6 @@ const lang: 'en' | 'es' = 'es';
           aiResultEl?.classList.add('hidden');
 
           try {
-            const resp = await fetch(heroImg.src);
-            const blob = await resp.blob();
-
             const { bootstrapIdentifiers, runCascade } = await import('../../../lib/identifiers');
             const { listConfiguredPluginIds, getAllKeysForPlugin } = await import('../../../lib/byo-keys');
             bootstrapIdentifiers();
@@ -811,9 +808,24 @@ const lang: 'en' | 'es' = 'es';
             const evidenceType = askAiBtn.dataset.evidenceType;
             const opts = await buildCascadeOptions({ mediaKind: 'photo', evidenceType });
 
+            // Pass the image URL directly so the server-side Edge Function fetches it
+            // server-to-server, avoiding CORS restrictions on external URLs (e.g. iNaturalist S3).
+            // Falls back to a client blob fetch only for same-origin / data: URLs where
+            // a direct URL round-trip through the Edge Function would be unnecessary.
+            let mediaInput: { kind: 'url'; url: string } | { kind: 'blob'; blob: Blob; mime: string };
+            const imgSrc = heroImg.src;
+            const isSameOrigin = imgSrc.startsWith(window.location.origin) || imgSrc.startsWith('data:') || imgSrc.startsWith('blob:');
+            if (isSameOrigin) {
+              const resp = await fetch(imgSrc);
+              const blob = await resp.blob();
+              mediaInput = { kind: 'blob', blob, mime: blob.type || 'image/jpeg' };
+            } else {
+              mediaInput = { kind: 'url', url: imgSrc };
+            }
+
             const result = await runCascade(
               {
-                media: { kind: 'blob', blob, mime: blob.type || 'image/jpeg' },
+                media: mediaInput,
                 mediaKind: 'photo',
                 byo_keys: byoKeys,
               },
