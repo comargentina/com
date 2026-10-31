@@ -273,6 +273,8 @@ Full design rationale: `docs/superpowers/specs/2026-04-26-ux-revamp-design.md`.
 
 ## Things you should NOT do without asking
 
+- **Don't poll background tasks in loops.** When a command runs as a background task, NEVER call `manage_task(Action='status')` repeatedly in a loop. Stop and wait for the reactive system wakeup to save tokens.
+- **Don't run the full test suite for narrow changes.** Use `tsc --noEmit` or run only the specific test file (e.g. `vitest run <file>.test.ts`). Never run all 700+ tests unless explicitly asked by the user.
 - **Don't run destructive git** (`git reset --hard`, `git push --force`,
   `git checkout --` against unstaged changes, `branch -D`) without explicit
   user permission. This repo is solo-developed but the user occasionally
