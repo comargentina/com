@@ -187,26 +187,59 @@ const lang: 'en' | 'es' = 'es';
       });
 
       /**
-       * Re-fetch the primary identification and update the species name
-       * without a full page reload. Lightweight: only queries the
-       * identifications table, not the full observation.
+       * Re-fetch observation and primary identification to update the species,
+       * coordinates readout, and sensitive badge without a full page reload.
        */
       async function refreshObservationData(obsId: string) {
         lastFetchedAt = Date.now();
         try {
           const supabase = getSupabase();
-          const { data: ids } = await supabase
-            .from('identifications')
-            .select('scientific_name, is_primary, is_research_grade, confidence')
-            .eq('observation_id', obsId)
-            .order('created_at', { ascending: false });
+          const { data: updatedObs } = await supabase
+            .from('observations')
+            .select(`
+              id, obscure_level, location, location_obscured,
+              identifications(scientific_name, is_primary, is_research_grade)
+            `)
+            .eq('id', obsId)
+            .maybeSingle();
 
-          if (ids && ids.length > 0) {
-            const primary = (ids as Array<{ scientific_name: string; is_primary: boolean }>)
-              .find(i => i.is_primary) ?? ids[0];
-            const speciesEl = document.getElementById('species');
-            if (speciesEl && primary.scientific_name) {
-              speciesEl.textContent = primary.scientific_name;
+          if (updatedObs) {
+            // Update sensitive badge
+            const sensitiveEl = document.getElementById('sensitive');
+            if (sensitiveEl) {
+              if (updatedObs.obscure_level && updatedObs.obscure_level !== 'none') {
+                sensitiveEl.classList.remove('hidden');
+              } else {
+                sensitiveEl.classList.add('hidden');
+              }
+            }
+
+            // Update coordinates readout
+            const coordsEl = document.querySelector('[data-obs-coords]');
+            if (coordsEl) {
+              const isEs = document.documentElement.lang === 'es';
+              const obscured = updatedObs.obscure_level;
+              const isObscured = !!obscured && obscured !== 'none';
+              const obsLoc = parseLocationToGeoJSON(updatedObs.location);
+              const coords = obsLoc?.coordinates;
+              if (Array.isArray(coords) && coords.length >= 2) {
+                const formatted = `${coords[1].toFixed(4)}, ${coords[0].toFixed(4)}`;
+                coordsEl.textContent = isObscured
+                  ? (isEs ? `~${formatted} (aproximado)` : `~${formatted} (coarsened)`)
+                  : formatted;
+              }
+            }
+
+            const ids = Array.isArray(updatedObs.identifications)
+              ? updatedObs.identifications
+              : (updatedObs.identifications ? [updatedObs.identifications] : []);
+            if (ids.length > 0) {
+              const primary = (ids as Array<{ scientific_name: string; is_primary: boolean }>)
+                .find(i => i.is_primary) ?? ids[0];
+              const speciesEl = document.getElementById('species');
+              if (speciesEl && primary?.scientific_name) {
+                speciesEl.textContent = primary.scientific_name;
+              }
             }
           }
         } catch {

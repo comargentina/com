@@ -238,6 +238,37 @@ export async function wireManagePanelDetails(
           );
         }
 
+        const sci = sciInput?.value.trim() ?? '';
+        const correctedSci = sci ? correctIdentificationName(sci) : '';
+        const initialSci = (_ident?.scientific_name as string | null)?.trim() ?? '';
+        const initialCorrectedSci = initialSci ? correctIdentificationName(initialSci) : '';
+        const isSciChanged = Boolean(correctedSci && correctedSci !== initialCorrectedSci);
+
+        // If the species name was modified, update identifications first.
+        // We do this BEFORE updating observations so that the
+        // sync_primary_id_trigger (which denormalizes taxa.obscure_level)
+        // runs first and is then overridden by the user's explicit
+        // obscure_level choice in the observations payload below.
+        if (isSciChanged) {
+          const { error: demoteErr } = await supabase.from('identifications')
+            .update({ is_primary: false })
+            .eq('observation_id', obsId)
+            .eq('is_primary', true);
+          if (demoteErr) throw demoteErr;
+
+          const { error: idErr } = await supabase.from('identifications').insert({
+            observation_id: obsId,
+            scientific_name: correctedSci,
+            confidence: 0.95,
+            source: 'human',
+            is_primary: true,
+            validated_by: null,
+            validated_at: new Date().toISOString(),
+            raw_response: { manual_override: true, by: viewer.id },
+          });
+          if (idErr) throw idErr;
+        }
+
         // Use .select() so PostgREST returns the matched rows. If RLS
         // filters the owner out (stale JWT edge-case), data will be an
         // empty array and we surface a clear error instead of silently
@@ -255,43 +286,18 @@ export async function wireManagePanelDetails(
               : 'Could not update observation. Verify you are still the owner and try again.',
           );
         }
-
-        const sci = sciInput?.value.trim();
-        if (sci) {
-          // Apply taxonomy synonym correction for known outdated names (#345)
-          const correctedSci = correctIdentificationName(sci);
-          // Demote the current primary identification. When no prior
-          // primary exists (e.g. brand-new observation that never went
-          // through the identify cascade), the UPDATE simply matches 0
-          // rows — this is expected and not an error (#445).
-          const { error: demoteErr } = await supabase.from('identifications')
-            .update({ is_primary: false })
-            .eq('observation_id', obsId)
-            .eq('is_primary', true);
-          // Only throw on actual RLS / network errors, not on 0-row matches.
-          if (demoteErr) throw demoteErr;
-
-          const { error: idErr } = await supabase.from('identifications').insert({
-            observation_id: obsId,
-            scientific_name: correctedSci,
-            confidence: 0.95,
-            source: 'human',
-            is_primary: true,
-            validated_by: null,
-            validated_at: new Date().toISOString(),
-            raw_response: { manual_override: true, by: viewer.id },
-          });
-          if (idErr) throw idErr;
-        }
       })()]);
 
       savedEl?.classList.remove('hidden');
-      const sci = sciInput?.value.trim();
+      if (obs && payload.obscure_level) {
+        obs.obscure_level = payload.obscure_level;
+      }
+      const sci = sciInput?.value.trim() ?? '';
       if (sci) {
         const correctedSci = correctIdentificationName(sci);
+        if (_ident) _ident.scientific_name = correctedSci;
         const speciesEl = document.getElementById('species');
         if (speciesEl) speciesEl.textContent = correctedSci;
-        // If the user typed an outdated name, update the input to show the correction
         if (correctedSci !== sci && sciInput) sciInput.value = correctedSci;
       }
       // Notify the page that identification data changed so it can
