@@ -201,9 +201,8 @@ const l = labels[lang] ?? labels.en;
 
       emit(completed ? 'guide_completed' : 'guide_dismissed');
 
-      if (completed) {
-        try { localStorage.setItem(`rastrum.guide.${guideId.replace('guide-', '')}`, 'done'); } catch { /* noop */ }
-      }
+      // Mark as seen whether completed or skipped — prevents re-showing on next visit.
+      try { localStorage.setItem(`rastrum.guide.${guideId.replace('guide-', '')}`, 'done'); } catch { /* noop */ }
 
       try { returnFocus?.focus(); } catch { /* noop */ }
       steps = [];
