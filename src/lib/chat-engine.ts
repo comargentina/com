@@ -43,6 +43,34 @@ export const BYO_GEMINI_KEY_BACKUP = 'rastrum.byoKeys.gemini_backup';
 const IS_TEST = import.meta.env.MODE === 'test';
 const BUILT_IN_KEY_1: string = import.meta.env.PUBLIC_GEMINI_KEY_1 ?? '';
 const BUILT_IN_KEY_2: string = import.meta.env.PUBLIC_GEMINI_KEY_2 ?? '';
+const BUILT_IN_GROQ_KEY: string = import.meta.env.PUBLIC_GROQ_KEY ?? '';
+
+export const BYO_GROQ_KEY = 'rastrum.byoKeys.groq';
+
+export function readByoGroqKey(): string | null {
+  try {
+    return localStorage.getItem(BYO_GROQ_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeByoGroqKey(key: string): void {
+  try {
+    if (key.trim()) {
+      localStorage.setItem(BYO_GROQ_KEY, key.trim());
+    } else {
+      localStorage.removeItem(BYO_GROQ_KEY);
+    }
+  } catch { /* ignore */ }
+}
+
+export function readActiveGroqKey(): string | null {
+  const byo = readByoGroqKey()?.trim();
+  if (byo) return byo;
+  if (BUILT_IN_GROQ_KEY?.trim()) return BUILT_IN_GROQ_KEY.trim();
+  return null;
+}
 
 export function readByoGeminiKey(): string | null {
   try {
@@ -261,6 +289,86 @@ async function* streamGeminiDirect(
   }
 }
 
+/** Stream text chat via Groq's OpenAI-compatible API using Qwen 2.5 / 3.8. */
+async function* streamGroqDirect(
+  messages: ChatMessage[],
+  groqKey: string,
+): AsyncIterable<StreamEvent> {
+  const body = {
+    model: 'qwen/qwen3.8-27b',
+    messages: messages.map(m => ({
+      role: m.role === 'tool' ? 'user' : m.role,
+      content: m.content,
+    })),
+    stream: true,
+    max_tokens: 2048,
+    temperature: 0.7,
+  };
+
+  const ac = new AbortController();
+  const timeout = setTimeout(() => ac.abort(), 35_000);
+  let res: Response;
+  try {
+    res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${groqKey}`,
+      },
+      body: JSON.stringify(body),
+      signal: ac.signal,
+    }).finally(() => clearTimeout(timeout));
+  } catch (e) {
+    yield { type: 'error', message: e instanceof Error ? e.message : String(e) };
+    return;
+  }
+
+  if (res.status === 429) {
+    yield { type: 'quota_exceeded' };
+    return;
+  }
+  if (!res.ok) {
+    let errText = `HTTP ${res.status}`;
+    try {
+      const errJson = await res.json() as { error?: { message?: string } };
+      if (errJson?.error?.message) errText = errJson.error.message;
+    } catch { /* empty */ }
+    yield { type: 'error', message: errText };
+    return;
+  }
+
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (!raw || raw === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(raw) as {
+            choices?: Array<{ delta?: { content?: string } }>;
+          };
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) yield { type: 'text', delta };
+        } catch {
+          // skip malformed
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 async function* streamGeminiEdge(
   messages: ChatMessage[],
   geminiKey?: string,
@@ -358,6 +466,12 @@ async function* streamGeminiEdge(
  *   { type: 'error', message }         — terminal error
  */
 export async function* streamChat(input: StreamChatInput): AsyncIterable<StreamEvent> {
+  const activeGroqKey = readActiveGroqKey();
+  if (activeGroqKey) {
+    yield* streamGroqDirect(input.messages, activeGroqKey);
+    return;
+  }
+
   const messages = withToolPrompt(input.messages);
   const availableKeys = readAllGeminiKeys();
   let keyIndex = 0;

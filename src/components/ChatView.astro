@@ -95,8 +95,20 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
     </p>
     <div class="space-y-2.5">
       <div>
+        <label for="chat-byo-groq-key-input" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          {lang === 'es' ? 'Clave Groq (texto ultra-rápido):' : 'Groq Key (ultra-fast text):'}
+        </label>
+        <input
+          id="chat-byo-groq-key-input"
+          type="password"
+          placeholder="gsk_..."
+          autocomplete="off"
+          class="w-full min-h-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs"
+        />
+      </div>
+      <div>
         <label for="chat-byo-key-input" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-          {lang === 'es' ? 'Cuenta 1 (Clave principal):' : 'Account 1 (Primary key):'}
+          {lang === 'es' ? 'Google AI Studio — Cuenta 1 (Fotos/visión):' : 'Google AI Studio — Account 1 (Photos/vision):'}
         </label>
         <input
           id="chat-byo-key-input"
@@ -556,25 +568,36 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   });
 
 
-  // ── Chat model badge — Groq (Llama 3.3 70B) ──
+  // ── Chat model badge ──
   const badgeContainer = document.getElementById('chat-model-badge');
-  if (badgeContainer) {
-    badgeContainer.innerHTML = `<span aria-hidden="true">⚡</span> <span id="chat-model-badge-text">Groq (Llama 3.3)</span>`;
+  const badgeText = document.getElementById('chat-model-badge-text');
+  const { readActiveGroqKey } = await import('../lib/chat-engine');
+  if (badgeContainer && badgeText) {
+    if (readActiveGroqKey()) {
+      badgeContainer.innerHTML = `<span aria-hidden="true">⚡</span> <span id="chat-model-badge-text">Groq</span>`;
+    } else {
+      badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <span id="chat-model-badge-text">Gemini Flash</span>`;
+    }
   }
 
   // ── BYO key banner — show if keys are saved ──
+  const groqKeyInput = document.getElementById('chat-byo-groq-key-input') as HTMLInputElement | null;
   const backupKeyInput = document.getElementById('chat-byo-backup-key-input') as HTMLInputElement | null;
   const quotaBannerClose = document.getElementById('chat-quota-banner-close') as HTMLButtonElement | null;
-  const { readByoGeminiKey, readByoGeminiBackupKey, writeByoGeminiKey, writeByoGeminiBackupKey } = await import('../lib/chat-engine');
+  const { readByoGeminiKey, readByoGeminiBackupKey, writeByoGeminiKey, writeByoGeminiBackupKey, readByoGroqKey, writeByoGroqKey } = await import('../lib/chat-engine');
   
+  const savedGroqKey = readByoGroqKey();
   const savedKey = readByoGeminiKey();
   const savedBackupKey = readByoGeminiBackupKey();
+  if (savedGroqKey && groqKeyInput) groqKeyInput.value = savedGroqKey;
   if (savedKey && byoKeyInput) byoKeyInput.value = savedKey;
   if (savedBackupKey && backupKeyInput) backupKeyInput.value = savedBackupKey;
 
   byoKeySave?.addEventListener('click', () => {
+    const groqKey = groqKeyInput?.value.trim() ?? '';
     const key = byoKeyInput?.value.trim() ?? '';
     const backupKey = backupKeyInput?.value.trim() ?? '';
+    writeByoGroqKey(groqKey);
     if (key) writeByoGeminiKey(key);
     if (backupKey) writeByoGeminiBackupKey(backupKey);
     quotaBanner?.classList.add('hidden');
