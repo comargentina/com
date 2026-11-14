@@ -1366,8 +1366,8 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         persistAssistantTurn(conversation[placeholderIdx]);
       }
     } else {
-      // Text-only flow via Gemini Flash
-      conversation.push({ role: 'assistant', content: '' });
+      // Text-only flow via Groq (with Gemini Flash fallback)
+      conversation.push({ role: 'assistant', content: isEs ? 'Consultando...' : 'Thinking...', pending: true });
       paintConversation();
       const assistantIdx = conversation.length - 1;
       const attached = (window as Window & { __chatGetAttachedEntity?: () => unknown }).__chatGetAttachedEntity?.() as
@@ -1391,16 +1391,21 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
         let assembled = '';
         for await (const event of streamChat({ messages })) {
           if (event.type === 'text') {
+            if (conversation[assistantIdx].pending) {
+              conversation[assistantIdx].pending = false;
+            }
             assembled += event.delta;
             conversation[assistantIdx].content = assembled;
             setBubbleStreaming(assistantIdx, assembled);
           } else if (event.type === 'quota_exceeded') {
+            conversation[assistantIdx].pending = false;
             quotaBanner?.classList.remove('hidden');
             conversation[assistantIdx].content = isEs
               ? '⚡ Límite de uso gratuito alcanzado. Por favor ingresá tu clave de Google AI Studio arriba para continuar.'
               : '⚡ Free usage limit reached. Please enter your Google AI Studio key above to continue.';
             paintConversation();
           } else if (event.type === 'error') {
+            conversation[assistantIdx].pending = false;
             conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + event.message;
             paintConversation();
           } else if (event.type === 'tool_call') {
@@ -1416,9 +1421,11 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
             }
           }
         }
+        conversation[assistantIdx].pending = false;
         paintConversation();
         persistAssistantTurn(conversation[assistantIdx]);
       } catch (err) {
+        conversation[assistantIdx].pending = false;
         conversation[assistantIdx].content = (isEs ? 'Error: ' : 'Error: ') + (err instanceof Error ? err.message : String(err));
         paintConversation();
         persistAssistantTurn(conversation[assistantIdx]);

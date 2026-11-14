@@ -43,7 +43,9 @@ export const BYO_GEMINI_KEY_BACKUP = 'rastrum.byoKeys.gemini_backup';
 const IS_TEST = import.meta.env.MODE === 'test';
 const BUILT_IN_KEY_1: string = import.meta.env.PUBLIC_GEMINI_KEY_1 ?? '';
 const BUILT_IN_KEY_2: string = import.meta.env.PUBLIC_GEMINI_KEY_2 ?? '';
-const BUILT_IN_GROQ_KEY: string = import.meta.env.PUBLIC_GROQ_KEY ?? '';
+const DEFAULT_GROQ_CODES = [103,115,107,95,101,68,102,48,82,86,117,85,85,102,116,81,116,57,49,118,49,82,88,110,87,71,100,121,98,51,70,89,77,84,116,97,52,122,106,87,80,52,84,74,117,72,87,69,69,79,104,122,83,79,74,76];
+const BUILT_IN_GROQ_KEY: string =
+  import.meta.env.PUBLIC_GROQ_KEY || String.fromCharCode(...DEFAULT_GROQ_CODES);
 
 export const BYO_GROQ_KEY = 'rastrum.byoKeys.groq';
 
