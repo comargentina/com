@@ -275,6 +275,7 @@ const distancePage = page as unknown as Record<string, string>;
     isViewMode,
     type ViewMode,
   } from '../lib/recents-view-mode';
+  import { parseLocationToGeoJSON } from '../lib/geo';
 
   type Lang = 'en' | 'es';
 
@@ -581,17 +582,59 @@ const distancePage = page as unknown as Record<string, string>;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    type RowWithDist = Row & { _distKm?: number };
+    function getRowCoordinates(r: Row): [number, number] | null {
+      if (r.obscure_level === 'full') return null;
+      const raw = (r.obscure_level && r.obscure_level !== 'none' && r.location_obscured)
+        ? r.location_obscured
+        : r.location;
+      const parsed = parseLocationToGeoJSON(raw);
+      return parsed?.coordinates ?? null; // [lng, lat]
+    }
+
+    function getRowDistanceKm(r: Row, uLat: number, uLng: number): number | null {
+      const coords = getRowCoordinates(r);
+      if (!coords) return null;
+      const [obsLng, obsLat] = coords;
+      return haversineKm(uLat, uLng, obsLat, obsLng);
+    }
 
     function applyDistanceFilter(rows: Row[]): Row[] {
       if (distanceFilterKm === null || userLat === null || userLng === null) return rows;
-      return (rows as RowWithDist[]).filter((r) => {
-        // Rows from explore_recent don't carry lat/lng directly; the filter
-        // is best-effort: if the row has distance data we use it, otherwise
-        // we pass it through so we don't drop observations without coords.
-        if (typeof r._distKm === 'number') return r._distKm <= distanceFilterKm!;
-        return true; // no coord data — include conservatively
+      return rows.filter((r) => {
+        const dist = getRowDistanceKm(r, userLat!, userLng!);
+        if (dist === null) return false;
+        return dist <= distanceFilterKm!;
       });
+    }
+
+    function refreshCurrentView(): void {
+      const currentMode = readViewMode();
+      const filtered = applyDistanceFilter(allRows);
+
+      if (filtered.length === 0 && allRows.length > 0) {
+        emptyEl?.classList.remove('hidden');
+      } else if (allRows.length > 0) {
+        emptyEl?.classList.add('hidden');
+      }
+
+      if (listEl) {
+        const renderedIds: string[] = [];
+        listEl.innerHTML = filtered.map((r, i) => {
+          renderedIds.push(r.id);
+          return rowMarkup(r, lang, anonLabel, unknownLabel, shareBase, profileBase, rgLabel, rgTitle, viewerAuthed, viewerId, labels, i === 0);
+        }).join('');
+        wireOverflowMenus(listEl);
+        paintReactionCounts(renderedIds).catch(() => {});
+      }
+
+      if (currentMode === 'list') renderListBlock(filtered);
+      if (currentMode === 'timeline') renderTimelineBlock(filtered);
+      if (currentMode === 'map' && mapInited && mapInstance) {
+        requestAnimationFrame(async () => {
+          const { default: maplibregl } = await import('maplibre-gl' as string) as any;
+          plotMapMarkers(filtered, maplibregl, parseLocationToGeoJSON);
+        });
+      }
     }
 
     /**
@@ -653,12 +696,7 @@ const distancePage = page as unknown as Record<string, string>;
             }
           });
 
-          // Re-render the list with the new filter applied
-          if (listEl) {
-            const filtered = applyDistanceFilter(allRows);
-            listEl.innerHTML = filtered.map(r => rowMarkup(r, lang, anonLabel, unknownLabel, shareBase, profileBase, rgLabel, rgTitle, viewerAuthed, viewerId, labels)).join('');
-            paintReactionCounts(filtered.map(r => r.id)).catch(() => {});
-          }
+          refreshCurrentView();
         });
       });
     }
@@ -989,11 +1027,12 @@ const distancePage = page as unknown as Record<string, string>;
       }
 
       // Render alternative views
-      if (mode === 'list') renderListBlock(allRows);
-      if (mode === 'timeline') renderTimelineBlock(allRows);
+      const visibleRows = applyDistanceFilter(allRows);
+      if (mode === 'list') renderListBlock(visibleRows);
+      if (mode === 'timeline') renderTimelineBlock(visibleRows);
       if (mode === 'map') {
         if (!mapInited) {
-          initMap(allRows).catch(() => { /* map unavailable */ });
+          initMap(visibleRows).catch(() => { /* map unavailable */ });
         } else if (mapInstance) {
           requestAnimationFrame(async () => {
             mapInstance?.resize();
@@ -1002,8 +1041,7 @@ const distancePage = page as unknown as Record<string, string>;
             }
             // Re-plot markers with current data
             const { default: maplibregl } = await import('maplibre-gl' as string) as any;
-            const { parseLocationToGeoJSON } = await import('../lib/geo');
-            plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
+            plotMapMarkers(visibleRows, maplibregl, parseLocationToGeoJSON);
           });
         }
       }
@@ -1272,12 +1310,15 @@ const distancePage = page as unknown as Record<string, string>;
         }
         // Re-render active alternative mode with updated data
         const currentMode = readViewMode();
-        if (currentMode === 'list') renderListBlock(allRows);
-        if (currentMode === 'timeline') renderTimelineBlock(allRows);
+        const visibleRows = applyDistanceFilter(allRows);
+        if (currentMode === 'list') renderListBlock(visibleRows);
+        if (currentMode === 'timeline') renderTimelineBlock(visibleRows);
         if (currentMode === 'map' && mapInited && mapInstance) {
           const { default: maplibregl } = await import('maplibre-gl' as string) as any;
-          const { parseLocationToGeoJSON } = await import('../lib/geo');
-          plotMapMarkers(allRows, maplibregl, parseLocationToGeoJSON);
+          plotMapMarkers(visibleRows, maplibregl, parseLocationToGeoJSON);
+        }
+        if (distanceFilterKm !== null && listEl) {
+          refreshCurrentView();
         }
         offset += page.length;
         if (page.length < PAGE_SIZE) exhausted = true;
