@@ -263,7 +263,7 @@ const obs = (tr as unknown as { observe: Record<string, string> }).observe;
       if (prevFocus instanceof HTMLElement) prevFocus.focus();
     }
 
-    function emit(kind: 'use' | 'skip' | 'cancel', file?: File) {
+    function emit(kind: 'use' | 'skip' | 'cancel' | 'delete', file?: File) {
       const detail: Record<string, unknown> = { kind };
       if (file) detail.file = file;
       window.dispatchEvent(new CustomEvent('rastrum:cropmodal-result', { detail }));

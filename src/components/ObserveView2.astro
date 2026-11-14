@@ -373,6 +373,7 @@ let photoCapturedAt: string | null = null;
 let bestResult: { scientific_name: string; common_name_en: string | null; confidence: number; source: string } | null = null;
 let identifyErrorReason: string | null = null;
 let cardAttempts: import('../lib/identify-cascade-client').IdentifyAttempt[] = [];
+const nodeAttempts = new Map<string, import('../lib/identify-cascade-client').IdentifyAttempt[]>();
 let observerAffirmed = false;
 let observerAffirmedTaxon: string | null = null;
 let reviewRequested = false;
@@ -430,6 +431,59 @@ function redispatchCardVm() {
     );
     document.dispatchEvent(new CustomEvent('rastrum:card-vm', { detail: cardVm }));
   } catch { /* VM seam is additive — never block the form */ }
+}
+
+function recomputeBestResultAndCard() {
+  cardAttempts = [];
+  bestResult = null;
+  if (!pipelineState) return;
+
+  const validFileIds = new Set(pipelineState.files.map(f => f.id));
+
+  for (const node of pipelineState.nodes) {
+    if (node.kind !== 'identify' || node.state !== 'done' || !node.output) continue;
+    if (node.fileId && !validFileIds.has(node.fileId)) continue;
+
+    const attempts = nodeAttempts.get(node.id);
+    if (attempts && attempts.length > 0) {
+      cardAttempts.push(...attempts);
+    } else {
+      cardAttempts.push({
+        source: node.output.source,
+        scientific_name: node.output.scientific_name,
+        confidence: node.output.confidence,
+      });
+    }
+
+    const out = node.output;
+    if (!bestResult || out.confidence > (bestResult.confidence ?? 0)) {
+      bestResult = {
+        scientific_name: out.scientific_name,
+        common_name_en: out.common_name_en ?? null,
+        confidence: out.confidence,
+        source: out.source,
+      };
+    }
+  }
+
+  const taxonInputEl = document.getElementById('obs2-taxon-input') as HTMLInputElement | null;
+  if (taxonInputEl) {
+    if (bestResult) {
+      taxonInputEl.value = bestResult.scientific_name;
+    } else {
+      taxonInputEl.value = '';
+    }
+  }
+
+  if (cardAttempts.length > 0) {
+    redispatchCardVm();
+  } else {
+    const cardEl = document.getElementById('obs2-card-v2');
+    if (cardEl) {
+      cardEl.innerHTML = '';
+      cardEl.classList.add('hidden');
+    }
+  }
 }
 
 document.addEventListener('rastrum:card-vm', (e) => {
@@ -716,6 +770,10 @@ const idCard          = document.getElementById('obs2-id-card');
           if (db?.id) await clearPipelineState(db.id);
           await clearPipelineState('__latest__');
         } catch { /* ignore */ }
+        pipelineState = null;
+        bestResult = null;
+        cardAttempts = [];
+        nodeAttempts.clear();
       });
     }
   } catch { /* no prior pipeline */ }
@@ -737,11 +795,19 @@ document.addEventListener('rastrum:photo-edited', (e: Event) => {
     file: ev.detail.edited,
     blobUrl: URL.createObjectURL(ev.detail.edited),
   };
+  const identifyNodeId = `identify-${old.id}`;
+  nodeAttempts.delete(identifyNodeId);
+  const node = pipelineState.nodes.find(n => n.id === identifyNodeId);
+  if (node) {
+    node.state = 'pending';
+    node.output = undefined;
+    node.error = undefined;
+  }
+  recomputeBestResultAndCard();
+
   // If pipeline already ran, re-run with the edited photo
   if (pipelineState.status === 'done' || pipelineState.status === 'failed') {
     pipelineState.status = 'processing';
-    const node = pipelineState.nodes.find(n => n.kind === 'identify' && n.fileId === old.id);
-    if (node) { node.state = 'pending'; node.output = undefined; node.error = undefined; }
     postForm?.classList.add('hidden');
     pipelineSection?.classList.remove('hidden');
     updatePipelineUI();
@@ -764,16 +830,37 @@ document.addEventListener('rastrum:photo-deleted', (e: Event) => {
   const old = pipelineState.files[idx];
   URL.revokeObjectURL(old.blobUrl);
   pipelineState.files.splice(idx, 1);
+  const identifyNodeId = `identify-${old.id}`;
+  nodeAttempts.delete(identifyNodeId);
   pipelineState.nodes = pipelineState.nodes.filter(n => n.fileId !== old.id);
-  // If no files left, reset the UI
+
+  // If no files left, reset the pipeline completely
   if (pipelineState.files.length === 0) {
+    const prevPipelineId = pipelineState.id;
     pipelineState.status = 'idle';
+    pipelineState.nodes = [];
+    nodeAttempts.clear();
+    cardAttempts = [];
+    bestResult = null;
+    const cardEl = document.getElementById('obs2-card-v2');
+    if (cardEl) {
+      cardEl.innerHTML = '';
+      cardEl.classList.add('hidden');
+    }
+    const taxonInputEl = document.getElementById('obs2-taxon-input') as HTMLInputElement | null;
+    if (taxonInputEl) taxonInputEl.value = '';
     postForm?.classList.add('hidden');
-    pipelineSection?.classList.remove('hidden');
+    pipelineSection?.classList.add('hidden');
     updatePipelineUI();
+    clearPipelineState(prevPipelineId).catch(() => {});
+    clearPipelineState('__latest__').catch(() => {});
   } else {
-    // If pipeline already ran, re-run with remaining photos
-    if (pipelineState.status === 'done' || pipelineState.status === 'failed') {
+    // Recompute bestResult and card attempts from remaining files
+    recomputeBestResultAndCard();
+
+    // Check if any remaining identify node needs running
+    const hasPending = pipelineState.nodes.some(n => n.kind === 'identify' && n.state === 'pending');
+    if (hasPending) {
       pipelineState.status = 'processing';
       postForm?.classList.add('hidden');
       pipelineSection?.classList.remove('hidden');
@@ -783,6 +870,9 @@ document.addEventListener('rastrum:photo-deleted', (e: Event) => {
         console.error('[rastrum] re-run after delete failed', err);
         showPostForm();
       });
+    } else {
+      updatePipelineUI();
+      showPostForm();
     }
   }
 });
@@ -811,17 +901,25 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
 
   const nodes = buildGraph(combinedFiles, runners);
 
-  // Preserve state of already-processed nodes from existing files
-  if (pipelineState?.nodes) {
+  // Preserve state of already-processed nodes from existing files ONLY
+  if (pipelineState?.nodes && existingFiles.length > 0) {
+    const existingFileIds = new Set(existingFiles.map(f => f.id));
     const oldNodesById = new Map(pipelineState.nodes.map(n => [n.id, n]));
     for (const node of nodes) {
-      const old = oldNodesById.get(node.id);
-      if (old && (old.state === 'done' || old.state === 'failed' || old.state === 'skipped')) {
-        node.state = old.state;
-        node.output = old.output;
-        node.error = old.error;
+      if ((node.kind === 'input' || node.kind === 'identify') && node.fileId && existingFileIds.has(node.fileId)) {
+        const old = oldNodesById.get(node.id);
+        if (old && (old.state === 'done' || old.state === 'failed' || old.state === 'skipped')) {
+          node.state = old.state;
+          node.output = old.output;
+          node.error = old.error;
+        }
       }
     }
+  } else {
+    // Fresh pipeline: clear previous state
+    nodeAttempts.clear();
+    cardAttempts = [];
+    bestResult = null;
   }
 
   pipelineState = {
@@ -965,7 +1063,9 @@ async function runPipeline(state: PipelineState) {
 
         const abort = new AbortController();
         const out = await runParallelIdentify(pf.file as File, { runners, taxonHint: null }, abort.signal);
-        cardAttempts = cardAttempts.concat(out.attempts ?? []);
+        if (out.attempts) {
+          nodeAttempts.set(node.id, out.attempts);
+        }
         if (out.kind === 'winner' || out.kind === 'uncertain') {
           const r = out.result;
           setNodeState(state, node.id, 'done', {
@@ -974,9 +1074,6 @@ async function runPipeline(state: PipelineState) {
             confidence: r.confidence,
             source: r.source,
           });
-          if (!bestResult || r.confidence > (bestResult.confidence ?? 0)) {
-            bestResult = { scientific_name: r.scientific_name, common_name_en: r.common_name_en ?? null, confidence: r.confidence, source: r.source };
-          }
         } else {
           const errs = (out as { errors?: Record<string, string> }).errors ?? {};
           const reason = errs.bioclip_2 ?? Object.values(errs)[0]
@@ -995,21 +1092,26 @@ async function runPipeline(state: PipelineState) {
             mediaKind: 'audio',
             locale: lang as 'en' | 'es',
           });
+          nodeAttempts.set(node.id, [{
+            source: result.source,
+            scientific_name: result.scientific_name,
+            confidence: result.confidence,
+          }]);
           setNodeState(state, node.id, 'done', {
             scientific_name: result.scientific_name,
             common_name_en: result.common_name_en,
             confidence: result.confidence,
             source: result.source,
           });
-          if (!bestResult || result.confidence > (bestResult.confidence ?? 0)) {
-            bestResult = { scientific_name: result.scientific_name, common_name_en: result.common_name_en ?? null, confidence: result.confidence, source: result.source };
-          }
         }
       }
     } catch (err) {
       setNodeState(state, node.id, 'failed', undefined, (err as Error).message);
     }
   }
+
+  // Recompute bestResult and cardAttempts from all current done identify nodes
+  recomputeBestResultAndCard();
 
   // Merge node
   const mergeNode = state.nodes.find(n => n.kind === 'merge');
@@ -1807,6 +1909,7 @@ document.getElementById('obs2-new-btn')?.addEventListener('click', () => {
   bestResult = null;
   identifyErrorReason = null;
   cardAttempts = [];
+  nodeAttempts.clear();
   observerAffirmed = false;
   observerAffirmedTaxon = null;
   reviewRequested = false;
@@ -1830,6 +1933,7 @@ document.getElementById('obs2-new-btn')?.addEventListener('click', () => {
 // ── Resume pipeline ────────────────────────────────────────────────────────
 async function resumePipeline(state: PipelineState) {
   pipelineState = state;
+  recomputeBestResultAndCard();
   pipelineSection?.classList.remove('hidden');
   updatePipelineUI();
   startGPS();

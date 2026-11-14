@@ -271,6 +271,12 @@ function showPreviews(files: File[]) {
           } else if (result.kind === 'delete') {
             // Remove the thumbnail and notify to delete the file
             thumb.remove();
+            const remaining = previews ? Array.from(previews.children).filter(c => c !== addMoreBtn) : [];
+            if (remaining.length === 0) {
+              previews?.classList.add('hidden');
+              previews?.classList.remove('flex');
+              defaultEl?.classList.remove('hidden');
+            }
             document.dispatchEvent(new CustomEvent('rastrum:photo-deleted', {
               detail: { file },
             }));
