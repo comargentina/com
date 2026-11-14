@@ -1,18 +1,11 @@
 /**
- * /functions/v1/chat — Gemini Flash chat endpoint with streaming SSE.
+ * /functions/v1/chat — Chat endpoint with streaming SSE.
  *
- * Key resolution order:
- *   1. GEMINI_API_KEY env var (operator server key, free tier)
- *   2. client_gemini_key in request body (user BYO key fallback)
- *
- * When both are exhausted, returns 402 so the client can prompt the user
- * to supply their own key.
+ * Provider resolution:
+ *   1. Groq (Llama 3.3 70B) if GROQ_API_KEY or client_groq_key or secret 'groq' / 'GROQ_API_KEY' is configured
+ *   2. Gemini Flash fallback (GEMINI_API_KEY or client_gemini_key)
  *
  * Deployed --no-verify-jwt (handles auth internally).
- *
- * Env vars:
- *   GEMINI_API_KEY — Google AI Studio key (optional, free-tier fallback)
- *   SUPABASE_URL / SUPABASE_ANON_KEY — for optional JWT auth checks
  */
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
@@ -23,6 +16,9 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-rastrum-build',
   'Access-Control-Max-Age': '86400',
 };
+
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const GEMINI_MODEL = 'gemini-3.5-flash';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -38,6 +34,7 @@ type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 type RequestBody = {
   messages: ChatMessage[];
   client_gemini_key?: string;
+  client_groq_key?: string;
 };
 
 serve(async (req: Request) => {
@@ -53,11 +50,109 @@ serve(async (req: Request) => {
     return jsonErr('Invalid JSON', 400);
   }
 
-  const { messages, client_gemini_key } = body;
+  const { messages, client_gemini_key, client_groq_key } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return jsonErr('messages required', 400);
   }
 
+  // 1. Check for Groq key first (from secret `groq` or `GROQ_API_KEY` or client override)
+  const groqApiKey = Deno.env.get('groq') ?? Deno.env.get('GROQ_API_KEY') ?? client_groq_key ?? null;
+
+  if (groqApiKey) {
+    const groqMessages = messages.map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const groqBody = {
+      model: GROQ_MODEL,
+      messages: groqMessages,
+      stream: true,
+      max_tokens: 2048,
+      temperature: 0.7,
+    };
+
+    let groqRes: Response;
+    try {
+      const ac = new AbortController();
+      const timeout = setTimeout(() => ac.abort(), 35_000);
+      groqRes = await fetch(GROQ_API_URL, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': `Bearer ${groqApiKey}`,
+        },
+        body: JSON.stringify(groqBody),
+        signal: ac.signal,
+      }).finally(() => clearTimeout(timeout));
+    } catch (e) {
+      return jsonErr(`Groq fetch failed: ${e instanceof Error ? e.message : String(e)}`, 502);
+    }
+
+    if (!groqRes.ok) {
+      const errText = await groqRes.text().catch(() => 'unknown');
+      console.error(`[chat] Groq error status=${groqRes.status} body=${errText}`);
+      if (groqRes.status === 429) return jsonErr('RATE_LIMITED', 429);
+      if (groqRes.status === 401 || groqRes.status === 403) return jsonErr(`Groq auth error: ${errText}`, 401);
+      return jsonErr(`Groq error ${groqRes.status}: ${errText}`, 502);
+    }
+
+    // Stream SSE from Groq back to client: `data: {"delta":"..."}`
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        const reader = groqRes.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        const send = (delta: string) => {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`));
+        };
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const raw = line.slice(6).trim();
+              if (raw === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(raw) as {
+                  choices?: Array<{ delta?: { content?: string } }>;
+                };
+                const text = parsed.choices?.[0]?.delta?.content;
+                if (text) send(text);
+              } catch {
+                // skip malformed
+              }
+            }
+          }
+        } catch {
+          // stream aborted or finished
+        } finally {
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        ...CORS_HEADERS,
+        'content-type': 'text/event-stream',
+        'cache-control': 'no-cache',
+        'x-accel-buffering': 'no',
+      },
+    });
+  }
+
+  // 2. Fallback to Gemini if no Groq key is found
   const apiKey = Deno.env.get('GEMINI_API_KEY') ?? client_gemini_key ?? null;
   if (!apiKey) {
     return jsonErr('NO_API_KEY', 402);

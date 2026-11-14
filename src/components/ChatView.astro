@@ -556,10 +556,10 @@ const observePath = getLocalizedPath(lang, routes.observe[lang] + '/');
   });
 
 
-  // ── Chat model badge — always Gemini Flash ──
+  // ── Chat model badge — Groq (Llama 3.3 70B) ──
   const badgeContainer = document.getElementById('chat-model-badge');
   if (badgeContainer) {
-    badgeContainer.innerHTML = `<span aria-hidden="true">✨</span> <span id="chat-model-badge-text">Gemini Flash</span>`;
+    badgeContainer.innerHTML = `<span aria-hidden="true">⚡</span> <span id="chat-model-badge-text">Groq (Llama 3.3)</span>`;
   }
 
   // ── BYO key banner — show if keys are saved ──
