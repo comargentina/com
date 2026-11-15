@@ -10,7 +10,7 @@
  * Idempotent: if the placeholder is already present (e.g. someone ran this
  * twice, or the build failed before inject-version ran), it's a no-op.
  */
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { PLACEHOLDER } from './inject-version.js';
@@ -24,6 +24,16 @@ if (manifest.version !== PLACEHOLDER) {
   manifest.version = PLACEHOLDER;
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
   console.log(`[restore-version-placeholder] manifest.webmanifest → ${PLACEHOLDER}`);
+}
+
+const manifestJsonPath = resolve(root, 'public/manifest.json');
+if (existsSync(manifestJsonPath)) {
+  const manifestJson = JSON.parse(readFileSync(manifestJsonPath, 'utf8'));
+  if (manifestJson.version !== PLACEHOLDER) {
+    manifestJson.version = PLACEHOLDER;
+    writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2) + '\n');
+    console.log(`[restore-version-placeholder] manifest.json → ${PLACEHOLDER}`);
+  }
 }
 
 const swPath = resolve(root, 'public/sw.js');

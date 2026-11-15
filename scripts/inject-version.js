@@ -18,7 +18,7 @@
  * The placeholder is restored after `astro build` by
  * scripts/restore-version-placeholder.js so the working tree stays clean.
  */
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -68,6 +68,14 @@ function main() {
   const manifestNext = substituteManifestVersion(manifest, version);
   writeFileSync(manifestPath, JSON.stringify(manifestNext, null, 2) + '\n');
   console.log(`[inject-version] manifest.webmanifest → ${version}`);
+
+  const manifestJsonPath = resolve(root, 'public/manifest.json');
+  if (existsSync(manifestJsonPath)) {
+    const manifestJson = JSON.parse(readFileSync(manifestJsonPath, 'utf8'));
+    const manifestJsonNext = substituteManifestVersion(manifestJson, version);
+    writeFileSync(manifestJsonPath, JSON.stringify(manifestJsonNext, null, 2) + '\n');
+    console.log(`[inject-version] manifest.json → ${version}`);
+  }
 
   const swPath = resolve(root, 'public/sw.js');
   const swNext = substituteSwVersion(readFileSync(swPath, 'utf8'), version);

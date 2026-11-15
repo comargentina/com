@@ -3,9 +3,15 @@
   "version": "__BUILD_VERSION__",
   "short_name": "COM Argentina",
   "description": "Club de Observadores de Mariposas de Argentina — Observación e identificación de biodiversidad.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "window-controls-overlay"
+  ],
   "background_color": "#09090b",
   "theme_color": "#10b981",
   "orientation": "any",
@@ -101,6 +107,11 @@
     }
   },
   "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.entrerios.com",
+      "id": "com.entrerios.com"
+    },
     {
       "platform": "webapp",
       "url": "https://com-com-f83a.vercel.app/manifest.webmanifest",

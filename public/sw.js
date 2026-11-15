@@ -27,6 +27,7 @@ const SHELL = [
   '/favicon.svg',
   '/rastrum-logo.svg',
   '/manifest.webmanifest',
+  '/manifest.json',
 ];
 
 self.addEventListener('install', (event) => {

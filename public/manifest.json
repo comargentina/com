@@ -1,0 +1,121 @@
+{
+  "name": "COM Argentina",
+  "version": "__BUILD_VERSION__",
+  "short_name": "COM Argentina",
+  "description": "Club de Observadores de Mariposas de Argentina — Observación e identificación de biodiversidad.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "window-controls-overlay"
+  ],
+  "background_color": "#09090b",
+  "theme_color": "#10b981",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/com-logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/com-logo-maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/com-logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/com-logo-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/com-logo-240.png",
+      "type": "image/png",
+      "sizes": "240x240",
+      "purpose": "any"
+    },
+    {
+      "src": "/com-logo-120.png",
+      "type": "image/png",
+      "sizes": "120x120",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "COM Argentina — página principal"
+    },
+    {
+      "src": "/screenshots/mobile-home.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "COM Argentina — captura e identificación de especies"
+    }
+  ],
+  "categories": [
+    "education",
+    "science",
+    "nature"
+  ],
+  "lang": "es",
+  "prefer_related_applications": false,
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "audio",
+          "accept": [
+            "audio/*"
+          ]
+        },
+        {
+          "name": "image",
+          "accept": [
+            "image/*"
+          ]
+        },
+        {
+          "name": "video",
+          "accept": [
+            "video/*"
+          ]
+        }
+      ]
+    }
+  },
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.entrerios.com",
+      "id": "com.entrerios.com"
+    },
+    {
+      "platform": "webapp",
+      "url": "https://com-com-f83a.vercel.app/manifest.webmanifest",
+      "id": "com-argentina-pwa"
+    }
+  ]
+}
