@@ -781,11 +781,59 @@ const idCard          = document.getElementById('obs2-id-card');
 
 // ── Files dropped ──────────────────────────────────────────────────────────
 
+// ── Helper: Reconcile pipelineState with visible DropZone thumbnails ─────
+function reconcileFilesWithDropZone(): boolean {
+  if (!pipelineState || pipelineState.files.length === 0) return false;
+  const previewsEl = document.getElementById('dz-previews');
+  if (!previewsEl) return false;
+
+  const thumbEls = Array.from(previewsEl.querySelectorAll('[data-file-id]')) as HTMLElement[];
+  const domFileIds = new Set(thumbEls.map(el => el.dataset.fileId).filter(Boolean) as string[]);
+
+  // If DropZone has thumbnails rendered, and pipelineState has more files than DOM thumbnails:
+  if (domFileIds.size > 0 && domFileIds.size < pipelineState.files.length) {
+    const toRemove = pipelineState.files.filter(f => !domFileIds.has(f.id));
+    if (toRemove.length > 0) {
+      for (const old of toRemove) {
+        URL.revokeObjectURL(old.blobUrl);
+        const identifyNodeId = `identify-${old.id}`;
+        nodeAttempts.delete(identifyNodeId);
+        pipelineState.nodes = pipelineState.nodes.filter(n => n.fileId !== old.id);
+      }
+      pipelineState.files = pipelineState.files.filter(f => domFileIds.has(f.id));
+
+      const mergeNode = pipelineState.nodes.find(n => n.kind === 'merge');
+      if (mergeNode) {
+        const remainingIdentifyIds = pipelineState.files.map(f => `identify-${f.id}`);
+        mergeNode.dependsOn = remainingIdentifyIds;
+      }
+
+      recomputeBestResultAndCard();
+      void savePipelineState(pipelineState).catch(() => {});
+      return true;
+    }
+  }
+  return false;
+}
+
 // ── Photo edited (crop/rotate from DropZone) — #787 ──────────────────────
 document.addEventListener('rastrum:photo-edited', (e: Event) => {
-  const ev = e as CustomEvent<{ original: File; edited: File }>;
+  const ev = e as CustomEvent<{ original: File; edited: File; fileId?: string }>;
   if (!pipelineState) return;
-  const idx = pipelineState.files.findIndex(f => f.file === ev.detail.original);
+  const fileId = ev.detail.fileId;
+  let idx = -1;
+  if (fileId) {
+    idx = pipelineState.files.findIndex(f => f.id === fileId);
+  }
+  if (idx === -1 && ev.detail.original) {
+    idx = pipelineState.files.findIndex(f => f.file === ev.detail.original);
+  }
+  if (idx === -1 && ev.detail.original) {
+    idx = pipelineState.files.findIndex(f =>
+      (f.file && f.file.name === ev.detail.original.name && f.file.size === ev.detail.original.size) ||
+      ((f as any).fileName === ev.detail.original.name && (f as any).fileSize === ev.detail.original.size)
+    );
+  }
   if (idx === -1) return;
   // Replace the file and revoke the old blobUrl to free memory
   const old = pipelineState.files[idx];
@@ -804,6 +852,7 @@ document.addEventListener('rastrum:photo-edited', (e: Event) => {
     node.error = undefined;
   }
   recomputeBestResultAndCard();
+  void savePipelineState(pipelineState).catch(() => {});
 
   // If pipeline already ran, re-run with the edited photo
   if (pipelineState.status === 'done' || pipelineState.status === 'failed') {
@@ -820,10 +869,24 @@ document.addEventListener('rastrum:photo-edited', (e: Event) => {
 });
 
 // ── Photo deleted (from crop modal) ──────────────────────────────────────
-document.addEventListener('rastrum:photo-deleted', (e: Event) => {
-  const ev = e as CustomEvent<{ file: File }>;
+document.addEventListener('rastrum:photo-deleted', async (e: Event) => {
+  const ev = e as CustomEvent<{ file: File; fileId?: string }>;
   if (!pipelineState) return;
-  const idx = pipelineState.files.findIndex(f => f.file === ev.detail.file);
+  const fileId = ev.detail.fileId;
+  const targetFile = ev.detail.file;
+  let idx = -1;
+  if (fileId) {
+    idx = pipelineState.files.findIndex(f => f.id === fileId);
+  }
+  if (idx === -1 && targetFile) {
+    idx = pipelineState.files.findIndex(f => f.file === targetFile);
+  }
+  if (idx === -1 && targetFile) {
+    idx = pipelineState.files.findIndex(f =>
+      (f.file && f.file.name === targetFile.name && f.file.size === targetFile.size) ||
+      ((f as any).fileName === targetFile.name && (f as any).fileSize === targetFile.size)
+    );
+  }
   if (idx === -1) return;
   conflictBypassed = false;
   // Remove the file and revoke the blobUrl to free memory
@@ -833,6 +896,12 @@ document.addEventListener('rastrum:photo-deleted', (e: Event) => {
   const identifyNodeId = `identify-${old.id}`;
   nodeAttempts.delete(identifyNodeId);
   pipelineState.nodes = pipelineState.nodes.filter(n => n.fileId !== old.id);
+
+  // Clean up merge node dependencies
+  const mergeNode = pipelineState.nodes.find(n => n.kind === 'merge');
+  if (mergeNode) {
+    mergeNode.dependsOn = mergeNode.dependsOn.filter(depId => depId !== identifyNodeId && depId !== `input-${old.id}`);
+  }
 
   // If no files left, reset the pipeline completely
   if (pipelineState.files.length === 0) {
@@ -857,6 +926,7 @@ document.addEventListener('rastrum:photo-deleted', (e: Event) => {
   } else {
     // Recompute bestResult and card attempts from remaining files
     recomputeBestResultAndCard();
+    await savePipelineState(pipelineState).catch(() => {});
 
     // Check if any remaining identify node needs running
     const hasPending = pipelineState.nodes.some(n => n.kind === 'identify' && n.state === 'pending');
@@ -884,7 +954,7 @@ document.addEventListener('rastrum:files-dropped', async (e: Event) => {
   conflictBypassed = false;
 
   const newPipelineFiles: PipelineFile[] = files.map(f => ({
-    id: crypto.randomUUID(),
+    id: (f as any)._dzId || crypto.randomUUID(),
     file: f,
     kind: triageFile(f),
     blobUrl: URL.createObjectURL(f),
@@ -1205,6 +1275,7 @@ function setNodeState(
 
 function updatePipelineUI() {
   if (!pipelineState) return;
+  reconcileFilesWithDropZone();
   document.dispatchEvent(new CustomEvent('rastrum:pipeline-update', { detail: { nodes: pipelineState.nodes } }));
 
   // Status text — count uploaded files (one input node per file), not raw
@@ -1490,6 +1561,7 @@ interface ConflictItem {
 }
 
 function checkSpeciesConflict(): { hasConflict: boolean; items: ConflictItem[] } {
+  reconcileFilesWithDropZone();
   if (!pipelineState || pipelineState.files.length < 2) {
     return { hasConflict: false, items: [] };
   }
@@ -1552,6 +1624,7 @@ function openConflictModal(items: ConflictItem[]) {
 
 async function saveAsSeparateObservations() {
   if (!pipelineState) return;
+  reconcileFilesWithDropZone();
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = isEs ? 'Guardando...' : 'Saving...'; }
   if (errorEl) errorEl.classList.add('hidden');
 
@@ -1724,6 +1797,7 @@ document.getElementById('obs2-conflict-separate-btn')?.addEventListener('click',
 postForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!pipelineState) return;
+  reconcileFilesWithDropZone();
 
   const conflict = checkSpeciesConflict();
   if (!conflictBypassed && conflict.hasConflict) {
