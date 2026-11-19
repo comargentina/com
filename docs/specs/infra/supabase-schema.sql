@@ -2448,7 +2448,12 @@ CREATE INDEX IF NOT EXISTS admin_audit_op_idx ON public.admin_audit (op, created
 
 ALTER TABLE public.admin_audit ENABLE ROW LEVEL SECURITY;
 
--- 6. Sync trigger keeps users.is_expert / .credentialed_researcher cached
+-- 6. Sync trigger keeps users.is_expert / .credentialed_researcher /
+--    .is_moderator / .is_admin cached for public profile display.
+ALTER TABLE public.users
+  ADD COLUMN IF NOT EXISTS is_moderator boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS is_admin     boolean NOT NULL DEFAULT false;
+
 CREATE OR REPLACE FUNCTION public.sync_user_role_flags() RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -2457,13 +2462,17 @@ AS $$
 BEGIN
   IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
     UPDATE public.users
-       SET is_expert = public.has_role(NEW.user_id, 'expert'),
-           credentialed_researcher = public.has_role(NEW.user_id, 'researcher')
+       SET is_expert              = public.has_role(NEW.user_id, 'expert'),
+           credentialed_researcher = public.has_role(NEW.user_id, 'researcher'),
+           is_moderator           = public.has_role(NEW.user_id, 'moderator'),
+           is_admin               = public.has_role(NEW.user_id, 'admin')
      WHERE id = NEW.user_id;
   ELSIF (TG_OP = 'DELETE') THEN
     UPDATE public.users
-       SET is_expert = public.has_role(OLD.user_id, 'expert'),
-           credentialed_researcher = public.has_role(OLD.user_id, 'researcher')
+       SET is_expert              = public.has_role(OLD.user_id, 'expert'),
+           credentialed_researcher = public.has_role(OLD.user_id, 'researcher'),
+           is_moderator           = public.has_role(OLD.user_id, 'moderator'),
+           is_admin               = public.has_role(OLD.user_id, 'admin')
      WHERE id = OLD.user_id;
   END IF;
   RETURN COALESCE(NEW, OLD);
@@ -2513,7 +2522,7 @@ BEGIN
 END
 $sync_role_owner$;
 
-GRANT UPDATE (is_expert, credentialed_researcher)
+GRANT UPDATE (is_expert, credentialed_researcher, is_moderator, is_admin)
   ON public.users TO service_role;
 
 -- 7. RLS policies
