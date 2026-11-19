@@ -308,8 +308,8 @@ const sponsoringI18n = {
     karma_total: number | null;
     credentialed_researcher: boolean | null;
     is_expert: boolean | null;
-    is_moderator: boolean | null | undefined;
-    is_admin: boolean | null | undefined;
+    is_moderator: boolean | null;
+    is_admin: boolean | null;
     follower_count: number | null;
     following_count: number | null;
   };
@@ -364,7 +364,7 @@ const sponsoringI18n = {
 
     const { data: profile } = await supabase
       .from('users')
-      .select('id, username, display_name, bio, avatar_url, region_primary, joined_at, karma_total, is_expert, credentialed_researcher, follower_count, following_count')
+      .select('id, username, display_name, bio, avatar_url, region_primary, joined_at, karma_total, is_expert, is_moderator, is_admin, credentialed_researcher, follower_count, following_count')
       .eq('username', username)
       .maybeSingle<PublicUser>();
 
