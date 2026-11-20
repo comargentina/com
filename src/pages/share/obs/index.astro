@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ShareObsView from '../../../components/ShareObsView.astro';
 
@@ -24,14 +24,14 @@ import ShareObsView from '../../../components/ShareObsView.astro';
 const lang: 'en' | 'es' = 'es';
 ---
 
-<BaseLayout title="Observación — COM Argentina" description="Ver una observación de biodiversidad compartida en la comunidad COM Argentina — identificación de especie, foto, audio, ubicación GPS y notas de campo." lang={lang}>
+<BaseLayout title="Observación — Mariposas en la ciudad" description="Ver una observación de biodiversidad compartida en la comunidad Mariposas en la ciudad — identificación de especie, foto, audio, ubicación GPS y notas de campo." lang={lang}>
 
   <!-- Detect user language preference BEFORE first paint so strings render correctly.
        This page is locale-neutral (no /en/ or /es/ prefix) so lang is always 'en'
        at build time. We swap the [data-i18n] text nodes at runtime. -->
   <script is:inline>
     (function () {
-      // Force Spanish for COM Argentina
+      // Force Spanish for Mariposas en la ciudad
       var lang = 'es';
       document.documentElement.lang = lang;
 
@@ -345,8 +345,8 @@ const lang: 'en' | 'es' = 'es';
         document.title = pageTitle;
         shareBtn.dataset.shareTitle = pageTitle;
         shareBtn.dataset.shareText  = lang === 'es'
-          ? `Observación de ${speciesName} en COM Argentina`
-          : `Observation of ${speciesName} on COM Argentina`;
+          ? `Observación de ${speciesName} en Mariposas en la ciudad`
+          : `Observation of ${speciesName} on Mariposas en la ciudad`;
         shareBtn.dataset.shareUrl = window.location.href;
 
         // Also rewrite the og: tags in <head> at runtime so JS-capable

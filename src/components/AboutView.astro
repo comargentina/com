@@ -1,4 +1,4 @@
----
+﻿---
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,7 +49,7 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
 <section class="relative -mx-4 px-4 py-16 md:py-24 text-center border-b border-zinc-200 dark:border-zinc-800">
   <div class="max-w-3xl mx-auto space-y-6">
     <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-      {isEs ? 'Acerca de COM Argentina' : 'About COM Argentina'}
+      {isEs ? 'Acerca de Mariposas en la ciudad' : 'About Mariposas en la ciudad'}
     </h1>
     <p class="text-lg md:text-xl text-emerald-600 dark:text-emerald-400 font-medium">
       {isEs ? 'Club de Observadores de Mariposas' : 'Butterfly Observers Club'}
@@ -148,13 +148,13 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
     </p>
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
-        ? 'COM Argentina busca llevar ese espíritu de observación y participación a una plataforma abierta de biodiversidad, donde cualquier persona pueda registrar lo que encuentra en la naturaleza, aprender a identificar especies y compartir sus observaciones con otros.'
-        : 'COM Argentina seeks to bring that spirit of observation and participation to an open biodiversity platform, where anyone can record what they find in nature, learn to identify species, and share their observations with others.'}
+        ? 'Mariposas en la ciudad busca llevar ese espíritu de observación y participación a una plataforma abierta de biodiversidad, donde cualquier persona pueda registrar lo que encuentra en la naturaleza, aprender a identificar especies y compartir sus observaciones con otros.'
+        : 'Mariposas en la ciudad seeks to bring that spirit of observation and participation to an open biodiversity platform, where anyone can record what they find in nature, learn to identify species, and share their observations with others.'}
     </p>
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
-        ? <Fragment>En este camino, encontramos en <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">COM</a> un proyecto que nos sirvió como una referencia fundamental. Su repositorio público y las plantillas desarrolladas por su creador, Artemio Padilla, nos permitieron tomar una base sobre la cual comenzar a construir y adaptar nuestra propia plataforma para COM Argentina.</Fragment>
-        : <Fragment>Along this journey, we found in <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">COM</a> a project that served as a fundamental reference. Its public repository and the templates developed by its creator, Artemio Padilla, provided us with a foundation upon which to build and adapt our own platform for COM Argentina.</Fragment>}
+        ? <Fragment>En este camino, encontramos en <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">COM</a> un proyecto que nos sirvió como una referencia fundamental. Su repositorio público y las plantillas desarrolladas por su creador, Artemio Padilla, nos permitieron tomar una base sobre la cual comenzar a construir y adaptar nuestra propia plataforma para Mariposas en la ciudad.</Fragment>
+        : <Fragment>Along this journey, we found in <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">COM</a> a project that served as a fundamental reference. Its public repository and the templates developed by its creator, Artemio Padilla, provided us with a foundation upon which to build and adapt our own platform for Mariposas en la ciudad.</Fragment>}
     </p>
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
@@ -163,8 +163,8 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
     </p>
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
-        ? <Fragment>Por este motivo, COM Argentina reconoce y agradece públicamente el trabajo de COM, incorporando un vínculo directo a <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">rastrum.org</a> para que quienes visiten nuestra plataforma puedan conocer también el proyecto que nos sirvió de inspiración y base tecnológica.</Fragment>
-        : <Fragment>For this reason, COM Argentina publicly recognizes and thanks the work of COM, incorporating a direct link to <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">rastrum.org</a> so that those who visit our platform can also discover the project that served as our inspiration and technological base.</Fragment>}
+        ? <Fragment>Por este motivo, Mariposas en la ciudad reconoce y agradece públicamente el trabajo de COM, incorporando un vínculo directo a <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">rastrum.org</a> para que quienes visiten nuestra plataforma puedan conocer también el proyecto que nos sirvió de inspiración y base tecnológica.</Fragment>
+        : <Fragment>For this reason, Mariposas en la ciudad publicly recognizes and thanks the work of COM, incorporating a direct link to <a href="https://rastrum.org/" class="text-emerald-600 hover:underline" target="_blank" rel="noopener">rastrum.org</a> so that those who visit our platform can also discover the project that served as our inspiration and technological base.</Fragment>}
     </p>
 
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed italic">
@@ -233,8 +233,8 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
     </p>
     <p class="text-base font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
       {isEs
-        ? 'COM Argentina es una comunidad abierta a observadores, naturalistas, científicos, educadores, fotógrafos y a cualquier persona que quiera aprender sobre la biodiversidad y ayudar a conservarla.'
-        : 'COM Argentina is an open community for observers, naturalists, scientists, educators, photographers, and anyone who wants to learn about biodiversity and help conserve it.'}
+        ? 'Mariposas en la ciudad es una comunidad abierta a observadores, naturalistas, científicos, educadores, fotógrafos y a cualquier persona que quiera aprender sobre la biodiversidad y ayudar a conservarla.'
+        : 'Mariposas en la ciudad is an open community for observers, naturalists, scientists, educators, photographers, and anyone who wants to learn about biodiversity and help conserve it.'}
     </p>
   </div>
 </section>

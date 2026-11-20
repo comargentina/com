@@ -1,4 +1,4 @@
----
+﻿---
 interface Props { lang: 'en' | 'es' }
 const { lang } = Astro.props;
 const isEs = lang === 'es';
@@ -21,8 +21,8 @@ const isEs = lang === 'es';
   </p>
   <p>
     {isEs
-      ? 'El servicio lo opera el proyecto COM Argentina (Club de Observadores de Mariposas). El código se publica bajo licencia MIT (cliente) y AGPL-3.0 (servidor). Los datos por observación los licencia el observador (tú) bajo una de las opciones Creative Commons descritas abajo.'
-      : 'The service is operated by COM Argentina (Club de Observadores de Mariposas). The codebase is released under the MIT license (client) and AGPL-3.0 (server). Per-observation data is licensed by you, the observer, under one of the Creative Commons options described below.'}
+      ? 'El servicio lo opera el proyecto Mariposas en la ciudad (Club de Observadores de Mariposas). El código se publica bajo licencia MIT (cliente) y AGPL-3.0 (servidor). Los datos por observación los licencia el observador (tú) bajo una de las opciones Creative Commons descritas abajo.'
+      : 'The service is operated by Mariposas en la ciudad (Club de Observadores de Mariposas). The codebase is released under the MIT license (client) and AGPL-3.0 (server). Per-observation data is licensed by you, the observer, under one of the Creative Commons options described below.'}
   </p>
 
   <h2>{isEs ? 'Cuenta y tokens' : 'Account and tokens'}</h2>

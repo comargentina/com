@@ -1,8 +1,8 @@
-# Política de Privacidad de COM Argentina
+# Política de Privacidad de Mariposas en la ciudad
 
 **Última actualización:** 10 de octubre de 2026  
-**Aplicación:** COM Argentina  
-**Desarrollador / Organización:** Club de Observadores de Mariposas de Argentina (comargentina)  
+**Aplicación:** Mariposas en la ciudad  
+**Desarrollador / Organización:** Club de Observadores de Mariposas de Colón (comargentina)  
 **Sitio web:** [https://com-com-f83a.vercel.app](https://com-com-f83a.vercel.app)  
 **Repositorio oficial:** [https://github.com/comargentina/com](https://github.com/comargentina/com)  
 
@@ -10,7 +10,7 @@
 
 ## 1. Introducción y Compromiso de Privacidad
 
-La aplicación **COM Argentina** es un proyecto de ciencia ciudadana y conservación desarrollado por el **Club de Observadores de Mariposas de Argentina**. Nuestra misión es fomentar el registro, la identificación y el estudio de mariposas y de la biodiversidad en Argentina.
+La aplicación **Mariposas en la ciudad** es un proyecto de ciencia ciudadana y conservación desarrollado por el **Club de Observadores de Mariposas de Colón**. Nuestra misión es fomentar el registro, la identificación y el estudio de mariposas y de la biodiversidad en Argentina.
 
 Creemos firmemente que participar en la observación comunitaria de la naturaleza no debe implicar la renuncia a la privacidad ni la explotación de los datos personales. Esta Política de Privacidad describe de manera clara y transparente qué datos recopilamos, cómo los utilizamos, dónde se almacenan y qué derechos tienen los usuarios sobre su información personal.
 
@@ -18,7 +18,7 @@ Creemos firmemente que participar en la observación comunitaria de la naturalez
 
 ## 2. Datos que Recopilamos
 
-Cuando utilizas **COM Argentina**, podemos recopilar y procesar los siguientes tipos de datos:
+Cuando utilizas **Mariposas en la ciudad**, podemos recopilar y procesar los siguientes tipos de datos:
 
 1. **Información de la Cuenta y Autenticación:**
    - **Correo electrónico:** Solicitado únicamente si decides registrarte o iniciar sesión mediante enlace mágico (Magic Link) o autenticación segura. *(El uso en modo invitado no requiere crear una cuenta ni ingresar un correo electrónico).*
@@ -60,14 +60,14 @@ Los datos recopilados se utilizan exclusivamente para las siguientes finalidades
 <a name="eliminacion-datos"></a>
 ## 5. Solicitud de Eliminación de Cuenta y Eliminación de Datos
 
-En cumplimiento de las políticas de Google Play y las normativas internacionales de protección de datos personales, los usuarios de **COM Argentina** tienen derecho a solicitar en cualquier momento la eliminación total de su cuenta y de sus datos personales asociados.
+En cumplimiento de las políticas de Google Play y las normativas internacionales de protección de datos personales, los usuarios de **Mariposas en la ciudad** tienen derecho a solicitar en cualquier momento la eliminación total de su cuenta y de sus datos personales asociados.
 
 ### Pasos para solicitar la eliminación de tu cuenta y datos:
 
 Los usuarios pueden solicitar la eliminación a través de cualquiera de los siguientes dos métodos:
 
 #### Método A: Directamente desde la aplicación o sitio web
-1. Inicia sesión en **COM Argentina** con tu correo electrónico.
+1. Inicia sesión en **Mariposas en la ciudad** con tu correo electrónico.
 2. Ingresa a la sección **Perfil** y haz clic en **Editar perfil** (o accede a `https://com-com-f83a.vercel.app/es/perfil/editar/`).
 3. Desplázate hasta la sección de gestión de cuenta y pulsa el botón **"Eliminar cuenta"**.
 4. Confirma la acción en el mensaje de seguridad para proceder con el borrado definitivo.
@@ -76,7 +76,7 @@ Los usuarios pueden solicitar la eliminación a través de cualquiera de los sig
 Si no tienes la aplicación instalada o no puedes acceder a tu cuenta:
 1. Envía un correo electrónico a nuestro equipo de soporte:  
    📧 **comargentina1@gmail.com** (o a través del repositorio oficial de GitHub [https://github.com/comargentina/com/issues](https://github.com/comargentina/com/issues)).
-2. Utiliza como asunto: `Solicitud de Eliminación de Cuenta y Datos - COM Argentina`.
+2. Utiliza como asunto: `Solicitud de Eliminación de Cuenta y Datos - Mariposas en la ciudad`.
 3. Indica en el mensaje la dirección de correo electrónico asociada a la cuenta que deseas eliminar.
 4. Tu solicitud será verificada y procesada en un plazo máximo de **30 días corridos**.
 
@@ -98,7 +98,7 @@ Si no tienes la aplicación instalada o no puedes acceder a tu cuenta:
 
 ## 6. Privacidad de Menores de Edad
 
-**COM Argentina** no recopila conscientemente información de identificación personal de niños menores de 13 años. Si un padre, madre o tutor legal toma conocimiento de que un menor de 13 años ha creado una cuenta o nos ha proporcionado información sin consentimiento previo, puede contactarnos a través de los canales indicados para proceder a la eliminación inmediata de la cuenta y sus datos asociados.
+**Mariposas en la ciudad** no recopila conscientemente información de identificación personal de niños menores de 13 años. Si un padre, madre o tutor legal toma conocimiento de que un menor de 13 años ha creado una cuenta o nos ha proporcionado información sin consentimiento previo, puede contactarnos a través de los canales indicados para proceder a la eliminación inmediata de la cuenta y sus datos asociados.
 
 ---
 
@@ -112,7 +112,7 @@ Podemos actualizar nuestra Política de Privacidad periódicamente para reflejar
 
 Si tienes dudas, consultas o requerimientos vinculados con esta Política de Privacidad o con el tratamiento de tus datos personales, puedes contactar al desarrollador:
 
-- **Organización / Desarrollador:** Club de Observadores de Mariposas de Argentina (COM Argentina)
+- **Organización / Desarrollador:** Club de Observadores de Mariposas de Colón (Mariposas en la ciudad)
 - **Correo de soporte:** `comargentina1@gmail.com`
 - **Repositorio de soporte y código:** [https://github.com/comargentina/com](https://github.com/comargentina/com)
 - **URL pública de Política de Privacidad:** [https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md](https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md)

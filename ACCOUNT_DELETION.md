@@ -1,14 +1,14 @@
-# Solicitud de Eliminación de Cuenta y Datos - COM Argentina
+# Solicitud de Eliminación de Cuenta y Datos - Mariposas en la ciudad
 
-**Aplicación:** COM Argentina  
-**Desarrollador / Organización:** Club de Observadores de Mariposas de Argentina (comargentina)  
+**Aplicación:** Mariposas en la ciudad  
+**Desarrollador / Organización:** Club de Observadores de Mariposas de Colón (comargentina)  
 **Fecha de vigencia:** 10 de octubre de 2026  
 **Repositorio oficial:** [https://github.com/comargentina/com](https://github.com/comargentina/com)  
 **Sitio web:** [https://com-com-f83a.vercel.app](https://com-com-f83a.vercel.app)  
 
 ---
 
-Esta página detalla el procedimiento oficial para que los usuarios de la aplicación **COM Argentina**, desarrollada por el **Club de Observadores de Mariposas de Argentina**, puedan solicitar el borrado definitivo de su cuenta y de todos los datos personales asociados, en conformidad con los requisitos de seguridad y transparencia de Google Play Store.
+Esta página detalla el procedimiento oficial para que los usuarios de la aplicación **Mariposas en la ciudad**, desarrollada por el **Club de Observadores de Mariposas de Colón**, puedan solicitar el borrado definitivo de su cuenta y de todos los datos personales asociados, en conformidad con los requisitos de seguridad y transparencia de Google Play Store.
 
 ---
 
@@ -17,7 +17,7 @@ Esta página detalla el procedimiento oficial para que los usuarios de la aplica
 Puedes solicitar la eliminación de tu cuenta y datos a través de cualquiera de las siguientes opciones:
 
 ### Opción 1: Directamente desde la aplicación o versión web
-1. Inicia sesión en **COM Argentina** con tu correo electrónico o credenciales habituales.
+1. Inicia sesión en **Mariposas en la ciudad** con tu correo electrónico o credenciales habituales.
 2. Accede a tu **Perfil** tocando el ícono de usuario en la barra de navegación.
 3. Selecciona la opción **"Editar perfil"** (o ingresa directamente a [https://com-com-f83a.vercel.app/es/perfil/editar/](https://com-com-f83a.vercel.app/es/perfil/editar/)).
 4. Desplázate hasta la sección final y haz clic en el botón rojo **"Eliminar cuenta"**.
@@ -27,8 +27,8 @@ Puedes solicitar la eliminación de tu cuenta y datos a través de cualquiera de
 Si has desinstalado la aplicación, no tienes acceso a tu dispositivo o prefieres gestionar la baja de forma externa:
 1. Envía un correo electrónico a nuestro equipo de atención:  
    📧 **comargentina1@gmail.com**
-2. **Asunto del correo:** `Solicitud de Eliminación de Cuenta y Datos - COM Argentina`
-3. **Cuerpo del mensaje:** Indica la dirección de correo electrónico vinculada a la cuenta de COM Argentina que deseas dar de baja.
+2. **Asunto del correo:** `Solicitud de Eliminación de Cuenta y Datos - Mariposas en la ciudad`
+3. **Cuerpo del mensaje:** Indica la dirección de correo electrónico vinculada a la cuenta de Mariposas en la ciudad que deseas dar de baja.
 4. Un administrador confirmará la recepción de tu pedido y completará la eliminación de tus datos en un plazo no mayor a **30 días corridos**.
 
 ---
@@ -58,6 +58,6 @@ Con el fin de preservar la validez científica y el rigor de los proyectos de ci
 
 Para cualquier consulta adicional respecto al tratamiento o supresión de tus datos personales, puedes contactar al desarrollador:
 
-- **Responsable:** Club de Observadores de Mariposas de Argentina (COM Argentina)
+- **Responsable:** Club de Observadores de Mariposas de Colón (Mariposas en la ciudad)
 - **Email:** `comargentina1@gmail.com`
 - **Política de Privacidad completa:** [https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md](https://github.com/comargentina/com/blob/main/PRIVACY_POLICY.md)

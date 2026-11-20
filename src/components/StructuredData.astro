@@ -1,4 +1,4 @@
----
+﻿---
 interface OrganizationProps { type: 'organization' }
 interface WebSiteProps { type: 'website'; lang: 'en' | 'es' }
 interface BreadcrumbItem { name: string; url?: string }
@@ -15,7 +15,7 @@ if (props.type === 'organization') {
   json = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'COM Argentina',
+    name: 'Mariposas en la ciudad',
     url: SITE,
     logo: `${SITE}/com-logo-512.png`,
     description: 'Plataforma abierta de observación de biodiversidad en Argentina. Club de Observadores de Mariposas.',
@@ -26,7 +26,7 @@ if (props.type === 'organization') {
   json = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'COM Argentina',
+    name: 'Mariposas en la ciudad',
     url: localeRoot,
     inLanguage: isEn ? 'en' : 'es',
     description: isEn
@@ -34,7 +34,7 @@ if (props.type === 'organization') {
       : 'Comunidad abierta para observar, conocer, valorar y proteger la biodiversidad de Argentina. Club de Observadores de Mariposas.',
     publisher: {
       '@type': 'Organization',
-      name: 'COM Argentina',
+      name: 'Mariposas en la ciudad',
       url: SITE,
     },
   };

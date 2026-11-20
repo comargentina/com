@@ -1,4 +1,4 @@
-# COM - Club de Observadores de Mariposas Argentina
+# Mariposas en la ciudad - Club de Observadores de Mariposas de Colón
 
 **Plataforma abierta para el registro, identificación y conservación de mariposas y biodiversidad en Argentina.**
 
@@ -6,9 +6,9 @@ Plataforma basada en la arquitectura open-source de **Rastrum**, adaptada y enfo
 
 ---
 
-## Sobre el proyecto COM Argentina
+## Sobre el proyecto Mariposas en la ciudad
 
-**COM (Club de Observadores de Mariposas Argentina)** es una plataforma de observación de biodiversidad centrada en la Lepidopterofauna y la biodiversidad regional argentina. Combina visión por computadora, análisis de evidencia en campo y curaduría experta para registrar e identificar mariposas (así como otras especies de flora y fauna) mediante fotos, audio y evidencia ecológica.
+**Mariposas en la ciudad (Club de Observadores de Mariposas de Colón)** es una plataforma de observación de biodiversidad centrada en la Lepidopterofauna y la biodiversidad regional argentina. Combina visión por computadora, análisis de evidencia en campo y curaduría experta para registrar e identificar mariposas (así como otras especies de flora y fauna) mediante fotos, audio y evidencia ecológica.
 
 Las observaciones se registran con coordenadas GPS, fecha/hora y estándares **Darwin Core**, facilitando la integración con monitoreos ecológicos y bases de datos como GBIF.
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared Open Graph card layout — used by both the build-time PNG
  * generator (`scripts/generate-og.ts`) and the client-side observation
  * renderer (`src/lib/og-card.ts`). Returns a satori-compatible React
@@ -105,7 +105,7 @@ function rastrumWordmark() {
             height: 56,
           },
         },
-        { type: 'span' as const, props: { children: 'COM Argentina' } },
+        { type: 'span' as const, props: { children: 'Mariposas en la ciudad' } },
       ],
     },
   };
@@ -275,7 +275,7 @@ function profileCard(input: ProfileCardInput) {
           type: 'div' as const,
           props: {
             style: { fontSize: 24, color: '#a7c3b6', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 },
-            children: 'Observador en COM Argentina',
+            children: 'Observador en Mariposas en la ciudad',
           },
         },
         {
