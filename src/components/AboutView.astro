@@ -71,30 +71,121 @@ const generatedLabel = isNaN(generatedDate.getTime()) ? '' : dateFmt.format(gene
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs ? (
         <span>
-          <strong class="text-zinc-900 dark:text-zinc-100">COM — Club de Observadores de Mariposas</strong>{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">Mariposas en la ciudad — Club de Observadores de Mariposas de Colón</strong>{' '}
           nació con una idea sencilla: acercar a las personas a la naturaleza a través de la observación de mariposas.
         </span>
       ) : (
         <span>
-          <strong class="text-zinc-900 dark:text-zinc-100">COM — Club de Observadores de Mariposas</strong>{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">Mariposas en la ciudad — Club de Observadores de Mariposas de Colón</strong>{' '}
           was born with a simple idea: bringing people closer to nature through butterfly observation.
         </span>
       )}
     </p>
+
+    <h3 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-100 pt-4">
+      {isEs ? '¿Cómo surgió la aplicación “Mariposas en la Ciudad”?' : 'How did the “Mariposas en la Ciudad” app come about?'}
+    </h3>
+
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
-        ? 'El proyecto comenzó durante la pandemia, a partir de un trabajo de formación en la Escuela de Naturalistas de Aves Argentinas impulsado por Débora Tanoni, bióloga egresada de la Facultad de Ciencias Exactas y Naturales de la UBA. Lo que comenzó como un trabajo práctico rápidamente se transformó en una comunidad de personas interesadas en aprender, observar y proteger la naturaleza.'
-        : 'The project began during the pandemic, growing out of a training program at the Aves Argentinas Naturalists School led by Débora Tanoni, a biologist from the Faculty of Exact and Natural Sciences at UBA. What started as a practical assignment quickly became a community of people interested in learning, observing, and protecting nature.'}
+        ? 'El proyecto comenzó con una iniciativa orientada a promover la conservación de las mariposas autóctonas y la biodiversidad en los espacios urbanos de la ciudad de Colón, Entre Ríos.'
+        : 'The project began with an initiative aimed at promoting the conservation of native butterflies and biodiversity in urban spaces of the city of Colón, Entre Ríos.'}
     </p>
+
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
-        ? 'Desde sus comienzos, COM buscó que observar una mariposa no fuera solamente reconocer una especie, sino también una oportunidad para conocer el ambiente que la rodea, comprender sus ciclos de vida y valorar la biodiversidad de la que todos formamos parte.'
-        : 'From the beginning, COM sought to make butterfly observation more than just species recognition — an opportunity to understand the surrounding environment, learn about life cycles, and appreciate the biodiversity we are all part of.'}
+        ? 'La idea nació de la necesidad de generar conciencia sobre la importancia de las mariposas en nuestros ecosistemas, su relación con las plantas nativas y el papel fundamental que cumplen como polinizadoras y bioindicadoras de la calidad ambiental.'
+        : 'The idea was born from the need to raise awareness about the importance of butterflies in our ecosystems, their relationship with native plants, and their fundamental role as pollinators and bioindicators of environmental quality.'}
     </p>
+
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs ? (
+        <span>
+          A partir de esta preocupación, se desarrolló el proyecto{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">“Mariposas en la Ciudad: Creación de Corredores de Biodiversidad Urbana en Colón, Entre Ríos”</strong>,{' '}
+          una propuesta que busca transformar plazas, parques, escuelas, boulevares y otros espacios públicos en pequeños refugios naturales, mediante la incorporación de plantas nativas hospederas y nectaríferas.
+        </span>
+      ) : (
+        <span>
+          From this concern, the project{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">“Mariposas en la Ciudad: Creation of Urban Biodiversity Corridors in Colón, Entre Ríos”</strong>{' '}
+          was developed, a proposal that seeks to transform squares, parks, schools, boulevards, and other public spaces into small natural refuges through the incorporation of native host and nectar plants.
+        </span>
+      )}
+    </p>
+
     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
       {isEs
-        ? 'La comunidad fue creciendo gracias al aporte generoso de especialistas, naturalistas, observadores y personas que simplemente tenían curiosidad por aprender. Se organizaron salidas a plazas, parques, reservas naturales, universidades y otros espacios verdes, además de charlas, actividades educativas e intercambios de plantas nativas y semillas.'
-        : 'The community grew thanks to the generous contributions of specialists, naturalists, observers, and people who were simply curious to learn. Outings to parks, nature reserves, universities, and other green spaces were organized, along with talks, educational activities, and native plant and seed exchanges.'}
+        ? 'En este contexto, surgió la idea de desarrollar una aplicación que permitiera acercar ese conocimiento a toda la comunidad, utilizando la tecnología como una herramienta para aprender, descubrir y valorar la riqueza natural que nos rodea.'
+        : 'In this context, the idea arose to develop an application that would bring this knowledge closer to the entire community, using technology as a tool to learn, discover, and value the natural wealth that surrounds us.'}
+    </p>
+
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs ? (
+        <span>
+          Así nació <strong class="text-zinc-900 dark:text-zinc-100">“Mariposas en la Ciudad”</strong>, concebida como una iniciativa que une tecnología, educación y conservación ambiental, con el propósito de facilitar el reconocimiento de las mariposas, difundir información sobre sus características y ciclos de vida, y despertar el interés por protegerlas y conservar sus hábitats.
+        </span>
+      ) : (
+        <span>
+          Thus was born <strong class="text-zinc-900 dark:text-zinc-100">“Mariposas en la Ciudad”</strong>, conceived as an initiative uniting technology, education, and environmental conservation, with the purpose of facilitating the identification of butterflies, disseminating information about their characteristics and life cycles, and fostering interest in protecting them and conserving their habitats.
+        </span>
+      )}
+    </p>
+
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs
+        ? 'La propuesta busca especialmente involucrar a niños, jóvenes, docentes, vecinos y visitantes, convirtiendo el aprendizaje sobre la naturaleza en una experiencia accesible, interactiva y participativa.'
+        : 'The proposal especially seeks to engage children, youth, educators, local residents, and visitors, turning learning about nature into an accessible, interactive, and participatory experience.'}
+    </p>
+
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs ? (
+        <span>
+          El proyecto obtuvo un importante reconocimiento institucional cuando, el{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">19 de noviembre de 2026</strong>,{' '}
+          el Honorable Concejo Deliberante de la ciudad de Colón, Entre Ríos, mediante la{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">Resolución N.º 47/2026</strong>,{' '}
+          declaró de Interés Ambiental, Educativo, Paisajístico y Turístico al proyecto “Mariposas en la Ciudad”.
+        </span>
+      ) : (
+        <span>
+          The project achieved important institutional recognition when, on{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">November 19, 2026</strong>,{' '}
+          the Honorable Deliberative Council of the city of Colón, Entre Ríos, through{' '}
+          <strong class="text-zinc-900 dark:text-zinc-100">Resolution No. 47/2026</strong>,{' '}
+          declared the “Mariposas en la Ciudad” project of Environmental, Educational, Landscape, and Touristic Interest.
+        </span>
+      )}
+    </p>
+
+    <figure class="my-6">
+      <img
+        src="/resolucion-47-2026.jpg"
+        alt={isEs
+          ? 'Resolución N.º 47/2026 del Honorable Concejo Deliberante de Colón declarando de Interés Ambiental, Educativo, Paisajístico y Turístico al proyecto Mariposas en la Ciudad'
+          : 'Resolution No. 47/2026 of the Honorable Deliberative Council of Colón declaring the Mariposas en la Ciudad project of Environmental, Educational, Landscape, and Touristic Interest'}
+        class="w-full max-w-2xl mx-auto rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800"
+        loading="lazy"
+        width="1024"
+        height="722"
+      />
+      <figcaption class="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        {isEs
+          ? 'Resolución N.º 47/2026 — Honorable Concejo Deliberante de Colón, Entre Ríos'
+          : 'Resolution No. 47/2026 — Honorable Deliberative Council of Colón, Entre Ríos'}
+      </figcaption>
+    </figure>
+
+    <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      {isEs
+        ? 'Este reconocimiento representa un impulso para continuar promoviendo la educación ambiental, la conservación de las especies autóctonas y la participación ciudadana.'
+        : 'This recognition represents an impetus to continue promoting environmental education, native species conservation, and civic engagement.'}
+    </p>
+
+    <p class="text-zinc-900 dark:text-zinc-100 font-bold leading-relaxed text-base md:text-lg">
+      {isEs
+        ? 'Porque conocer es el primer paso para valorar, y valorar es el primer paso para proteger.'
+        : 'Because knowing is the first step to valuing, and valuing is the first step to protecting.'}
     </p>
   </div>
 </section>
